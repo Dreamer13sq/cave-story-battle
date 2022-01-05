@@ -316,6 +316,7 @@ function LoadVBX(path, format=-1, freeze=true)
 		}
 		vbx.bonenames[i] = name;
 		vbx.bonemap[$ name] = i;
+		//printf("[%s] %s", i, name)
 	}
 	
 	// Parent Indices

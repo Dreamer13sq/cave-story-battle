@@ -1,4 +1,4 @@
-/// @desc
+/// @desc Draw model
 
 draw_clear_alpha(0, 1);
 
@@ -25,7 +25,18 @@ shader_set(shd_pnct);
 
 matrix_set(matrix_world, Mat4TranslateRotateScale(x, y, z, 0, 0, zrot, 1));
 
-vertex_submit(vb, pr_trianglelist, -1);
+//vertex_submit(vb, pr_trianglelist, -1);
+
+// VBX
+shader_set(shd_pnctbw);
+
+shader_set_uniform_matrix_array(HEADER.shd_pnctbw_u_matpose, matpose)
+var tex = sprite_get_texture(tex_pal_sue0, 0);
+
+for (var i = 0; i < vbx.vbcount; i++)
+{
+	vbx.SubmitVBIndex(i, pr_trianglelist, tex);
+}
 
 shader_reset();
 gpu_pop_state();

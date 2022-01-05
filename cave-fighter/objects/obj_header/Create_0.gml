@@ -14,7 +14,7 @@ CAMERA3D = new Camera3D();
 draw_set_font(fnt_cave);
 display_set_gui_size(480, 270);
 
-
+show_debug_overlay(1);
 
 // VBFormats
 
@@ -42,5 +42,7 @@ vertex_format_add_texcoord();
 vertex_format_add_custom(vertex_type_float4, vertex_usage_texcoord); // Bone Indices
 vertex_format_add_custom(vertex_type_float4, vertex_usage_texcoord); // Bone Weights
 vbf_pnctbw = vertex_format_end();
+
+shd_pnctbw_u_matpose = shader_get_uniform(shd_pnctbw, "u_matpose");
 
 room_goto_next();

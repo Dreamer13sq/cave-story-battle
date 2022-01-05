@@ -1,11 +1,16 @@
 /// @desc
 
 vb = LoadVertexBuffer("test.vb", HEADER.vbf_pnct);
+vbx = LoadVBX("sue/model.vbx", HEADER.vbf_pnctbw);
+
+poses = [];
+matpose = Mat4ArrayFlat(200);
+LoadPoseArray("sue/pose/idle0.pse", poses);
 
 z = 0;
 zrot = 0;
 
-CAMERA3D.SetLocation(2, -4, 2);
+CAMERA3D.SetLocation(0, 2, 1);
 CAMERA3D.LookAt(0, 0, 0);
 
 function CreateGridVB(count, cellsize)
@@ -44,4 +49,8 @@ function CreateGridVB(count, cellsize)
 }
 
 vb_grid = CreateGridVB(16, 1);
+
+pos = 0;
+posmax = array_length(poses);
+posspeed = 1.0;
 

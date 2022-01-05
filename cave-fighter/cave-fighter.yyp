@@ -4,6 +4,7 @@
     {"id":{"name":"scr_math_3dops","path":"scripts/scr_math_3dops/scr_math_3dops.yy",},"order":2,},
     {"id":{"name":"spr_person","path":"sprites/spr_person/spr_person.yy",},"order":1,},
     {"id":{"name":"shd_pnct","path":"shaders/shd_pnct/shd_pnct.yy",},"order":1,},
+    {"id":{"name":"scr_anim","path":"scripts/scr_anim/scr_anim.yy",},"order":9,},
     {"id":{"name":"scr_vbformat_def","path":"scripts/scr_vbformat_def/scr_vbformat_def.yy",},"order":4,},
     {"id":{"name":"scr_fighteraction","path":"scripts/scr_fighteraction/scr_fighteraction.yy",},"order":1,},
     {"id":{"name":"scr_player","path":"scripts/scr_player/scr_player.yy",},"order":0,},
@@ -15,6 +16,8 @@
     {"id":{"name":"scr_fighter","path":"scripts/scr_fighter/scr_fighter.yy",},"order":0,},
     {"id":{"name":"scr_inputmanager","path":"scripts/scr_inputmanager/scr_inputmanager.yy",},"order":6,},
     {"id":{"name":"spr_inputcmd_ring","path":"sprites/spr_inputcmd_ring/spr_inputcmd_ring.yy",},"order":2,},
+    {"id":{"name":"shd_pnctbw","path":"shaders/shd_pnctbw/shd_pnctbw.yy",},"order":2,},
+    {"id":{"name":"tex_pal_sue0","path":"sprites/tex_pal_sue0/tex_pal_sue0.yy",},"order":7,},
     {"id":{"name":"spr_meter_power","path":"sprites/spr_meter_power/spr_meter_power.yy",},"order":6,},
     {"id":{"name":"shd_pct","path":"shaders/shd_pct/shd_pct.yy",},"order":0,},
     {"id":{"name":"spr_inputcmd","path":"sprites/spr_inputcmd/spr_inputcmd.yy",},"order":0,},
@@ -35,6 +38,7 @@
     {"id":{"name":"spr_meter_health","path":"sprites/spr_meter_health/spr_meter_health.yy",},"order":3,},
     {"id":{"name":"scr_math_mat4","path":"scripts/scr_math_mat4/scr_math_mat4.yy",},"order":0,},
     {"id":{"name":"fighter folder setup","path":"notes/fighter folder setup/fighter folder setup.yy",},"order":1,},
+    {"id":{"name":"scr_dmr_pose","path":"scripts/scr_dmr_pose/scr_dmr_pose.yy",},"order":1,},
     {"id":{"name":"rm_init","path":"rooms/rm_init/rm_init.yy",},"order":0,},
   ],
   "Options": [
@@ -86,6 +90,9 @@
   ],
   "IncludedFiles": [
     {"CopyToMask":-1,"filePath":"datafiles","resourceVersion":"1.0","name":"test.vb","resourceType":"GMIncludedFile",},
+    {"CopyToMask":-1,"filePath":"datafiles/sue","resourceVersion":"1.0","name":"model.vbx","resourceType":"GMIncludedFile",},
+    {"CopyToMask":-1,"filePath":"datafiles/sue/pose","resourceVersion":"1.0","name":"idle0.pse","resourceType":"GMIncludedFile",},
+    {"CopyToMask":-1,"filePath":"datafiles/sue/pose","resourceVersion":"1.0","name":"idle0.001.pse","resourceType":"GMIncludedFile",},
   ],
   "MetaData": {
     "IDEVersion": "2.3.7.606",
