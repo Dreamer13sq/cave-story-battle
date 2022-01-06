@@ -24,25 +24,8 @@ function LoadPoseArray(path, out)
 	
 	array_resize(out, framecount)
 	
-	if 0
-	for (var f = 0; f < framecount; f++)
-	{
-		framemats = array_create(bonecount);
-		
-		for (var boneindex = 0; boneindex < bonecount; boneindex++)
-		{
-			framemats[@ boneindex] = matrix_build_identity();
-			i = 0;
-			repeat(16)
-			{
-				framemats[@ boneindex][@ i] = buffer_read(b, buffer_f32);
-				i++;
-			}
-		}
-		
-		out[@ f] = framemats;
-	}
-	else
+	printf([path, framecount, bonecount])
+	
 	for (var f = 0; f < framecount; f++)
 	{
 		framemats = array_create(bonecount);
@@ -61,4 +44,26 @@ function LoadPoseArray(path, out)
 	}
 	
 	buffer_delete(b);
+}
+
+function LoadFighterPoses(rootpath, outstruct)
+{
+	rootpath = filename_dir(rootpath);
+	
+	var f = file_find_first(rootpath+"/*.pse", 0);
+	var name;
+	var index = 0;
+	
+	while (f != "")
+	{
+		name = filename_change_ext(f, "");
+		
+		outstruct[$ name] = [];
+		LoadPoseArray("sue/pose/"+f, outstruct[$ name]);
+		f = file_find_next();
+		
+		index += 1;
+	}
+	
+	file_find_close();
 }

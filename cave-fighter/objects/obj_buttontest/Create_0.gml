@@ -45,12 +45,18 @@ function AppendHistory(inputcmd)
 	entry[@ 1] = 0;
 }
 
-floory = 200;
+CAMERA3D.SetLocation(0, 4, 1);
+CAMERA3D.LookAt(0, 0, 1);
+CAMERA3D.PanLocation(0, 0, 0);
 
-fighter = new Fighter();
-fighter.x = 200;
+floory = 200;
+stagesize = 300;
+zoffset = 0;
+
+fighter = new Fighter_Sue();
+fighter.x = 0;
 fighter.y = 0;
-fighter.Runner = Fighter_Quote_Runner;
 fighter.inputmgr = input;
 
-infinitedash = 1;
+infinitedash = 0;
+

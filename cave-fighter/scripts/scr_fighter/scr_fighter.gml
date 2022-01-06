@@ -37,13 +37,13 @@ function Fighter() constructor
 	framelast = 0;
 	
 	attributes = {
-		walkspeed : 2,
+		walkspeed : 3,
 		deceleration : 0.3,
 		acceleration : 0.7,
 		
-		dashspeed : 4,
-		backdashspeed : 4,
-		runspeed : 3,
+		dashspeed : 5,
+		backdashspeed : 5,
+		runspeed : 4,
 		dashframes : 16,
 		dashframesmin : 8,
 		backdashframes : 10,
@@ -111,6 +111,15 @@ function Fighter() constructor
 	inputhistory = array_create(inputhistorycount);
 	for (var i = 0; i < inputhistorycount; i++)
 		{inputhistory[i] = [0, 0];}
+	
+	vbx = -1;
+	pos = 0;
+	posmax = 1;
+	posspeed = 1.0;
+	poseset = {};
+	posekey = -1;
+	activepose = -1;
+	matpose = Mat4ArrayFlat(200);
 	
 	function Start()
 	{
@@ -661,6 +670,28 @@ function Fighter() constructor
 	
 	#endregion ================================================
 	
+	#region Runner Utility ====================================
+	
+	// Returns true if frame is before given frame
+	function SetPose(key)
+	{
+		if (!variable_struct_exists(poseset, key))
+		{
+			show_debug_message("Unknown key \"" + key + "\"")
+			return;
+		}
+	
+		if (key != posekey)
+		{
+			posekey = key;
+			activepose = poseset[$ key];
+			pos = 0;
+			posmax = array_length(activepose);
+		}
+	}
+	
+	#endregion ================================================
+	
 	DefaultRunner = Fighter_Default_Runner;
 	Runner = DefaultRunner;
 	
@@ -714,6 +745,9 @@ function Fighter() constructor
 		if keyboard_check_pressed(VKey._1) {DoDamage(5, 2);}
 		if keyboard_check_pressed(VKey._2) {DoDamage(0, 1);}
 		if keyboard_check_pressed(VKey._3) {DoDamage(15, 0);}
+		
+		pos = Modulo(pos+posspeed, posmax);
+		matpose = activepose[pos];
 	}
 }
 

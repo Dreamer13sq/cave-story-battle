@@ -13,6 +13,8 @@ varying vec2 v_uv;
 varying vec4 v_color;
 varying vec3 v_nor;
 
+uniform float u_zoffset;
+uniform float u_normalsign;
 uniform mat4 u_matpose[200];
 
 void main()
@@ -34,12 +36,16 @@ void main()
 	normal = m * normal;
 	
 	vertexpos.y *= -1.0;
-	//normal.y *= -1.0;
+	
+	v_nor = (normal * u_mattran).xyz;
+	v_color = in_Colour;
+    v_uv = in_TextureCoord;
+	
+	u_mattran[1][1] *= 0.02;
 	
     gl_Position = (u_matproj * u_matview * u_mattran) * vertexpos;
+	float side = (gl_Position.x * 0.1);
+	
+	gl_Position.z = (gl_Position.z + u_zoffset) * 0.1;
     
-    v_color = in_Colour;
-    v_uv = in_TextureCoord;
-	v_nor = (normal * u_mattran).xyz;
-
 }

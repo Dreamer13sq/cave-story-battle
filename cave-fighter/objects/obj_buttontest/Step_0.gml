@@ -43,5 +43,14 @@ if infinitedash {fighter.dashmeter = fighter.dashmetermax;}
 
 fighter.Update(1);
 
-if fighter.x >= 500 {fighter.x -= 500;}
-if fighter.x <= -20 {fighter.x += 500;}
+if fighter.x >= stagesize {fighter.x -= stagesize*2;}
+if fighter.x <= -stagesize {fighter.x += stagesize*2;}
+
+CAMERA3D.PanLocation(
+	LevKeyHeld(VKey.d, VKey.a) * 0.1,
+	LevKeyHeld(VKey.w, VKey.s) * 0.10,
+	0
+	);
+
+
+CAMERA3D.UpdateMatView();

@@ -1,5 +1,6 @@
 {
   "resources": [
+    {"id":{"name":"scr_fighter_sue","path":"scripts/scr_fighter_sue/scr_fighter_sue.yy",},"order":1,},
     {"id":{"name":"obj_battle","path":"objects/obj_battle/obj_battle.yy",},"order":1,},
     {"id":{"name":"scr_math_3dops","path":"scripts/scr_math_3dops/scr_math_3dops.yy",},"order":2,},
     {"id":{"name":"spr_person","path":"sprites/spr_person/spr_person.yy",},"order":1,},
@@ -92,7 +93,10 @@
     {"CopyToMask":-1,"filePath":"datafiles","resourceVersion":"1.0","name":"test.vb","resourceType":"GMIncludedFile",},
     {"CopyToMask":-1,"filePath":"datafiles/sue","resourceVersion":"1.0","name":"model.vbx","resourceType":"GMIncludedFile",},
     {"CopyToMask":-1,"filePath":"datafiles/sue/pose","resourceVersion":"1.0","name":"idle0.pse","resourceType":"GMIncludedFile",},
-    {"CopyToMask":-1,"filePath":"datafiles/sue/pose","resourceVersion":"1.0","name":"idle0.001.pse","resourceType":"GMIncludedFile",},
+    {"CopyToMask":-1,"filePath":"datafiles/sue/pose","resourceVersion":"1.0","name":"walk.pse","resourceType":"GMIncludedFile",},
+    {"CopyToMask":-1,"filePath":"datafiles/sue/pose","resourceVersion":"1.0","name":"dashstart.pse","resourceType":"GMIncludedFile",},
+    {"CopyToMask":-1,"filePath":"datafiles/sue/pose","resourceVersion":"1.0","name":"dashback.pse","resourceType":"GMIncludedFile",},
+    {"CopyToMask":-1,"filePath":"datafiles/sue/pose","resourceVersion":"1.0","name":"jumpfall.pse","resourceType":"GMIncludedFile",},
   ],
   "MetaData": {
     "IDEVersion": "2.3.7.606",

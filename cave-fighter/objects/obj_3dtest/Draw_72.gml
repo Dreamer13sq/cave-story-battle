@@ -31,6 +31,7 @@ matrix_set(matrix_world, Mat4TranslateRotateScale(x, y, z, 0, 0, zrot, 1));
 shader_set(shd_pnctbw);
 
 shader_set_uniform_matrix_array(HEADER.shd_pnctbw_u_matpose, matpose)
+shader_set_uniform_f(HEADER.shd_pnctbw_u_zoffset, zoffset)
 var tex = sprite_get_texture(tex_pal_sue0, 0);
 
 for (var i = 0; i < vbx.vbcount; i++)

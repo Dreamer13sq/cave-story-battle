@@ -10,6 +10,7 @@
 
 CURRENT_FRAME = 0;
 CAMERA3D = new Camera3D();
+CAMERA3D.SetupCamera(480, 270, 50, 0.1, 100);
 
 draw_set_font(fnt_cave);
 display_set_gui_size(480, 270);
@@ -44,5 +45,7 @@ vertex_format_add_custom(vertex_type_float4, vertex_usage_texcoord); // Bone Wei
 vbf_pnctbw = vertex_format_end();
 
 shd_pnctbw_u_matpose = shader_get_uniform(shd_pnctbw, "u_matpose");
+shd_pnctbw_u_zoffset = shader_get_uniform(shd_pnctbw, "u_zoffset");
+shd_pnctbw_u_normalsign = shader_get_uniform(shd_pnctbw, "u_normalsign");
 
 room_goto_next();
