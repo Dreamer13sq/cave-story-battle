@@ -23,3 +23,9 @@ if keyboard_check_pressed(vk_escape)
 }
 
 CURRENT_FRAME++;
+
+for (var i = 0; i < playerinputcount; i++)
+{
+	playerinput[i].UpdateInput();
+	playerinput[i].UpdateInputBuffers(1);
+}

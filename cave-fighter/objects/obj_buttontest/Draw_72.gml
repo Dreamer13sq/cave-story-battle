@@ -20,20 +20,40 @@ gpu_set_zwriteenable(true);
 matrix_set(matrix_projection, CAMERA3D.matproj);
 matrix_set(matrix_view, CAMERA3D.matview);
 
-// VBX
-shader_set(shd_pnctbw);
+// Grid
+matrix_set(matrix_world, Mat4());
+vertex_submit(vb_grid, pr_linelist, -1);
 
-var tex = sprite_get_texture(tex_pal_sue0, 0);
+// VBX
+shader_set(shd_fighter);
 
 gpu_set_cullmode(fighter.forwardsign? cull_clockwise: cull_counterclockwise);
 matrix_set(matrix_world, Mat4TranslateScaleXYZ(
 	fighter.x/100, 0, fighter.y/100, fighter.forwardsign, 1, 1));
-shader_set_uniform_matrix_array(HEADER.shd_pnctbw_u_matpose, fighter.matpose)
-shader_set_uniform_f(HEADER.shd_pnctbw_u_zoffset, zoffset)
+shader_set_uniform_matrix_array(HEADER.shd_fighter_u_matpose, fighter.matpose);
+shader_set_uniform_f(HEADER.shd_fighter_u_forwardsign, fighter.forwardsign);
+U_Fighter_SetTint_Preset(0);
+
+if fighter.FlagGet(FL_Fighter.dashing)
+{
+	if BoolStep(fighter.frame, 4) {U_Fighter_SetTint_Preset(FighterTintPreset.white, 1);}
+	else {U_Fighter_SetTint_Preset(FighterTintPreset.parry, 1);}
+}
 
 for (var i = 0; i < fighter.vbx.vbcount; i++)
 {
-	fighter.vbx.SubmitVBIndex(i, pr_trianglelist, tex);
+	fighter.vbx.SubmitVBIndex(i, pr_trianglelist, fighter.activetexture);
+}
+
+// Draw entities
+var ll = ll_battleentity;
+var nd = ll.headnode, ndnext;
+while (nd)
+{
+	ndnext = nd.nodenext;
+	nd.Render3D();
+	
+	nd = ndnext;
 }
 
 shader_reset();

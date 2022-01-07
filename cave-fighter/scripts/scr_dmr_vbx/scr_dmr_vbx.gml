@@ -61,7 +61,7 @@ function VBXData() constructor
 	bonenames = [];
 	bonecount = 0;
 	
-	vbformat = -1;	// Vertex Buffer Format created in LoadVBX() (Don't touch!)
+	vbformat = -1;	// Vertex Buffer Format created in OpenVBX() (Don't touch!)
 	
 	// Returns vertex buffer with given name. -1 if not found
 	static FindVB = function(_name)
@@ -157,14 +157,14 @@ function VBXFree(vbx)
 }
 
 // Returns vertex buffer from file (.vb)
-function LoadVertexBuffer(path, format, freeze=true)
+function OpenVertexBuffer(path, format, freeze=true)
 {
 	var bzipped = buffer_load(path);
 	
 	// error reading file
 	if bzipped < 0
 	{
-		show_debug_message("LoadVertexBuffer(): Error loading vertex buffer from \"" + path + "\"");
+		show_debug_message("OpenVertexBuffer(): Error loading vertex buffer from \"" + path + "\"");
 		return -1;
 	}
 	
@@ -179,7 +179,7 @@ function LoadVertexBuffer(path, format, freeze=true)
 }
 
 // Returns vbx struct from file (.vbx)
-function LoadVBX(path, format=-1, freeze=true)
+function OpenVBX(path, format=-1, freeze=true)
 {
 	if filename_ext(path) == ""
 	{
@@ -190,7 +190,7 @@ function LoadVBX(path, format=-1, freeze=true)
 	
 	if bzipped < 0
 	{
-		show_debug_message("LoadVBX(): Error loading vbx data from \"" + path + "\"");
+		show_debug_message("OpenVBX(): Error loading vbx data from \"" + path + "\"");
 		return -1;
 	}
 	
@@ -227,7 +227,7 @@ function LoadVBX(path, format=-1, freeze=true)
 			vb = vertex_create_buffer_from_buffer(b, format);
 			if ( vb < 0 )
 			{
-				show_debug_message("LoadVBX(): vbx data is invalid (vb) \"" + path + "\"");
+				show_debug_message("OpenVBX(): vbx data is invalid (vb) \"" + path + "\"");
 				return -1;
 			}
 			
@@ -237,7 +237,7 @@ function LoadVBX(path, format=-1, freeze=true)
 			return vbx;
 		}
 		
-		show_debug_message("LoadVBX(): vbx data is invalid \"" + path + "\"");
+		show_debug_message("OpenVBX(): vbx data is invalid \"" + path + "\"");
 		return vbx;
 	}
 	
@@ -364,48 +364,6 @@ function LoadVBX(path, format=-1, freeze=true)
 	}
 	
 	return vbx;
-}
-
-// Loads flattened matrix array
-function LoadPoses(path, outarray, offset=0)
-{
-	var bzipped = buffer_load(path);
-	
-	if bzipped < 0
-	{
-		show_debug_message("LoadPoses(): Error loading pose data from \"" + path + "\"");
-		return -1;
-	}
-	
-	var b = buffer_decompress(bzipped);
-	if b < 0 {b = bzipped;} else {buffer_delete(bzipped);}
-	
-	var bonecount = buffer_read(b, buffer_u32);
-	var posecount = buffer_read(b, buffer_u32);
-	var matrixcount = bonecount*16;
-	var pindex, mindex;
-	
-	var posedata = array_create(posecount);
-	var matrixdata;
-	
-	// For each pose
-	pindex = 0; repeat(posecount)
-	{
-		matrixdata = array_create(matrixcount);
-		posedata[@ pindex++] = matrixdata;
-		
-		// For each bone
-		mindex = 0; repeat(matrixcount)
-		{
-			matrixdata[@ mindex++] = buffer_read(b, buffer_f32);
-		}
-	}
-	
-	buffer_delete(b);
-	
-	array_copy(outarray, offset, posedata, 0, posecount);
-	
-	return posedata;
 }
 
 // Returns true if buffer contains vbx header

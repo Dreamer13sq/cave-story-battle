@@ -2,7 +2,7 @@
 
 function Fighter_Sue() : Fighter() constructor
 {
-	vbx = LoadVBX("sue/model.vbx", HEADER.vbf_pnctbw);
+	vbx = OpenVBX("sue/model.vbx", HEADER.vbf_pnctbw);
 	LoadFighterPoses("sue/pose/", poseset);
 	SetPose(variable_struct_get_names(poseset)[0]);
 	
@@ -57,10 +57,16 @@ function Fighter_Sue_Runner()
 		break;
 		
 		// ----------------------------------------------------------
+		case(ST_Fighter.leapforward):
+		case(ST_Fighter.leapback):
+		case(ST_Fighter.leap):
+			
+			
 		case(ST_Fighter.jumpforward):
 		case(ST_Fighter.jumpback):
 		case(ST_Fighter.jump):{
-			SetPose("jumpfall");
+			if yspeed > 0 {SetPose("jumprise")}
+			else {SetPose("jumpfall");}
 			DefaultRunner();
 		}
 		break;

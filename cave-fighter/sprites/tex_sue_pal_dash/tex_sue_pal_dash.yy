@@ -24,12 +24,12 @@
   "gridX": 0,
   "gridY": 0,
   "frames": [
-    {"compositeImage":{"FrameId":{"name":"9911a525-27dd-45ba-a657-d606480e3a2d","path":"sprites/tex_pal_sue0/tex_pal_sue0.yy",},"LayerId":null,"resourceVersion":"1.0","name":"","tags":[],"resourceType":"GMSpriteBitmap",},"images":[
-        {"FrameId":{"name":"9911a525-27dd-45ba-a657-d606480e3a2d","path":"sprites/tex_pal_sue0/tex_pal_sue0.yy",},"LayerId":{"name":"892785c2-4ddf-45fd-b99b-c562b9ed7711","path":"sprites/tex_pal_sue0/tex_pal_sue0.yy",},"resourceVersion":"1.0","name":"","tags":[],"resourceType":"GMSpriteBitmap",},
-      ],"parent":{"name":"tex_pal_sue0","path":"sprites/tex_pal_sue0/tex_pal_sue0.yy",},"resourceVersion":"1.0","name":"9911a525-27dd-45ba-a657-d606480e3a2d","tags":[],"resourceType":"GMSpriteFrame",},
+    {"compositeImage":{"FrameId":{"name":"eab7d7f3-e52c-4610-9676-4e4c0829b8c8","path":"sprites/tex_sue_pal_dash/tex_sue_pal_dash.yy",},"LayerId":null,"resourceVersion":"1.0","name":"","tags":[],"resourceType":"GMSpriteBitmap",},"images":[
+        {"FrameId":{"name":"eab7d7f3-e52c-4610-9676-4e4c0829b8c8","path":"sprites/tex_sue_pal_dash/tex_sue_pal_dash.yy",},"LayerId":{"name":"62d76680-b900-45f3-8d78-0bf089c856c1","path":"sprites/tex_sue_pal_dash/tex_sue_pal_dash.yy",},"resourceVersion":"1.0","name":"","tags":[],"resourceType":"GMSpriteBitmap",},
+      ],"parent":{"name":"tex_sue_pal_dash","path":"sprites/tex_sue_pal_dash/tex_sue_pal_dash.yy",},"resourceVersion":"1.0","name":"eab7d7f3-e52c-4610-9676-4e4c0829b8c8","tags":[],"resourceType":"GMSpriteFrame",},
   ],
   "sequence": {
-    "spriteId": {"name":"tex_pal_sue0","path":"sprites/tex_pal_sue0/tex_pal_sue0.yy",},
+    "spriteId": {"name":"tex_sue_pal_dash","path":"sprites/tex_sue_pal_dash/tex_sue_pal_dash.yy",},
     "timeUnits": 1,
     "playback": 1,
     "playbackSpeed": 30.0,
@@ -41,7 +41,7 @@
     "moments": {"Keyframes":[],"resourceVersion":"1.0","resourceType":"KeyframeStore<MomentsEventKeyframe>",},
     "tracks": [
       {"name":"frames","spriteId":null,"keyframes":{"Keyframes":[
-            {"id":"5e6ba2d5-0e47-46ce-82e8-b13b8de3cee9","Key":0.0,"Length":1.0,"Stretch":false,"Disabled":false,"IsCreationKey":false,"Channels":{"0":{"Id":{"name":"9911a525-27dd-45ba-a657-d606480e3a2d","path":"sprites/tex_pal_sue0/tex_pal_sue0.yy",},"resourceVersion":"1.0","resourceType":"SpriteFrameKeyframe",},},"resourceVersion":"1.0","resourceType":"Keyframe<SpriteFrameKeyframe>",},
+            {"id":"ca407ea3-c928-4d2e-af6f-f689b6fcefde","Key":0.0,"Length":1.0,"Stretch":false,"Disabled":false,"IsCreationKey":false,"Channels":{"0":{"Id":{"name":"eab7d7f3-e52c-4610-9676-4e4c0829b8c8","path":"sprites/tex_sue_pal_dash/tex_sue_pal_dash.yy",},"resourceVersion":"1.0","resourceType":"SpriteFrameKeyframe",},},"resourceVersion":"1.0","resourceType":"Keyframe<SpriteFrameKeyframe>",},
           ],"resourceVersion":"1.0","resourceType":"KeyframeStore<SpriteFrameKeyframe>",},"trackColour":0,"inheritsTrackColour":true,"builtinName":0,"traits":0,"interpolation":1,"tracks":[],"events":[],"isCreationTrack":false,"resourceVersion":"1.0","tags":[],"resourceType":"GMSpriteFramesTrack","modifiers":[],},
     ],
     "visibleRange": null,
@@ -58,22 +58,22 @@
     "yorigin": 0,
     "eventToFunction": {},
     "eventStubScript": null,
-    "parent": {"name":"tex_pal_sue0","path":"sprites/tex_pal_sue0/tex_pal_sue0.yy",},
+    "parent": {"name":"tex_sue_pal_dash","path":"sprites/tex_sue_pal_dash/tex_sue_pal_dash.yy",},
     "resourceVersion": "1.3",
-    "name": "tex_pal_sue0",
+    "name": "tex_sue_pal_dash",
     "tags": [],
     "resourceType": "GMSequence",
   },
   "layers": [
-    {"visible":true,"isLocked":false,"blendMode":0,"opacity":100.0,"displayName":"default","resourceVersion":"1.0","name":"892785c2-4ddf-45fd-b99b-c562b9ed7711","tags":[],"resourceType":"GMImageLayer",},
+    {"visible":true,"isLocked":false,"blendMode":0,"opacity":100.0,"displayName":"default","resourceVersion":"1.0","name":"62d76680-b900-45f3-8d78-0bf089c856c1","tags":[],"resourceType":"GMImageLayer",},
   ],
   "nineSlice": null,
   "parent": {
-    "name": "Sprites",
-    "path": "folders/Sprites.yy",
+    "name": "Textures",
+    "path": "folders/Textures.yy",
   },
   "resourceVersion": "1.0",
-  "name": "tex_pal_sue0",
+  "name": "tex_sue_pal_dash",
   "tags": [],
   "resourceType": "GMSprite",
 }

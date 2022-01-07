@@ -26,11 +26,15 @@ function LoadPoseArray(path, out)
 	
 	printf([path, framecount, bonecount])
 	
-	for (var f = 0; f < framecount; f++)
+	var f, boneindex, i;
+	
+	f = 0;
+	repeat(framecount)
 	{
 		framemats = array_create(bonecount);
 		
-		for (var boneindex = 0; boneindex < bonecount; boneindex++)
+		boneindex = 0;
+		repeat(bonecount)
 		{
 			i = 0;
 			repeat(16)
@@ -38,9 +42,11 @@ function LoadPoseArray(path, out)
 				framemats[@ boneindex*16+i] = buffer_read(b, buffer_f32);
 				i++;
 			}
+			boneindex++;
 		}
 		
 		out[@ f] = framemats;
+		f++;
 	}
 	
 	buffer_delete(b);

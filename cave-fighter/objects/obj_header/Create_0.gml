@@ -44,8 +44,39 @@ vertex_format_add_custom(vertex_type_float4, vertex_usage_texcoord); // Bone Ind
 vertex_format_add_custom(vertex_type_float4, vertex_usage_texcoord); // Bone Weights
 vbf_pnctbw = vertex_format_end();
 
-shd_pnctbw_u_matpose = shader_get_uniform(shd_pnctbw, "u_matpose");
-shd_pnctbw_u_zoffset = shader_get_uniform(shd_pnctbw, "u_zoffset");
-shd_pnctbw_u_normalsign = shader_get_uniform(shd_pnctbw, "u_normalsign");
+var shd = shd_pct;
+shd_pct_u_zoffset = shader_get_uniform(shd, "u_zoffset");
+
+var shd = shd_pnctbw;
+shd_pnctbw_u_matpose = shader_get_uniform(shd, "u_matpose");
+shd_pnctbw_u_zoffset = shader_get_uniform(shd, "u_zoffset");
+shd_pnctbw_u_normalsign = shader_get_uniform(shd, "u_normalsign");
+
+var shd = shd_fighter;
+shd_fighter_u_matpose = shader_get_uniform(shd, "u_matpose");
+shd_fighter_u_zoffset = shader_get_uniform(shd, "u_zoffset");
+shd_fighter_u_forwardsign = shader_get_uniform(shd, "u_forwardsign");
+shd_fighter_u_tintcolor = shader_get_uniform(shd, "u_tintcolor");
+shd_fighter_u_tintparam = shader_get_uniform(shd, "u_tintparam");
+
+// Input
+playerinputcount = 2;
+playerinput = [];
+for (var i = 0; i < playerinputcount; i++)
+{
+	playerinput[i] = new InputManager();
+}
+
+var inp = playerinput[0];
+inp.DefineInputKey(InputIndex.right, VKey.right);
+inp.DefineInputKey(InputIndex.up, VKey.up);
+inp.DefineInputKey(InputIndex.left, VKey.left);
+inp.DefineInputKey(InputIndex.down, VKey.down);
+inp.DefineInputKey(InputIndex.a, VKey.z);
+inp.DefineInputKey(InputIndex.b, VKey.x);
+inp.DefineInputKey(InputIndex.c, VKey.c);
+inp.DefineInputKey(InputIndex.dash, VKey.space);
+inp.DefineInputKey(InputIndex.start, VKey.enter);
+inp.DefineInputKey(InputIndex.select, VKey.shift);
 
 room_goto_next();

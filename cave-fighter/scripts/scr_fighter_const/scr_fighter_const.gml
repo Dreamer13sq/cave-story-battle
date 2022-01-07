@@ -277,7 +277,6 @@ function BTNColor(btn)
 	}
 }
 
-
 function ST_Fighter_GetName(enumvalue)
 {
 	switch(enumvalue)
@@ -307,6 +306,8 @@ function ST_Fighter_GetName(enumvalue)
 		case(ST_Fighter.leap): return "leap";
 		case(ST_Fighter.leapback): return "leapback";
 		case(ST_Fighter.leapforward): return "leapforward";
+		case(ST_Fighter.airdash): return "airdash";
+		case(ST_Fighter.airbackdash): return "airbackdash";
 		case(ST_Fighter.cancel_neutral): return "cancel_neutral";
 		case(ST_Fighter.cancel_forward): return "cancel_forward";
 		case(ST_Fighter.cancel_back): return "cancel_back";

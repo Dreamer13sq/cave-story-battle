@@ -2,11 +2,11 @@
   "isDnD": false,
   "isCompatibility": false,
   "parent": {
-    "name": "DmrVB",
-    "path": "folders/DmrVB.yy",
+    "name": "Entity",
+    "path": "folders/Scripts/Entity.yy",
   },
   "resourceVersion": "1.0",
-  "name": "scr_dmr_pose",
+  "name": "scr_entity",
   "tags": [],
   "resourceType": "GMScript",
 }

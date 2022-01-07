@@ -37,30 +37,30 @@ function Fighter() constructor
 	framelast = 0;
 	
 	attributes = {
-		walkspeed : 3,
-		deceleration : 0.3,
-		acceleration : 0.7,
+		walkspeed : 5,
+		deceleration : 0.6,
+		acceleration : 0.9,
 		
-		dashspeed : 5,
-		backdashspeed : 5,
-		runspeed : 4,
+		dashspeed : 7,
+		backdashspeed : 7,
+		runspeed : 6.5,
 		dashframes : 16,
-		dashframesmin : 8,
-		backdashframes : 10,
-		backdashframesmin : 7,
+		dashframesmin : 10,
+		backdashframes : 12,
+		backdashframesmin : 10,
 		dashstopframes : 5,
 		backdashstopframes : 5,
 		runstopframes : 5,
 		
 		jumpsquatframes : 3,
-		jumpheight : 7,
+		jumpheight : 10,
 		leapsquatframes : 6,
 		leapheight : 10,
-		airspeed : 2.5,
-		gravity : 0.3,
+		airspeed : 4,
+		gravity : 0.4,
 		terminal : -16,
-		airdrift : 0.08,
-		airdriftmax : 2,
+		airdrift : 0.12,
+		airdriftmax : 3,
 		};
 	
 	sequences = {
@@ -72,6 +72,8 @@ function Fighter() constructor
 	
 	x = 0;
 	y = 0;
+	z = 0;
+	
 	xspeed = 0;
 	yspeed = 0;
 	xspeedtarget = 0;
@@ -91,16 +93,7 @@ function Fighter() constructor
 	
 	commandavailable = array_create(16); // Array of bit fields
 	
-	inputmap = array_create(8);
-	inputmap[InputIndex.right] = VKey.right;
-	inputmap[InputIndex.up] = VKey.up;
-	inputmap[InputIndex.left] = VKey.left;
-	inputmap[InputIndex.down] = VKey.down;
-	inputmap[InputIndex.a] = VKey.z;
-	inputmap[InputIndex.b] = VKey.x;
-	inputmap[InputIndex.c] = VKey.c;
-	inputmap[InputIndex.dash] = VKey.space;
-	
+	inputmgr = HEADER.playerinput[0];
 	inputlastframe = array_create(16, 255);
 	ipressed = 0;
 	iheld = 0;
@@ -120,6 +113,12 @@ function Fighter() constructor
 	posekey = -1;
 	activepose = -1;
 	matpose = Mat4ArrayFlat(200);
+	
+	texture_base = sprite_get_texture(tex_sue_pal_c00, 0);
+	texture_dash = sprite_get_texture(tex_sue_pal_dash, 0);
+	texture_parry = sprite_get_texture(tex_sue_pal_c00, 0);
+	texture_charge = sprite_get_texture(tex_sue_pal_c00, 0);
+	activetexture = texture_base;
 	
 	function Start()
 	{
@@ -670,7 +669,7 @@ function Fighter() constructor
 	
 	#endregion ================================================
 	
-	#region Runner Utility ====================================
+	#region Animation ====================================
 	
 	// Returns true if frame is before given frame
 	function SetPose(key)
@@ -688,6 +687,18 @@ function Fighter() constructor
 			pos = 0;
 			posmax = array_length(activepose);
 		}
+	}
+	
+	function CreateAfterImage(_texture, _tintpreset)
+	{
+		var nd = BATTLE.ll_battleentity.AppendNode(new E_Fighter_Afterimage());
+		nd.SetLocation(x, y, z);
+		nd.vbx = vbx;
+		nd.forwardsign = forwardsign;
+		nd.texture = _texture;
+		nd.tintpreset = _tintpreset;
+		
+		array_copy(nd.matpose, 0, matpose, 0, array_length(matpose));
 	}
 	
 	#endregion ================================================
@@ -742,12 +753,18 @@ function Fighter() constructor
 		Runner(ts);
 		framelast = frame;
 		
-		if keyboard_check_pressed(VKey._1) {DoDamage(5, 2);}
-		if keyboard_check_pressed(VKey._2) {DoDamage(0, 1);}
-		if keyboard_check_pressed(VKey._3) {DoDamage(15, 0);}
-		
 		pos = Modulo(pos+posspeed, posmax);
 		matpose = activepose[pos];
+		
+		activetexture = texture_base;
+		
+		if FlagGet(FL_Fighter.dashing)
+		{
+			if (frame mod 4 == 0)
+			{
+				CreateAfterImage(activetexture, FighterTintPreset.dash);
+			}
+		}
 	}
 }
 
@@ -755,7 +772,7 @@ function Fighter() constructor
 
 #region Default Runner ==============================
 
-function Fighter_Default_Runner()
+function Fighter_Default_Runner(ts, f)
 {
 	switch(state)
 	{
@@ -867,6 +884,7 @@ function Fighter_Default_Runner()
 			if ( PopStateStart() )
 			{
 				FlagSet(FL_Fighter.useddashbutton, ButtonHeld(BTN_DASH));
+				FlagSet(FL_Fighter.dashing, 1);
 				return;
 			}
 			
@@ -879,6 +897,8 @@ function Fighter_Default_Runner()
 					!(FlagGet(FL_Fighter.useddashbutton)? ButtonHeld(BTN_DASH): ButtonHeld(BTN_FORWARD))
 					)
 				{
+					FlagSet(FL_Fighter.dashing, 0);
+					
 					if ( ButtonHeld(BTN_FORWARD) )
 						{return SetState(ST_Fighter.run);}
 					else
@@ -918,6 +938,7 @@ function Fighter_Default_Runner()
 			if ( PopStateStart() )
 			{
 				FlagSet(FL_Fighter.useddashbutton, ButtonHeld(BTN_DASH));
+				FlagSet(FL_Fighter.dashing, 1);
 				return;
 			}
 			
@@ -930,6 +951,7 @@ function Fighter_Default_Runner()
 					!(FlagGet(FL_Fighter.useddashbutton)? ButtonHeld(BTN_DASH): ButtonHeld(BTN_BACK))
 					)
 				{
+					FlagSet(FL_Fighter.dashing, 0);
 					return SetState(ST_Fighter.backdash_stop);
 				}
 			}

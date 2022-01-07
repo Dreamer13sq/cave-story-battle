@@ -1,6 +1,7 @@
-//
-// A Not-so Simple passthrough vertex shader
-//
+/*
+	Used for fighter models
+*/
+
 attribute vec3 in_Position;	// (x,y,z)
 attribute vec3 in_Normal;	// (nx,ny,nz)
 attribute vec4 in_Colour;	// (r,g,b,a)
@@ -8,12 +9,13 @@ attribute vec2 in_TextureCoord;	// (u,v)
 attribute vec4 in_Bone;	// (b1,b2,b3,b4)
 attribute vec4 in_Weight;	// (w1,w2,w3,w4)
 
-varying vec2 v_uv;
-varying vec4 v_color;
+varying vec3 v_pos;
 varying vec3 v_nor;
+varying vec4 v_color;
+varying vec2 v_uv;
 
 uniform float u_zoffset;
-uniform float u_normalsign;
+uniform float u_forwardsign;
 uniform mat4 u_matpose[200];
 
 void main()
@@ -36,6 +38,7 @@ void main()
 	
 	vertexpos.y *= -1.0;
 	
+	v_pos = vertexpos.xyz;
 	v_nor = (normal * u_mattran).xyz;
 	v_color = in_Colour;
     v_uv = in_TextureCoord;

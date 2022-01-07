@@ -1,14 +1,11 @@
+import os
 import sys
 import string
 import pyperclip
 
 VARCHAR = string.ascii_letters + '_0123456789';
 
-'''
-    D:\Cave-Story-Series\fighter\cave-fighter\scripts\scr_fighter_const\scr_fighter_const.gml
-'''
-
-def main():
+def CorrectStatements(path):
     argv = sys.argv
     argc = len(sys.argv)
     
@@ -16,13 +13,20 @@ def main():
         print('> No file path given')
         return
     
-    fpath = argv[1].replace('\\', '/');
-    enumindex = 0 if argc <= 2 else argv[2]
+    rootpath = argv[1].replace('\\', '/');
+    rootpath = rootpath[:rootpath.rfind('/')+1]
+    print(rootpath)
+    
+    
     
     f = open(fpath, 'r')
     if not f:
         print('> Error opening file "%s"' % fpath)
         return
+    
+    
+    
+    return
     
     mode = 0
     s = ''
@@ -78,5 +82,25 @@ def main():
     out += '}\n'
     
     pyperclip.copy(out)
+
+def CorrectLoop(path):
+    pathlist = os.listdir(path)
+    
+    for p in pathlist:
+        fullpath = path+'/'+p
+        
+        # Dir
+        if not os.path.isfile(fullpath):
+            CorrectStatements(fullpath)
+        # File
+        else:
+            f = open(fullpath, 'r')
+            
+            if f:
+                for l in f:
+                    if 'if' in l:
+                        print(l)
+                
+                f.close()
 
 main();
