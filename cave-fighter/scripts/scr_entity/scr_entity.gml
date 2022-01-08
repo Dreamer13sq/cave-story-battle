@@ -18,6 +18,7 @@ function EntityLL() constructor
 	nodecount = 0;
 	slotcurrent = 1;
 	slotmax = 256;
+	name = "<no name>";
 	
 	nodelist = array_create(slotmax);
 	
@@ -55,8 +56,6 @@ function EntityLL() constructor
 			if (slotcurrent == slotmax) {slotcurrent = 1;}
 		}
 		
-		printf("Append() %s", nodecount)
-		
 		return _newstruct;
 	}
 	
@@ -67,9 +66,7 @@ function EntityLL() constructor
 	
 	function RemoveNodeSlot(_nodeslot, _clean=true, _delete=true)
 	{
-		printf("Remove(%d)", _nodeslot)
-		
-		//if (_nodeslot >= 1 && _nodeslot <= slotmax)
+		if (_nodeslot >= 1 && _nodeslot <= slotmax)
 		{
 			var nd = nodelist[@ _nodeslot];
 			
@@ -143,6 +140,7 @@ function Entity() constructor
 	state = 0;
 	frame = 0;
 	
+	vb = -1;
 	vbx = -1;
 	
 	drawlayer = 0;
@@ -207,3 +205,49 @@ function Entity() constructor
 	
 }
 
+function E_Hitball() : Entity() constructor
+{
+	vb = OpenVertexBuffer("hitball.vb", HEADER.vbf_pct);
+	
+	elementcount = 16;
+	element = array_create(elementcount);
+	
+	radius = 10;
+	
+	for (var i = 0; i < elementcount; i++)
+	{
+		element[i] = [0, 0, 0, 0, 0, 1, 1]; // [x, y, z, dirx, diry, dirz, speed]
+	}
+	
+	function Update(ts)
+	{
+		var e;
+		for (var i = 0; i < elementcount; i++)
+		{
+			e = element[i];
+			
+			e[@ 0] += e[6] * e[3];
+			e[@ 1] += e[6] * e[4];
+			e[@ 2] += e[6] * e[5];
+			e[@ 6] *= 0.8;
+		}
+		
+		radius *= 0.8;
+		
+		if (radius < 1)
+		{
+			Destroy();
+			return;
+		}
+	}
+	
+	function Render3D()
+	{
+		for (var i = 0; i < elementcount; i++)
+		{
+			e = element[i];
+			matrix_set(matrix_world, Mat4TranslateScale(e[0], e[1], e[2], radius));
+			vertex_submit(vb, pr_trianglelist, -1);
+		}
+	}
+}

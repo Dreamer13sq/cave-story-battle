@@ -6,6 +6,7 @@ if infinitedash {fighter.dashmeter = fighter.dashmetermax;}
 
 fighter.Update(ts);
 
+// Update Entity
 var ll = ll_battleentity;
 var nd = ll.headnode, ndnext;
 while (nd)
@@ -32,10 +33,29 @@ if (
 }
 
 CAMERA3D.PanLocation(
-	LevKeyHeld(VKey.d, VKey.a) * 0.05,
-	-LevKeyHeld(VKey.w, VKey.s) * 0.05,
-	LevKeyHeld(VKey.e, VKey.q) * 0.02
+	LevKeyHeld(VKey.d, VKey.a) * 5,
+	-LevKeyHeld(VKey.e, VKey.q) * 2,
+	LevKeyHeld(VKey.w, VKey.s) * 5
 	);
 
+if (lookat)
+{
+	CAMERA3D.LookAt(0, 0, 100);
+}
 
 CAMERA3D.UpdateMatView();
+
+// Update Particles
+var ll = ll_particle;
+var nd = ll.headnode, ndnext;
+while (nd)
+{
+	ndnext = nd.nodenext;
+	
+	nd.Update(ts);
+	if (nd.nodeinert) {ll.RemoveNode(nd);}
+	
+	nd = ndnext;
+}
+
+

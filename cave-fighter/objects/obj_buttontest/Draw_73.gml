@@ -9,23 +9,41 @@ shader_set_uniform_f(HEADER.shd_pnctbw_u_zoffset, zoffset);
 
 var f = fighter;
 
-var xx = 360;
-var ysep = 20;
-var hist = f.inputhistory;
-var n = array_length(hist);
-var _index = f.inputhistoryindex;
-
-// History
-var xx = 440;
-var yy = 4;
-
-for (var i = 0; i < 16; i++)
+if debug
 {
-	draw_sprite(spr_inputcmd, BTNImage(hist[_index][0]), xx, yy+i*ysep);
-	//draw_text(xx+40, yy+2+i*ysep, hist[_index][1]);
+	var xx = 360;
+	var ysep = 20;
+	var hist = f.inputhistory;
+	var n = array_length(hist);
+	var _index = f.inputhistoryindex;
+
+	// History
+	var xx = 440;
+	var yy = 4;
+
+	for (var i = 0; i < 16; i++)
+	{
+		draw_sprite(spr_inputcmd, BTNImage(hist[_index][0]), xx, yy+i*ysep);
+		//draw_text(xx+40, yy+2+i*ysep, hist[_index][1]);
 	
-	_index--;
-	if _index < 0 {_index = n-1;}
+		_index--;
+		if _index < 0 {_index = n-1;}
+	}
+	
+	// Fighter Vars
+	var xx = fighter.x+stagesize, yy = floory-fighter.y
+	var xscale = fighter.forwardsign;
+	var yscale = 1;
+
+	if fighter.state == ST_Fighter.crouch {yscale = 0.5;}
+	if fighter.state == ST_Fighter.jumpsquat {yscale = 0.7;}
+	if fighter.state == ST_Fighter.leapsquat {yscale = 0.3;}
+
+	//draw_sprite_ext(spr_person, 0, xx, yy, xscale, yscale, 0, c_white, 1);
+	draw_text(xx, yy, ST_Fighter_GetName(fighter.state));
+	draw_text(xx, yy+20, fighter.frame);
+	draw_text(xx, yy+40, [fighter.xspeed, fighter.yspeed]);
+
 }
 
 // Input Display
@@ -149,22 +167,6 @@ if ( BoolStep(f.powermeterflash, 6) )
 		DrawSpriteW(spr, 5, xx, yy, sgn*clamp(f.powermeter mod amtmax, 0, ww));	
 	}
 }
-
-// Fighter Vars
-var xx = fighter.x+stagesize, yy = floory-fighter.y
-var xscale = fighter.forwardsign;
-var yscale = 1;
-
-if fighter.state == ST_Fighter.crouch {yscale = 0.5;}
-if fighter.state == ST_Fighter.jumpsquat {yscale = 0.7;}
-if fighter.state == ST_Fighter.leapsquat {yscale = 0.3;}
-
-//draw_sprite_ext(spr_person, 0, xx, yy, xscale, yscale, 0, c_white, 1);
-draw_text(xx, yy, ST_Fighter_GetName(fighter.state));
-draw_text(xx, yy+20, fighter.frame);
-draw_text(xx, yy+40, [fighter.xspeed, fighter.yspeed]);
-
-
 
 shader_reset();
 gpu_pop_state();

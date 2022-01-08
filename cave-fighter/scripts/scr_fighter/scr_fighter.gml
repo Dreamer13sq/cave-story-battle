@@ -4,6 +4,8 @@
 
 function Fighter() constructor
 {
+	#region Variables =========================================
+	
 	battleflag = 0;
 	fighterflag = 0;
 	buttonstrength = 0; // 0 = A, 1 = B, 2 = C
@@ -38,8 +40,8 @@ function Fighter() constructor
 	
 	attributes = {
 		walkspeed : 5,
-		deceleration : 0.6,
-		acceleration : 0.9,
+		deceleration : 0.9,
+		acceleration : 1.0,
 		
 		dashspeed : 7,
 		backdashspeed : 7,
@@ -120,6 +122,8 @@ function Fighter() constructor
 	texture_charge = sprite_get_texture(tex_sue_pal_c00, 0);
 	activetexture = texture_base;
 	
+	#endregion ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+	
 	function Start()
 	{
 		for (var i = 0; i < hitboxcount; i++)
@@ -133,18 +137,18 @@ function Fighter() constructor
 		}
 	}
 	
-	function SetState(_state)
+	function StateSet(_state)
 	{
 		state = _state;
 		statestart = true;
 		frame = 0;
-		framelast = 0;
+		framelast = -1;
 		Runner(0);
 		
 		return false;
 	}
 	
-	function PopStateStart()
+	function StateStartPop()
 	{
 		if statestart 
 		{
@@ -596,9 +600,42 @@ function Fighter() constructor
 	{
 		if (framelast < frame)
 		{
-			return _frame >= framelast && _frame <= frame;
+			return _frame > framelast && _frame <= frame;
 		}
 		return false;
+	}
+	
+	// Returns true if frame is on a frame in step interval
+	function FrameStep(_framestart, _frameend, _step)
+	{
+		_frameend = min(_frameend, frame);
+		if (_frameend < 0) {_frameend = frame;}
+		
+		while (_framestart <= _frameend)
+		{
+			if ( FrameIs(_framestart) )
+			{
+				return true;
+			}
+			
+			_framestart += _step;
+		}
+		
+		return false;
+	}
+	
+	// Returns true if frame is within a step interval
+	function FrameStepBool(_framestart, _frameend, _step)
+	{
+		_frameend = min(_frameend, frame);
+		if (_frameend < 0) {_frameend = frame;}
+		
+		var f1 = framelast, f2 = frame;
+		
+		f1 -= _framestart;
+		f2 -= _framestart;
+		
+		return (f1 < f2) && BoolStep(f2, _step) && f2 <= _frameend;
 	}
 	
 	// Returns true if frame is past or at given frame
@@ -610,6 +647,7 @@ function Fighter() constructor
 		}
 		return false;
 	}
+	
 	
 	// Sets or clears battle flag
 	function FlagSet(_flag, _active)
@@ -691,7 +729,7 @@ function Fighter() constructor
 	
 	function CreateAfterImage(_texture, _tintpreset)
 	{
-		var nd = BATTLE.ll_battleentity.AppendNode(new E_Fighter_Afterimage());
+		var nd = NewEntity_Battle(new E_Fighter_Afterimage());
 		nd.SetLocation(x, y, z);
 		nd.vbx = vbx;
 		nd.forwardsign = forwardsign;
@@ -749,9 +787,9 @@ function Fighter() constructor
 		PowerUpdate(ts);
 		DashUpdate(ts);
 		
+		framelast = frame;
 		frame += ts;
 		Runner(ts);
-		framelast = frame;
 		
 		pos = Modulo(pos+posspeed, posmax);
 		matpose = activepose[pos];
@@ -760,9 +798,16 @@ function Fighter() constructor
 		
 		if FlagGet(FL_Fighter.dashing)
 		{
-			if (frame mod 4 == 0)
+			if ( FrameIs(0) && (powermeter != powermeterold) )
 			{
-				CreateAfterImage(activetexture, FighterTintPreset.dash);
+				CreateHitBall(self);
+			}
+			
+			if ( FrameStep(0, -1, 6) )
+			{
+				printf(frame)
+				CreateAfterImage(activetexture, (powermeter != powermeterold)? 
+					FighterTintPreset.charge: FighterTintPreset.dash);
 			}
 		}
 	}
@@ -780,11 +825,11 @@ function Fighter_Default_Runner(ts, f)
 		default:{
 			if FlagGet(FL_Fighter.airborne)
 			{
-				SetState(ST_Fighter.jump); return false;
+				StateSet(ST_Fighter.jump); return false;
 			}
 			else
 			{
-				SetState(ST_Fighter.wait); return false;
+				StateSet(ST_Fighter.wait); return false;
 			}
 		}
 			break;
@@ -794,23 +839,23 @@ function Fighter_Default_Runner(ts, f)
 			FlagSet(FL_Fighter.airborne, false);
 			SetApproach(0, attributes.deceleration, 0, 0);
 			
-			if ButtonHeld(BTN_FORWARD) {return SetState(ST_Fighter.walkforward);}
-			if ButtonHeld(BTN_BACK) {return SetState(ST_Fighter.walkback);}
+			if ButtonHeld(BTN_FORWARD) {return StateSet(ST_Fighter.walkforward);}
+			if ButtonHeld(BTN_BACK) {return StateSet(ST_Fighter.walkback);}
 			if ButtonHeld(BTN_UP) 
 			{
 				if ( Button(BTN_DOWN, LEAPBUFFERFRAMES) ) 
-					{return SetState(ST_Fighter.leapsquat);}
+					{return StateSet(ST_Fighter.leapsquat);}
 				else 
-					{return SetState(ST_Fighter.jumpsquat);}
+					{return StateSet(ST_Fighter.jumpsquat);}
 			}
-			if ButtonHeld(BTN_DOWN) {return SetState(ST_Fighter.crouch);}
+			if ButtonHeld(BTN_DOWN) {return StateSet(ST_Fighter.crouch);}
 			
 			if ( SequenceEvaluate([BTN_DOWN, BTN_FORWARD, BTN_A]) )
 			{
 				printf("はどうけん");
 				//PowerUseEX();
 				PowerAdd(2);
-				return SetState(ST_Fighter.dash);
+				return StateSet(ST_Fighter.dash);
 			}
 			
 			if ( SequenceEvaluate([BTN_DOWN, BTN_FORWARD, BTN_B]) )
@@ -818,7 +863,7 @@ function Fighter_Default_Runner(ts, f)
 			{
 				printf("さくねつ");
 				
-				return SetState(ST_Fighter.dash);
+				return StateSet(ST_Fighter.dash);
 			}
 			
 			if ( SequenceEvaluate([BTN_DOWN, BTN_FORWARD, BTN_C]) )
@@ -826,7 +871,7 @@ function Fighter_Default_Runner(ts, f)
 			{
 				printf("だいはどうけん");
 				
-				return SetState(ST_Fighter.dash);
+				return StateSet(ST_Fighter.dash);
 			}
 		}	
 			break;
@@ -835,18 +880,18 @@ function Fighter_Default_Runner(ts, f)
 		case(ST_Fighter.walkforward):{
 			SetApproach(attributes.walkspeed, attributes.acceleration, 0, 0);
 			
-			if ButtonHeld(BTN_DOWN) {return SetState(ST_Fighter.crouch);}
+			if ButtonHeld(BTN_DOWN) {return StateSet(ST_Fighter.crouch);}
 			if ButtonHeld(BTN_UP) 
 			{
 				if ( Button(BTN_DOWN, LEAPBUFFERFRAMES) ) 
-					{return SetState(ST_Fighter.leapsquat);}
+					{return StateSet(ST_Fighter.leapsquat);}
 				else 
-					{return SetState(ST_Fighter.jumpsquat);}
+					{return StateSet(ST_Fighter.jumpsquat);}
 			}
-			if !ButtonHeld(BTN_FORWARD) {return SetState(ST_Fighter.wait);}
+			if !ButtonHeld(BTN_FORWARD) {return StateSet(ST_Fighter.wait);}
 			if ( Button(BTN_DASH, DASHBUFFERFRAMES) || SequenceEvaluateKey2("dash0", "dash1") )
 			{
-				if ( DashUse(0) ) {return SetState(ST_Fighter.dash);}
+				if ( DashUse(0) ) {return StateSet(ST_Fighter.dash);}
 			}
 		}	
 			break;
@@ -855,18 +900,18 @@ function Fighter_Default_Runner(ts, f)
 		case(ST_Fighter.walkback):{
 			SetApproach(-attributes.walkspeed, attributes.acceleration, 0, 0);
 			
-			if ButtonHeld(BTN_DOWN) {return SetState(ST_Fighter.crouch);}
+			if ButtonHeld(BTN_DOWN) {return StateSet(ST_Fighter.crouch);}
 			if ButtonHeld(BTN_UP) 
 			{
 				if ( Button(BTN_DOWN, LEAPBUFFERFRAMES) ) 
-					{return SetState(ST_Fighter.leapsquat);}
+					{return StateSet(ST_Fighter.leapsquat);}
 				else 
-					{return SetState(ST_Fighter.jumpsquat);}
+					{return StateSet(ST_Fighter.jumpsquat);}
 			}
-			if !ButtonHeld(BTN_BACK) {return SetState(ST_Fighter.wait);}
+			if !ButtonHeld(BTN_BACK) {return StateSet(ST_Fighter.wait);}
 			if ( Button(BTN_DASH, DASHBUFFERFRAMES) || SequenceEvaluateKey2("bdash0", "bdash1") )
 			{
-				if ( DashUse(0) ) {return SetState(ST_Fighter.backdash);}
+				if ( DashUse(0) ) {return StateSet(ST_Fighter.backdash);}
 			}
 		}
 			break;
@@ -875,13 +920,13 @@ function Fighter_Default_Runner(ts, f)
 		case(ST_Fighter.crouch):{
 			SetApproach(0, attributes.deceleration, 0, 0);
 			
-			if !ButtonHeld(BTN_DOWN) {return SetState(ST_Fighter.wait);}
+			if !ButtonHeld(BTN_DOWN) {return StateSet(ST_Fighter.wait);}
 		}	
 			break;
 		
 		// ----------------------------------------------------------
 		case(ST_Fighter.dash):{
-			if ( PopStateStart() )
+			if ( StateStartPop() )
 			{
 				FlagSet(FL_Fighter.useddashbutton, ButtonHeld(BTN_DASH));
 				FlagSet(FL_Fighter.dashing, 1);
@@ -900,9 +945,9 @@ function Fighter_Default_Runner(ts, f)
 					FlagSet(FL_Fighter.dashing, 0);
 					
 					if ( ButtonHeld(BTN_FORWARD) )
-						{return SetState(ST_Fighter.run);}
+						{return StateSet(ST_Fighter.run);}
 					else
-						{return SetState(ST_Fighter.dash_stop);}
+						{return StateSet(ST_Fighter.dash_stop);}
 				}
 			}
 		}	
@@ -911,7 +956,7 @@ function Fighter_Default_Runner(ts, f)
 		// ----------------------------------------------------------
 		case(ST_Fighter.dash_stop):{
 			SetApproach(0, attributes.deceleration, 0, 0);
-			if ( FrameIs(attributes.dashstopframes) ) {return SetState(ST_Fighter.wait);}
+			if ( FrameIs(attributes.dashstopframes) ) {return StateSet(ST_Fighter.wait);}
 		}	
 			break;
 		
@@ -921,7 +966,7 @@ function Fighter_Default_Runner(ts, f)
 			
 			if ( !ButtonHeld(BTN_FORWARD) )
 			{
-				return SetState(ST_Fighter.run_stop);
+				return StateSet(ST_Fighter.run_stop);
 			}
 		}	
 			break;
@@ -929,13 +974,13 @@ function Fighter_Default_Runner(ts, f)
 		// ----------------------------------------------------------
 		case(ST_Fighter.run_stop):{
 			SetApproach(0, attributes.deceleration, 0, 0);
-			if ( FrameIs(attributes.runstopframes) ) {return SetState(ST_Fighter.wait);}
+			if ( FrameIs(attributes.runstopframes) ) {return StateSet(ST_Fighter.wait);}
 		}	
 			break;
 		
 		// ----------------------------------------------------------
 		case(ST_Fighter.backdash):{
-			if ( PopStateStart() )
+			if ( StateStartPop() )
 			{
 				FlagSet(FL_Fighter.useddashbutton, ButtonHeld(BTN_DASH));
 				FlagSet(FL_Fighter.dashing, 1);
@@ -952,7 +997,7 @@ function Fighter_Default_Runner(ts, f)
 					)
 				{
 					FlagSet(FL_Fighter.dashing, 0);
-					return SetState(ST_Fighter.backdash_stop);
+					return StateSet(ST_Fighter.backdash_stop);
 				}
 			}
 		}	
@@ -961,7 +1006,7 @@ function Fighter_Default_Runner(ts, f)
 		// ----------------------------------------------------------
 		case(ST_Fighter.backdash_stop):{
 			SetApproach(0, attributes.deceleration, 0, 0);
-			if ( FrameIs(attributes.backdashstopframes) ) {return SetState(ST_Fighter.wait);}
+			if ( FrameIs(attributes.backdashstopframes) ) {return StateSet(ST_Fighter.wait);}
 		}	
 			break;
 		
@@ -977,7 +1022,7 @@ function Fighter_Default_Runner(ts, f)
 			{
 				if ButtonHeld(BTN_FORWARD) 
 				{
-					SetState(ST_Fighter.jumpforward);
+					StateSet(ST_Fighter.jumpforward);
 					SetSpeed(attributes.airspeed, attributes.jumpheight);
 					SetApproach(attributes.airspeed, attributes.airdrift, attributes.terminal, attributes.gravity);
 					return false;
@@ -985,14 +1030,14 @@ function Fighter_Default_Runner(ts, f)
 				
 				if ButtonHeld(BTN_BACK) 
 				{
-					SetState(ST_Fighter.jumpback); 
+					StateSet(ST_Fighter.jumpback); 
 					SetSpeed(-attributes.airspeed, attributes.jumpheight);
 					SetApproach(-attributes.airspeed, attributes.airdrift, attributes.terminal, attributes.gravity);
 					return false;
 				}
 				
 				SetSpeed(xspeed, attributes.jumpheight);
-				SetState(ST_Fighter.jump);
+				StateSet(ST_Fighter.jump);
 			}
 		}
 			break;
@@ -1005,7 +1050,7 @@ function Fighter_Default_Runner(ts, f)
 			{
 				if ButtonHeld(BTN_FORWARD) 
 				{
-					SetState(ST_Fighter.leapforward);
+					StateSet(ST_Fighter.leapforward);
 					SetSpeed(attributes.airspeed, attributes.leapheight);
 					SetApproach(attributes.airspeed, attributes.airdrift, attributes.terminal, attributes.gravity);
 					return false;
@@ -1013,14 +1058,14 @@ function Fighter_Default_Runner(ts, f)
 				
 				if ButtonHeld(BTN_BACK) 
 				{
-					SetState(ST_Fighter.leapback); 
+					StateSet(ST_Fighter.leapback); 
 					SetSpeed(-attributes.airspeed, attributes.leapheight);
 					SetApproach(-attributes.airspeed, attributes.airdrift, attributes.terminal, attributes.gravity);
 					return false;
 				}
 				
 				SetSpeed(xspeed, attributes.leapheight);
-				SetState(ST_Fighter.leap);
+				StateSet(ST_Fighter.leap);
 			}
 		}
 			break;
@@ -1032,7 +1077,7 @@ function Fighter_Default_Runner(ts, f)
 		case(ST_Fighter.jumpforward):
 		case(ST_Fighter.jumpback):
 		case(ST_Fighter.jump):{
-			if ( PopStateStart() )
+			if ( StateStartPop() )
 			{
 				FlagSet(FL_Fighter.airborne, true);
 				return false;
@@ -1052,16 +1097,16 @@ function Fighter_Default_Runner(ts, f)
 			// Airdash
 			if ( Button(BTN_DASH, DASHBUFFERFRAMES) || SequenceEvaluateKey2("dash0", "dash1") )
 			{
-				if ( DashUse(true) ) {return SetState(ST_Fighter.airdash);}
+				if ( DashUse(true) ) {return StateSet(ST_Fighter.airdash);}
 			}
 			if ( (Button(BTN_DASH, DASHBUFFERFRAMES) && ButtonHeld(BTN_BACK)) || SequenceEvaluateKey2("bdash0", "bdash1") )
 			{
-				if ( DashUse(true) ) {return SetState(ST_Fighter.airbackdash);}
+				if ( DashUse(true) ) {return StateSet(ST_Fighter.airbackdash);}
 			}
 			
 			if ( y == 0 )
 			{
-				SetState(ST_Fighter.wait);
+				StateSet(ST_Fighter.wait);
 				return false;
 			}
 		}
@@ -1069,7 +1114,7 @@ function Fighter_Default_Runner(ts, f)
 		
 		// ----------------------------------------------------------
 		case(ST_Fighter.airdash):{
-			if ( PopStateStart() )
+			if ( StateStartPop() )
 			{
 				FlagSet(FL_Fighter.useddashbutton, ButtonHeld(BTN_DASH));
 				return;
@@ -1085,7 +1130,7 @@ function Fighter_Default_Runner(ts, f)
 					!(FlagGet(FL_Fighter.useddashbutton)? ButtonHeld(BTN_DASH): ButtonHeld(BTN_FORWARD))
 					)
 				{
-					return SetState(ST_Fighter.jump);
+					return StateSet(ST_Fighter.jump);
 				}
 			}
 		}
@@ -1093,7 +1138,7 @@ function Fighter_Default_Runner(ts, f)
 		
 		// ----------------------------------------------------------
 		case(ST_Fighter.airbackdash):{
-			if ( PopStateStart() )
+			if ( StateStartPop() )
 			{
 				FlagSet(FL_Fighter.useddashbutton, ButtonHeld(BTN_DASH));
 				return;
@@ -1109,7 +1154,7 @@ function Fighter_Default_Runner(ts, f)
 					!(FlagGet(FL_Fighter.useddashbutton)? ButtonHeld(BTN_DASH): ButtonHeld(BTN_BACK))
 					)
 				{
-					return SetState(ST_Fighter.jump);
+					return StateSet(ST_Fighter.jump);
 				}
 			}
 		}

@@ -10,7 +10,9 @@
 
 CURRENT_FRAME = 0;
 CAMERA3D = new Camera3D();
-CAMERA3D.SetupCamera(480, 270, 50, 0.1, 100);
+CAMERA3D.SetupCamera(480, 270, 50, 10, 1000);
+lastwindowsize = [window_get_width(), window_get_height()];
+windowresized = false;
 
 draw_set_font(fnt_cave);
 display_set_gui_size(480, 270);

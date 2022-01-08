@@ -6,6 +6,7 @@ varying vec3 v_nor;
 varying vec4 v_color;
 varying vec2 v_uv;
 
+uniform float u_forwardsign;
 
 uniform float u_tintparam[3]; // [strength, mid, exponent]
 uniform vec3 u_tintcolor[3];
@@ -19,7 +20,7 @@ float Ease(float x)
 
 void main()
 {
-	vec3 l = normalize(vec3(1.0, -1.0, 2.0));
+	vec3 l = normalize(vec3(1.0*u_forwardsign, -1.0, 2.0));
 	float dp = dot(v_nor, l);
 	
 	float lightvalue = v_uv.x*dp;

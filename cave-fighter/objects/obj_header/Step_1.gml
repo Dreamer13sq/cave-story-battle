@@ -1,5 +1,16 @@
 /// @desc
 
+if (lastwindowsize[0] != window_get_width() || lastwindowsize[1] != window_get_height())
+{
+	lastwindowsize[0] = window_get_width();
+	lastwindowsize[0] = window_get_height();
+	windowresized = true;
+}
+else
+{
+	windowresized = false;
+}
+
 if keyboard_check(vk_tab)
 {
 	if keyboard_check_pressed(VKey.R)

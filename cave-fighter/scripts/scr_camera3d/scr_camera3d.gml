@@ -16,6 +16,8 @@ function Camera3D() constructor
 	
 	matproj = Mat4();
 	matview = Mat4();
+	matbillboard_yup = Mat4();
+	matbillboard_zup = Mat4();
 	
 	function SetupCamera(_w, _h, _fov, _znear, _zfar)
 	{
@@ -45,6 +47,19 @@ function Camera3D() constructor
 		
 		matproj = matrix_build_projection_perspective_fov(
 			fieldofview, width/height, znear, zfar);
+		
+		matbillboard_zup = Mat4();
+		array_copy(matbillboard_zup, 0, matview, 0, 16);
+		matbillboard_zup[0] = 1;
+		matbillboard_zup[1] = 0;
+		matbillboard_zup[2] = 0;
+		matbillboard_zup[4] = 0;
+		matbillboard_zup[5] = 1;
+		matbillboard_zup[6] = 0;
+		matbillboard_zup[8] = 0;
+		matbillboard_zup[9] = 0;
+		matbillboard_zup[10] = 1;
+		matbillboard_yup = matrix_multiply(Mat4Rotate(90, 0, 0), matbillboard_zup);
 		
 		//matview = matrix_multiply(Mat4ScaleXYZ(1, -1, 1), matview);
 	}
