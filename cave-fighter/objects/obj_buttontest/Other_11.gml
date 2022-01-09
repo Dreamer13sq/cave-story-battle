@@ -19,4 +19,5 @@ e.valuestep = 1;
 e = r.Real("Y").DefineControl(fighter, "y");
 e.valueprecision = 1;
 e.valuestep = 1;
-
+b.Bool().Label("Infinite Dash").DefineControl(self, "infinitedash");
+b.Bool().Label("Infinite Power").DefineControl(self, "infinitepower");

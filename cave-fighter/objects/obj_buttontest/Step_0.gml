@@ -3,6 +3,7 @@
 var ts = 1;
 
 if infinitedash {fighter.dashmeter = fighter.dashmetermax;}
+if infinitepower {fighter.PowerAdd(2);}
 
 fighter.Update(ts);
 

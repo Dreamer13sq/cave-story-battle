@@ -33,16 +33,11 @@ function LoadPoseArray(path, out)
 	{
 		framemats = array_create(bonecount);
 		
-		boneindex = 0;
-		repeat(bonecount)
+		i = 0;
+		repeat(bonecount * 16)
 		{
-			i = 0;
-			repeat(16)
-			{
-				framemats[@ boneindex*16+i] = buffer_read(b, buffer_f32);
-				i++;
-			}
-			boneindex++;
+			framemats[@ i] = buffer_read(b, buffer_f16);
+			i++;
 		}
 		
 		out[@ f] = framemats;

@@ -207,7 +207,7 @@ function Entity() constructor
 
 function E_Hitball() : Entity() constructor
 {
-	vb = OpenVertexBuffer("hitball.vb", HEADER.vbf_pct);
+	vb = FetchVB("hitball.vb", HEADER.vbf_pct);
 	
 	elementcount = 16;
 	element = array_create(elementcount);

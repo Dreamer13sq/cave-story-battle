@@ -81,4 +81,8 @@ inp.DefineInputKey(InputIndex.dash, VKey.space);
 inp.DefineInputKey(InputIndex.start, VKey.enter);
 inp.DefineInputKey(InputIndex.select, VKey.shift);
 
+// Vertex buffers
+vbmap = ds_map_create();
+vbxmap = ds_map_create();
+
 room_goto_next();

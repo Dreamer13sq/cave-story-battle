@@ -26,8 +26,8 @@ fighter.x = 0;
 fighter.y = 0;
 fighter.inputmgr = input;
 
-vb_grid = OpenVertexBuffer("grid.vb", HEADER.vbf_pct);
-vb_axisbox = OpenVertexBuffer("axisbox.vb", HEADER.vbf_pct);
+vb_grid = FetchVB("grid.vb", HEADER.vbf_pct);
+vb_axisbox = FetchVB("axisbox.vb", HEADER.vbf_pct);
 
 ll_battleentity = new EntityLL();
 ll_battleentity.name = "Battle LL";
@@ -35,6 +35,7 @@ ll_particle = new EntityLL();
 ll_particle.name = "Particle LL";
 
 infinitedash = 0;
+infinitepower = 0;
 debug = 0;
 
 // Layout

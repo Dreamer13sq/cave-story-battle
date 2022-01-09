@@ -39,13 +39,13 @@ function Fighter() constructor
 	framelast = 0;
 	
 	attributes = {
-		walkspeed : 5,
+		walkspeed : 6,
 		deceleration : 0.9,
 		acceleration : 1.0,
 		
-		dashspeed : 7,
-		backdashspeed : 7,
-		runspeed : 6.5,
+		dashspeed : 8,
+		backdashspeed : 8,
+		runspeed : 7.5,
 		dashframes : 16,
 		dashframesmin : 10,
 		backdashframes : 12,
@@ -57,7 +57,7 @@ function Fighter() constructor
 		jumpsquatframes : 3,
 		jumpheight : 10,
 		leapsquatframes : 6,
-		leapheight : 10,
+		leapheight : 13,
 		airspeed : 4,
 		gravity : 0.4,
 		terminal : -16,
@@ -334,6 +334,7 @@ function Fighter() constructor
 	function PowerAdd(value)
 	{
 		powermeter = clamp(powermeter+value, 0, powermetermax*(powerstockcount));
+		if (powermeter > powermeterold) {powermeterold = powermeter;}
 	}
 	
 	// Returns true and uses ex meter cost if sufficient
@@ -854,7 +855,7 @@ function Fighter_Default_Runner(ts, f)
 			{
 				printf("はどうけん");
 				//PowerUseEX();
-				PowerAdd(2);
+				PowerAdd(7);
 				return StateSet(ST_Fighter.dash);
 			}
 			
@@ -1117,6 +1118,7 @@ function Fighter_Default_Runner(ts, f)
 			if ( StateStartPop() )
 			{
 				FlagSet(FL_Fighter.useddashbutton, ButtonHeld(BTN_DASH));
+				FlagSet(FL_Fighter.dashing, 1);
 				return;
 			}
 			
@@ -1130,6 +1132,7 @@ function Fighter_Default_Runner(ts, f)
 					!(FlagGet(FL_Fighter.useddashbutton)? ButtonHeld(BTN_DASH): ButtonHeld(BTN_FORWARD))
 					)
 				{
+					FlagSet(FL_Fighter.dashing, 0);
 					return StateSet(ST_Fighter.jump);
 				}
 			}
@@ -1141,6 +1144,7 @@ function Fighter_Default_Runner(ts, f)
 			if ( StateStartPop() )
 			{
 				FlagSet(FL_Fighter.useddashbutton, ButtonHeld(BTN_DASH));
+				FlagSet(FL_Fighter.dashing, 1);
 				return;
 			}
 			
@@ -1154,6 +1158,7 @@ function Fighter_Default_Runner(ts, f)
 					!(FlagGet(FL_Fighter.useddashbutton)? ButtonHeld(BTN_DASH): ButtonHeld(BTN_BACK))
 					)
 				{
+					FlagSet(FL_Fighter.dashing, 0);
 					return StateSet(ST_Fighter.jump);
 				}
 			}

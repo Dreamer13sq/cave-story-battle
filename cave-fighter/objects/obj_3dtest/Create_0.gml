@@ -11,8 +11,8 @@ zoffset = 0;
 CAMERA3D.SetLocation(0, 4, 1);
 lookatvec = [0,0,1];
 
-vb = OpenVertexBuffer("test.vb", HEADER.vbf_pnct);
-vbx = OpenVBX("sue/model.vbx", HEADER.vbf_pnctbw);
+vb = FetchVB("test.vb", HEADER.vbf_pnct);
+vbx = FetchVBX("sue/model.vbx", HEADER.vbf_pnctbw);
 poseset = {}
 LoadFighterPoses("sue/pose/", poseset);
 matpose = Mat4ArrayFlat(200);

@@ -16,7 +16,7 @@ if debug
 	var hist = f.inputhistory;
 	var n = array_length(hist);
 	var _index = f.inputhistoryindex;
-
+	
 	// History
 	var xx = 440;
 	var yy = 4;
@@ -125,7 +125,7 @@ var spr = spr_meter_power;
 var xx = 16, yy = 270-32, ww = amtmax, hh = sprite_get_height(spr);
 var sgn = 1;
 var lvl = f.powermeter div f.powermetermax;
-var lvlold = f.powermeterold div f.powermetermax;
+var lvlold = (f.powermeterold-1) div f.powermetermax;
 
 var s = "Lv"+string(amt2 div amtmax)+"/"+string(n);
 DrawText(xx+2, yy+2-2, s, c_dkgray);

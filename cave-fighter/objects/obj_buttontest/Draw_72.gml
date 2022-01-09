@@ -53,11 +53,18 @@ U_Fighter_SetTint_Preset(0);
 
 if fighter.FlagGet(FL_Fighter.dashing)
 {
-	if fighter.FrameStepBool(0, -1, 4) {U_Fighter_SetTint_Preset(FighterTintPreset.white, 1);}
-	else 
+	if (fighter.powermeter != fighter.powermeterold)
 	{
-		U_Fighter_SetTint_Preset((fighter.powermeter != fighter.powermeterold)? 
-			FighterTintPreset.charge: FighterTintPreset.parry);
+		if fighter.FrameElapsed(3)
+		{
+			if fighter.FrameStepBool(0, -1, 4)
+			U_Fighter_SetTint_Preset((fighter.powermeter != fighter.powermeterold)? 
+				FighterTintPreset.charge: FighterTintPreset.parry);
+		}
+		else
+		{
+			U_Fighter_SetTint_Preset(FighterTintPreset.white);
+		}
 	}
 }
 
