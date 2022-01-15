@@ -1096,13 +1096,13 @@ function Fighter_Default_Runner(ts, f)
 			}
 			
 			// Airdash
-			if ( Button(BTN_DASH, DASHBUFFERFRAMES) || SequenceEvaluateKey2("dash0", "dash1") )
-			{
-				if ( DashUse(true) ) {return StateSet(ST_Fighter.airdash);}
-			}
 			if ( (Button(BTN_DASH, DASHBUFFERFRAMES) && ButtonHeld(BTN_BACK)) || SequenceEvaluateKey2("bdash0", "bdash1") )
 			{
 				if ( DashUse(true) ) {return StateSet(ST_Fighter.airbackdash);}
+			}
+			if ( Button(BTN_DASH, DASHBUFFERFRAMES) || SequenceEvaluateKey2("dash0", "dash1") )
+			{
+				if ( DashUse(true) ) {return StateSet(ST_Fighter.airdash);}
 			}
 			
 			if ( y == 0 )

@@ -2,9 +2,14 @@
 
 if (lastwindowsize[0] != window_get_width() || lastwindowsize[1] != window_get_height())
 {
-	lastwindowsize[0] = window_get_width();
-	lastwindowsize[0] = window_get_height();
-	windowresized = true;
+	if (window_get_width() > 0 && window_get_height())
+	{
+		lastwindowsize[0] = window_get_width();
+		lastwindowsize[0] = window_get_height();
+		windowresized = true;
+	
+		surface_resize(application_surface, window_get_width(), window_get_height());
+	}
 }
 else
 {

@@ -10,18 +10,20 @@ function E_Fighter_Afterimage() : Entity() constructor
 	texture = -1;
 	
 	forwardsign = 1;
-	life = 20;
+	lifemax = 20;
+	life = lifemax;
 	
 	tintpreset = 0;
 	
 	function Render3D()
 	{
-		if (BoolStep(life, 4))
+		if (BoolStep(life, 3))
 		{
 			matrix_set(matrix_world, mattran);
 			gpu_set_cullmode(forwardsign? cull_clockwise: cull_counterclockwise);
 			shader_set_uniform_matrix_array(HEADER.shd_fighter_u_matpose, matpose);
-			shader_set_uniform_f(HEADER.shd_fighter_u_zoffset, 1);
+			shader_set_uniform_f(HEADER.shd_fighter_u_forwardsign, forwardsign);
+			shader_set_uniform_f(HEADER.shd_fighter_u_zoffset, 1+life/lifemax);
 			U_Fighter_SetTint_Preset(tintpreset, 1.0);
 			
 			for (var i = 0; i < vbx.vbcount; i++)
@@ -40,7 +42,7 @@ function E_Fighter_Afterimage() : Entity() constructor
 			return;
 		}
 		
-		mattran = Mat4TranslateScaleXYZ(x, z, y, forwardsign, 1, 1);
+		mattran = Mat4Transform(x, 0, y, 0, 0, 0, forwardsign, 1, 1);
 	}
 }
 

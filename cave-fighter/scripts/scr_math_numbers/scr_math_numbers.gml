@@ -95,13 +95,13 @@ function IsApproaching(value, target, step)
 // Returns true when value is in an odd interval
 function BoolStep(value, step)
 {
-	return (value mod step * 2) div step;
+	return (value mod (step * 2)) div step;
 }
 
 // Returns 1 when value is in an odd interval, -1 otherwise
 function BoolStepPol(value, step)
 {
-	return ((value mod step * 2) div step)? 1: -1;
+	return ((value mod (step * 2)) div step)? 1: -1;
 }
 
 // Returns value from 0 to 1 based on position in interval

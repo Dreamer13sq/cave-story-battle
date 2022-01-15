@@ -37,17 +37,26 @@ void main()
 	normal = m * normal;
 	
 	vertexpos.y *= -1.0;
+	//normal.y *= -1.0;
+	
+	//vertexpos.y *= 0.1;
 	
 	v_pos = vertexpos.xyz;
 	v_nor = (normal * u_mattran).xyz;
 	v_color = in_Colour;
     v_uv = in_TextureCoord;
 	
-	u_mattran[1][1] *= 0.02;
+	u_mattran[1][1] *= 0.2;
+	
+	//float fighterx = u_mattran[3][0];
+	//u_mattran[3][0] = 0.0;
+	//u_matproj[3][0] += fighterx*1.1;
+	
+	u_mattran[3][1] -= u_zoffset;
 	
     gl_Position = (u_matproj * u_matview * u_mattran) * vertexpos;
 	float side = (gl_Position.x * 0.1);
 	
-	gl_Position.z = (gl_Position.z + u_zoffset) * 0.1;
+	//gl_Position.z = (gl_Position.z + u_zoffset) * 0.1;
     
 }

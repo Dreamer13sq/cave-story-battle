@@ -45,7 +45,8 @@ gpu_set_cullmode(fighter.forwardsign? cull_clockwise: cull_counterclockwise);
 matrix_set(matrix_world, Mat4Transform(
 	fighter.x, 0, fighter.y,
 	0, 0, 0,
-	fighter.forwardsign, 1, 1));
+	fighter.forwardsign, 1, 1)
+);
 shader_set_uniform_matrix_array(HEADER.shd_fighter_u_matpose, fighter.matpose);
 shader_set_uniform_f(HEADER.shd_fighter_u_forwardsign, fighter.forwardsign);
 shader_set_uniform_f(HEADER.shd_fighter_u_zoffset, 0);
