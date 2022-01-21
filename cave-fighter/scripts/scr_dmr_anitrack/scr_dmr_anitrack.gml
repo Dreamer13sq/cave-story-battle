@@ -532,8 +532,7 @@ function CalculateAnimationPose(
 	array_resize(outbonetransform, n);
 	
 	// Calculate animation for specific bone
-	i = 0; 
-	repeat(n)
+	i = 0; repeat(n)
 	{
 		localtransform[i++] = matrix_multiply(
 			posedata[i], bone_localmatricies[i]);
