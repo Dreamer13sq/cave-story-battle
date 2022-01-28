@@ -19,7 +19,8 @@ function FetchVBX(path, format)
 	
 	if ( !ds_map_exists(_map, path) )
 	{
-		_map[? path] = OpenVBX(path, format);
+		_map[? path] = new VBMData();
+		OpenVBM(_map[? path], path, format);
 	}
 	
 	return _map[? path];

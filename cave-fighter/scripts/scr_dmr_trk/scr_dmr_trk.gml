@@ -1,16 +1,23 @@
 /*
+	Track data struct for animation playback
 */
 
-enum AniTrack_Intrpl
+#macro TRKHEADERCODE 0x004b5254
+
+enum TRK_Intrpl
 {
 	constant = 0,
 	linear = 1,
 	smooth = 2,
 }
 
-function AniTrackData() constructor
+function TRKData() constructor
 {
-	tracks = []; // array of AniTrackData_Track
+	matrixspace = 0; // 0 = None, 1 = Local, 2 = Pose, 3 = World, 4 = Evaluated
+	framematrices = []; // Array of flat matrix arrays for each frame
+	
+	trackspace = 0; // 0 = None, 1 = Local, 2 = Pose, 3 = World
+	tracks = []; // array of TRKData_Track
 	tracknames = [];	// (bone) names for each track
 	trackmap = {}; // {trackname: track} for each track
 	trackcount = 0;
@@ -21,43 +28,121 @@ function AniTrackData() constructor
 	markercount = 0;
 	
 	positionrange = [0, 1];
+	positionstep = 1.0
 	
+	framecount = 0;
 	framespersecond = 1;
-	length = 0;
+	duration = 0;
 	flag = 0;
 }
 
-function AniTrackData_Track() constructor
+function TRKData_Track() constructor
 {
 	frames = [];
 	vectors = [];
 	count = 0;
 }
 
-// Returns animation struct from file (.ani)
-function LoadAniTrack(_path)
+// Removes allocated memory from trk struct (None yet)
+function TRKFree(trk) constructor
 {
-	var bcompressed = buffer_load(_path);
-	if bcompressed == -1
+	
+}
+
+// Returns animation struct from file (.trk)
+function OpenTRK(outtrk, path)
+{
+	if filename_ext(path) == ""
 	{
-		printf("LoadAniTrack(): Error loading file \"%s\"", _path);
-		return 0;
+		path = filename_change_ext(path, ".trk");	
 	}
-	var b = buffer_decompress(bcompressed);
-	buffer_delete(bcompressed);
+	
+	var bzipped = buffer_load(path);
+	
+	if bzipped < 0
+	{
+		show_debug_message("OpenTRK(): Error loading track data from \"" + path + "\"");
+		return -1;
+	}
+	
+	var b = buffer_decompress(bzipped);
+	if b < 0 {b = bzipped;} else {buffer_delete(bzipped);}
+	
+	var header;
+	
+	// Header
+	header = buffer_peek(b, 0, buffer_u32);
+	
+	// Not a trk file
+	if ( (header & 0x00FFFFFF) != TRKHEADERCODE )
+	{
+		show_debug_message("OpenTRK(): header is invalid \"" + path + "\"");
+		return new VBMData();
+	}
+	
+	switch(header & 0xFF)
+	{
+		default:
 		
-	/*
-		bonecount
-		maxframe
-		tracks[bonecount]
-			trackname
-			transforms[10]
-				pair[2]
-					frame
-					value
+		// Version 1
+		case(1): 
+			return __TRKOpen_v1(b, outtrk);
+	}
+	
+	return -1;
+}
+
+function __TRKOpen_v1(b, outtrk)
+{
+	/* File spec:
+	    'TRK' (3B)
+	    TRK Version (1B)
+		
+	    flags (1B)
+		
+	    fps (1f)
+	    framecount (1I)
+	    numtracks (1I)
+	    duration (1f)
+	    positionstep (1f)
+		
+		tracknames[numtracks]
+	        namelength (1B)
+	        namechars[namelength]
+	            char (1B)
+		
+		matrixspace (1B)
+	        0 = No Matrices
+	        1 = LOCAL
+	        2 = POSE
+	        3 = WORLD
+	        4 = EVALUATED
+	    matrixdata[framecount]
+	        framematrices[numtracks]
+	            mat4 (16f)
+		
+	    trackspace (1B)
+	        0 = No Tracks
+	        1 = LOCAL
+	        2 = POSE
+	        3 = WORLD
+	    trackdata[numtracks]
+	        numframes (4B)
+	        framepositions[numframes]
+	            position (1f)
+	        framevectors[numframes]
+	            vector[3]
+	                value (1f)
+    
+	    nummarkers (4B)
+	    markernames[nummarkers]
+	        namelength (1B)
+	        namechars[namelength]
+	            char (1B)
+	    markerpositions[nummarkers]
+	        position (1f)
 	*/
-		
-	var out = new AniTrackData();
+	
 	var flag;
 	
 	var namelength;
@@ -68,10 +153,17 @@ function LoadAniTrack(_path)
 	
 	// Flag
 	flag = buffer_read(b, buffer_u8);
+	outtrk.flag = flag;
 	// Animation Original FPS
-	out.framespersecond = buffer_read(b, buffer_f32);
-	// Animation Length
-	out.length = buffer_read(b, buffer_u16);
+	outtrk.framespersecond = buffer_read(b, buffer_f32);
+	// Frame Count
+	outtrk.framecount = buffer_read(b, buffer_u32);
+	// Track/Bone Count
+	outtrk.trackcount = buffer_read(b, buffer_u32);
+	// Duration
+	outtrk.duration = buffer_read(b, buffer_f32);
+	// Position Step
+	outtrk.positionstep = buffer_read(b, buffer_f32);
 	
 	// Transforms -------------------------------------------------
 	
@@ -83,19 +175,21 @@ function LoadAniTrack(_path)
 	var name;
 	var vector;
 	var vectorsize;
+	var trackindex;
+	var transformindex;
+	var matarray;
+	var m;
 	
-	var v, f;
+	var i, v, f, n;
 	
-	var numtracks = buffer_read(b, buffer_u16);
-	out.trackcount = numtracks;
+	var numtracks = outtrk.trackcount;
 	
-	printf(numtracks);
-	
-	array_resize(out.tracks, numtracks);
-	array_resize(out.tracknames, numtracks);
+	array_resize(outtrk.tracks, numtracks);
+	array_resize(outtrk.tracknames, numtracks);
 	
 	// Track Names
-	for (var trackindex = 0; trackindex < numtracks; trackindex++)
+	trackindex = 0;
+	repeat(numtracks)
 	{
 		name = "";
 		namelength = buffer_read(b, buffer_u8);
@@ -103,68 +197,116 @@ function LoadAniTrack(_path)
 		{
 			name += chr( buffer_read(b, buffer_u8) );
 		}
-		out.tracknames[trackindex] = name;
+		outtrk.tracknames[trackindex] = name;
+		trackindex++;
 	}
+	
+	// Read Matrices
+	outtrk.matrixspace = buffer_read(b, buffer_u8);
+	if (outtrk.matrixspace > 0)
+	{
+		numframes = outtrk.framecount;
+		n = numtracks*16;
+		array_resize(outtrk.framematrices, numframes);
 		
-	// Read tracks
-	for (var trackindex = 0; trackindex < numtracks; trackindex++)
-	{		
-		transformtracks = array_create(3); // [location<3>, quaternion<4>, scale<3>]
-		
-		// For each transform vector [location<3>, quaternion<4>, scale<3>]
-		for (var transformindex = 0; transformindex < 3; transformindex++)
+		f = 0;
+		repeat(numframes)
 		{
-			vectorsize = (transformindex == 1)? 4:3; // 4 for quats, 3 for location and scale
+			matarray = array_create(n);
 			
-			numframes = buffer_read(b, buffer_u16); // Frame Count
-			
-			track = new AniTrackData_Track();
-			trackframes = array_create(numframes);
-			trackvectors = array_create(numframes);
-			
-			// Frame Positions
-			for (f = 0; f < numframes; f++)
+			i = 0;
+			repeat(n)
 			{
-				trackframes[f] = buffer_read(b, buffer_f32);
+				matarray[i++] = buffer_read(b, buffer_f32);
 			}
 			
-			if numframes > 0
+			/*
+			matarray = array_create(numtracks);
+			for (trackindex = 0; trackindex < numtracks; trackindex++)
 			{
-				out.positionrange[0] = min(out.positionrange[0], trackframes[0]);
-				out.positionrange[1] = max(out.positionrange[1], trackframes[numframes-1]);
-			}
-			
-			// Frame Vectors
-			for (f = 0; f < numframes; f++)
-			{
-				vector = array_create(vectorsize);
-						
-				for (v = 0; v < vectorsize; v++)
+				m = matrix_build_identity();
+				for (var i = 0; i < 16; i++)
 				{
-					vector[v] = buffer_read(b, buffer_f32);
+					m[i] = buffer_read(b, buffer_f32);
 				}
+				matarray[@ trackindex] = m;
+			}
+			*/
+			
+			outtrk.framematrices[@ f++] = matarray;
+		}
+	}
+	
+	// Read tracks
+	outtrk.trackspace = buffer_read(b, buffer_u8);
+	if (outtrk.trackspace > 0)
+	{
+		trackindex = 0;
+		repeat(numtracks)
+		{
+			transformtracks = array_create(3); // [location<3>, quaternion<4>, scale<3>]
+		
+			// For each transform vector [location<3>, quaternion<4>, scale<3>]
+			transformindex = 0;
+			repeat(3)
+			{
+				vectorsize = (transformindex == 1)? 4:3; // 4 for quats, 3 for location and scale
+			
+				numframes = buffer_read(b, buffer_u32); // Frame Count
+			
+				track = new TRKData_Track();
+				trackframes = array_create(numframes);
+				trackvectors = array_create(numframes);
+			
+				// Frame Positions
+				f = 0;
+				repeat(numframes)
+				{
+					trackframes[f++] = buffer_read(b, buffer_f32);
+				}
+			
+				if numframes > 0
+				{
+					outtrk.positionrange[0] = min(outtrk.positionrange[0], trackframes[0]);
+					outtrk.positionrange[1] = max(outtrk.positionrange[1], trackframes[numframes-1]);
+				}
+			
+				// Frame Vectors
+				f = 0;
+				repeat(numframes)
+				{
+					vector = array_create(vectorsize);
+					
+					v = 0;
+					repeat(vectorsize)
+					{
+						vector[v++] = buffer_read(b, buffer_f32);
+					}
 				
-				trackvectors[f] = vector; // Vector
+					trackvectors[f++] = vector; // Vector
+				}
+			
+				track.count = numframes;
+				track.frames = trackframes;
+				track.vectors = trackvectors;
+				transformtracks[transformindex++] = track;
 			}
 			
-			track.count = numframes;
-			track.frames = trackframes;
-			track.vectors = trackvectors;
-			transformtracks[transformindex] = track;
+			outtrk.tracks[trackindex] = transformtracks;
+			outtrk.trackmap[$ outtrk.tracknames[trackindex++] ] = transformtracks;
 		}
-		
-		out.tracks[trackindex] = transformtracks;
-		out.trackmap[$ out.tracknames[trackindex] ] = transformtracks;
 	}
 	
 	// Markers -----------------------------------------------------
-	var nummarkers = buffer_read(b, buffer_u16);
-	out.markercount = nummarkers;
+	var nummarkers = buffer_read(b, buffer_u32);
+	outtrk.markercount = nummarkers;
 	
-	array_resize(out.markerpositions, nummarkers);
-	array_resize(out.markernames, nummarkers);
+	array_resize(outtrk.markerpositions, nummarkers);
+	array_resize(outtrk.markernames, nummarkers);
 	
-	for (var i = 0; i < nummarkers; i++) // Marker Names
+	// Marker Names
+	i = 0;
+	repeat(nummarkers)
 	{
 		name = "";
 		namelength = buffer_read(b, buffer_u8);
@@ -172,25 +314,32 @@ function LoadAniTrack(_path)
 		{
 			name += chr( buffer_read(b, buffer_u8) );
 		}
-		out.markernames[i] = name;
+		outtrk.markernames[i++] = name;
 	}
 	
-	for (var i = 0; i < nummarkers; i++) // Marker Frames
+	// Marker Frames
+	i = 0;
+	repeat(nummarkers)
 	{
-		out.markerpositions[i] = buffer_read(b, buffer_f32);
-		out.markermap[$ out.markernames[i] ] = out.markerpositions[i];
+		outtrk.markerpositions[i] = buffer_read(b, buffer_f32);
+		outtrk.markermap[$ outtrk.markernames[i] ] = outtrk.markerpositions[i];
+		i++;
 	}
-		
-	buffer_delete(b);
-		
-	printf("Returning Animation...");
 	
-	return out;
+	buffer_delete(b);
+	
+	return 1;
 }
 
 // Evaluates animation at given position and fills "outpose" with evaluated matrices
 // Set "bonekeys" to 0 to use indices instead of bone names
-function EvaluateAnimationTracks(pos, interpolationtype, bonekeys, trackdata, outpose)
+function EvaluateAnimationTracks(
+	trackdata,	// TRK struct for animation
+	pos,	// 0-1 Value for animation position
+	interpolationtype,	// Interpolation method for blending keyframes
+	bonekeys,	// Bone names to map tracks to bones. 0 for track indices
+	outpose
+	)
 {
 	// ~16% of original time / ~625% speed increase with the YYC compiler
 	
@@ -216,10 +365,12 @@ function EvaluateAnimationTracks(pos, interpolationtype, bonekeys, trackdata, ou
 		q_c, q_s, q_omc;
 	
 	if pos < 0.5 {possearchstart = 0;}
-	else {possearchstart = trackdata.length;}
+	else {possearchstart = 1.0;}
 	
-	var mat4identity = matrix_build_identity();
 	var mm = matrix_build_identity();
+	
+	var _lastepsilon = math_get_epsilon();
+	math_set_epsilon(0.00000000000000001);
 	
 	// Map tracks
 	if bonekeys == 0 // Bone Indices
@@ -257,14 +408,12 @@ function EvaluateAnimationTracks(pos, interpolationtype, bonekeys, trackdata, ou
 		outposematrix = outpose[@ t]; // Target Bone Matrix
 		t++;
 		
-		//array_copy(outposematrix, 0, mat4identity, 0, 16);
-		
 		// For each transform (location, scale, rotation)
 		// Performs in this order: Translation, Rotation, Scale
-		for (ttype = 0; ttype < 3; ttype++)
-		//for (ttype = 2; ttype >= 0; ttype--)
+		ttype = 0;
+		repeat(3)
 		{
-			track = transformtracks[ttype]; // AniTrackData_Track
+			track = transformtracks[ttype]; // TRKData_Track
 			trackframes = track.frames;
 			trackvectors = track.vectors;
 			findexmax = track.count - 1;
@@ -355,12 +504,14 @@ function EvaluateAnimationTracks(pos, interpolationtype, bonekeys, trackdata, ou
 				if poscurr >= posnext {blendamt = 1;} // Same frame
 				else {blendamt = (pos - poscurr) / (posnext - poscurr);} // More than one unit difference
 				
+				blendamt = clamp(blendamt, 0.0, 1.0);
+				
 				// Apply Interpolation
 				switch(interpolationtype)
 				{
-					case(AniTrack_Intrpl.constant): blendamt = blendamt >= 0.99; break;
-					//case(AniTrack_Intrpl.linear): blendamt = blendamt; break;
-					case(AniTrack_Intrpl.smooth): blendamt = 0.5*(1-cos(pi*blendamt)); break;
+					case(TRK_Intrpl.constant): blendamt = blendamt >= 0.99; break;
+					//case(TRK_Intrpl.linear): blendamt = blendamt; break;
+					case(TRK_Intrpl.smooth): blendamt = 0.5*(1-cos(pi*blendamt)); break;
 				}
 				
 				// Apply Transform
@@ -492,36 +643,26 @@ function EvaluateAnimationTracks(pos, interpolationtype, bonekeys, trackdata, ou
 						
 						break;
 				}
-				
-				continue;
-				
-				if bonekeys != 0
-				if t < 120
-				if bonekeys[t] == "hand_r" && ttype == 2
-				{
-					execinfo = "";
-					execinfo += stringf("Current Pos: %F", pos) + "\n";
-					execinfo += stringf("Pos: [%F, %F]", poscurr, posnext) + "\n";
-					execinfo += stringf("Frame: [%d, %d]", findexcurr, findexnext) + "\n";
-					execinfo += stringf("Blend Amount: %F", blendamt) + "\n";
-					execinfo += stringf("Quat: %s", quat) + "\n";
-				}
 			}
+			
+			ttype++;
 		}
 		
 		
 	}
 	
+	math_set_epsilon(_lastepsilon);
+	
 	return outpose;
 }
 
 // Fills outtransform with calculated animation pose
-// bones = Array of VBXBone()
+// bones = Array of VBMBone()
 // posedata = Array of 4x4 matrices. 2D
 // outposetransform = Flat Array of matrices in localspace, size = len(posedata) * 16, give to shader
 // outbonetransform = Array of bone matrices in modelspace
 function CalculateAnimationPose(
-	bone_parentindices, bone_localmatricies, bone_inversemodelmatrix, posedata, 
+	bone_parentindices, bone_localmatricies, bone_inversemodelmatrices, posedata, 
 	outposetransform, outbonetransform = [])
 {
 	var n = min( array_length(bone_parentindices), array_length(posedata));
@@ -552,13 +693,13 @@ function CalculateAnimationPose(
 	// Compute final matrix for bone
 	i = 0; repeat(n)
 	{
-		m = matrix_multiply(bone_inversemodelmatrix[i], outbonetransform[i]);
+		m = matrix_multiply(bone_inversemodelmatrices[i], outbonetransform[i]);
 		array_copy(outposetransform, (i++)*16, m, 0, 16);
 	}
 }
 
 // Returns amount to move position in one frame
-function TrackData_GetTimeStep(trackdata, framespersecond)
+function TrackData_GetTimeStep(trkdata, framespersecond)
 {
-	return (trackdata.framespersecond/framespersecond)/trackdata.length;
+	return trkdata.positionstep*(trkdata.framespersecond/framespersecond);
 }
