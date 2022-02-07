@@ -2,7 +2,7 @@
 
 function Fighter_Sue() : Fighter() constructor
 {
-	vbx = FetchVBX("sue/model.vbx", HEADER.vbf_pnctbw);
+	vbm = FetchVBM("sue/model.vbm", HEADER.vbf_pnctbw);
 	LoadFighterPoses("sue/pose/", poseset);
 	SetPose(variable_struct_get_names(poseset)[0]);
 	

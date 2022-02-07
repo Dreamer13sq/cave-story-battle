@@ -38,7 +38,7 @@ matrix_set(matrix_world, Mat4());
 matrix_set(matrix_view, CAMERA3D.matbillboard_yup);
 vertex_submit(vb_axisbox, pr_trianglelist, -1);
 
-// VBX ========================================================================
+// VBM ========================================================================
 shader_set(shd_fighter);
 
 gpu_set_cullmode(fighter.forwardsign? cull_clockwise: cull_counterclockwise);
@@ -69,9 +69,9 @@ if fighter.FlagGet(FL_Fighter.dashing)
 	}
 }
 
-for (var i = 0; i < fighter.vbx.vbcount; i++)
+for (var i = 0; i < fighter.vbm.vbcount; i++)
 {
-	fighter.vbx.SubmitVBIndex(i, pr_trianglelist, fighter.activetexture);
+	fighter.vbm.SubmitVBIndex(i, pr_trianglelist, fighter.activetexture);
 }
 
 // Draw entities

@@ -13,6 +13,35 @@ enum TRK_Intrpl
 
 function TRKData() constructor
 {
+	// Returns true on success, false on failure
+	// Populates outarray with frame matrix array for frame.
+	function CopyFrameMatrixArray(f, out, out_offset=0)
+	{
+		if (f >= 0 && f < array_length(framematrices))
+		{
+			array_copy(out, out_offset, framematrices[f], 0, array_length(framematrices[f]));
+			return true;
+		}
+		return false;
+	}
+	
+	// Returns matrix array for frame. -1 if index is invalid
+	function GetFrameMatrixArray(f, out)
+	{
+		if (f >= 0 && f < array_length(framematrices))
+		{
+			return framematrices[f];
+		}
+		return -1;
+	}
+	
+	function toString()
+	{
+		return "{TRK " + 
+			string(array_length(framematrices)) + " matrices, " +
+			string(trackcount) + " tracks}" 
+	}
+	
 	matrixspace = 0; // 0 = None, 1 = Local, 2 = Pose, 3 = World, 4 = Evaluated
 	framematrices = []; // Array of flat matrix arrays for each frame
 	

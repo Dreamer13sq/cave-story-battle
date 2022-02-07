@@ -53,7 +53,7 @@ enum VBM_AttributeType
 function VBMData() constructor 
 {
 	vb = [];	// Vertex buffers
-	vbmap = {};	// {vbname: vertex_buffer} for each vb
+	vb_map = {};	// {vbname: vertex_buffer} for each vb
 	vbnames = [];	// Names corresponding to buffers
 	vbnamemap = {};	// Names to indices
 	vbcount = 0;
@@ -70,7 +70,7 @@ function VBMData() constructor
 	// Returns vertex buffer with given name. -1 if not found
 	static FindVB = function(_name)
 	{
-		var i = variable_struct_get(vbmap, _name);
+		var i = variable_struct_get(vb_map, _name);
 		return is_undefined(i)? -1: i;
 	}
 	
@@ -127,9 +127,9 @@ function VBMData() constructor
 		if (vbcount > 0)
 		{
 			// Name exists
-			if ( variable_struct_exists(vbmap, vbname) )
+			if ( variable_struct_exists(vb_map, vbname) )
 			{
-				vertex_submit(vbmap[$ vbname], prim, texture);
+				vertex_submit(vb_map[$ vbname], prim, texture);
 			}
 		}
 	}
@@ -137,7 +137,7 @@ function VBMData() constructor
 	static AddVB = function(vb, vbname)
 	{
 		vb[vbcount] = vb;
-		vbmap[$ vbname] = vb;
+		vb_map[$ vbname] = vb;
 		vbnames[vbcount] = vbname;
 		vbnamemap[$ vbname] = vbcount;
 		vbcount += 1;	
@@ -397,7 +397,7 @@ function __VBMOpen_v1(outvbm, b, format, freeze)
 		
 		if freeze {vertex_freeze(vb);}
 		outvbm.vb[i] = vb;
-		outvbm.vbmap[$ outvbm.vbnames[i]] = vb;
+		outvbm.vb_map[$ outvbm.vbnames[i]] = vb;
 		
 		// move to next vb
 		buffer_seek(b, buffer_seek_relative, vbuffersize);

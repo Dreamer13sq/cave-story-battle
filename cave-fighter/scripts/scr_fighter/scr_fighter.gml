@@ -107,7 +107,7 @@ function Fighter() constructor
 	for (var i = 0; i < inputhistorycount; i++)
 		{inputhistory[i] = [0, 0];}
 	
-	vbx = -1;
+	vbm = -1;
 	pos = 0;
 	posmax = 1;
 	posspeed = 1.0;
@@ -710,12 +710,12 @@ function Fighter() constructor
 	
 	#region Animation ====================================
 	
-	// Returns true if frame is before given frame
+	// Sets animation for fighter
 	function SetPose(key)
 	{
 		if (!variable_struct_exists(poseset, key))
 		{
-			show_debug_message("Unknown key \"" + key + "\"")
+			show_message("Unknown key \"" + key + "\"")
 			return;
 		}
 	
@@ -724,7 +724,7 @@ function Fighter() constructor
 			posekey = key;
 			activepose = poseset[$ key];
 			pos = 0;
-			posmax = array_length(activepose);
+			posmax = activepose.framecount;
 		}
 	}
 	
@@ -732,7 +732,7 @@ function Fighter() constructor
 	{
 		var nd = NewEntity_Battle(new E_Fighter_Afterimage());
 		nd.SetLocation(x, y, z);
-		nd.vbx = vbx;
+		nd.vbm = vbm;
 		nd.forwardsign = forwardsign;
 		nd.texture = _texture;
 		nd.tintpreset = _tintpreset;
@@ -793,7 +793,7 @@ function Fighter() constructor
 		Runner(ts);
 		
 		pos = Modulo(pos+posspeed, posmax);
-		matpose = activepose[pos];
+		activepose.CopyFrameMatrixArray(pos, matpose);
 		
 		activetexture = texture_base;
 		

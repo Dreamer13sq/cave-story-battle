@@ -141,7 +141,7 @@ function Entity() constructor
 	frame = 0;
 	
 	vb = -1;
-	vbx = -1;
+	vbm = -1;
 	
 	drawlayer = 0;
 	drawdepth = 0;

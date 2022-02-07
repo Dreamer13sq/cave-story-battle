@@ -6,7 +6,7 @@ Structure:
 			- Contains what data to load from the folder
 			- Maps textures to meshes
 			- Maps meshes to shaders
-		<name>.vbx
+		<name>.vbm
 			- Model to load
 		<name>.pse
 			- ALL animations for character stored as matrix arrays for each bone

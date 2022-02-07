@@ -49,9 +49,9 @@ function LoadPoseArray(path, out)
 
 function LoadFighterPoses(rootpath, outstruct)
 {
-	rootpath = filename_dir(rootpath);
+	rootpath = filename_dir(rootpath) + "/";
 	
-	var f = file_find_first(rootpath+"/*.pse", 0);
+	var f = file_find_first(rootpath+"*.trk", 0);
 	var name;
 	var index = 0;
 	
@@ -59,8 +59,12 @@ function LoadFighterPoses(rootpath, outstruct)
 	{
 		name = filename_change_ext(f, "");
 		
-		outstruct[$ name] = [];
-		LoadPoseArray("sue/pose/"+f, outstruct[$ name]);
+		var trk = new TRKData();
+		OpenTRK(trk, rootpath+f);
+		outstruct[$ name] = trk;
+		
+		//LoadPoseArray("sue/pose/"+f, outstruct[$ name]);
+		
 		f = file_find_next();
 		
 		index += 1;

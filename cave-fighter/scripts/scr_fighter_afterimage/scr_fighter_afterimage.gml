@@ -3,7 +3,7 @@
 
 function E_Fighter_Afterimage() : Entity() constructor
 {
-	vbx = -1;
+	vbm = -1;
 	color = c_white;
 	matpose = array_create(200*16);
 	mattran = Mat4();
@@ -26,9 +26,9 @@ function E_Fighter_Afterimage() : Entity() constructor
 			shader_set_uniform_f(HEADER.shd_fighter_u_zoffset, 1+life/lifemax);
 			U_Fighter_SetTint_Preset(tintpreset, 1.0);
 			
-			for (var i = 0; i < vbx.vbcount; i++)
+			for (var i = 0; i < vbm.vbcount; i++)
 			{
-				vbx.SubmitVBIndex(i, pr_trianglelist, texture);
+				vbm.SubmitVBIndex(i, pr_trianglelist, texture);
 			}
 		}
 	}

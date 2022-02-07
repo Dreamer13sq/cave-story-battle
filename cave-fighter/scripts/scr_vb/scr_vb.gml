@@ -3,7 +3,7 @@
 
 function FetchVB(path, format)
 {
-	var _map = HEADER.vbmap;
+	var _map = HEADER.vb_map;
 	
 	if ( !ds_map_exists(_map, path) )
 	{
@@ -13,14 +13,15 @@ function FetchVB(path, format)
 	return _map[? path];
 }
 
-function FetchVBX(path, format)
+function FetchVBM(path, format)
 {
-	var _map = HEADER.vbxmap;
+	var _map = HEADER.vbm_map;
 	
 	if ( !ds_map_exists(_map, path) )
 	{
-		_map[? path] = new VBMData();
-		OpenVBM(_map[? path], path, format);
+		var vbm = new VBMData();
+		OpenVBM(vbm, path, format);
+		_map[? path] = vbm;
 	}
 	
 	return _map[? path];
