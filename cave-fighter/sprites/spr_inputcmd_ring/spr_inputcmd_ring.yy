@@ -59,7 +59,7 @@
     "eventToFunction": {},
     "eventStubScript": null,
     "parent": {"name":"spr_inputcmd_ring","path":"sprites/spr_inputcmd_ring/spr_inputcmd_ring.yy",},
-    "resourceVersion": "1.3",
+    "resourceVersion": "1.4",
     "name": "spr_inputcmd_ring",
     "tags": [],
     "resourceType": "GMSequence",

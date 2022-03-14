@@ -59,7 +59,7 @@
     "eventToFunction": {},
     "eventStubScript": null,
     "parent": {"name":"tex_sue_pal_c00","path":"sprites/tex_sue_pal_c00/tex_sue_pal_c00.yy",},
-    "resourceVersion": "1.3",
+    "resourceVersion": "1.4",
     "name": "tex_sue_pal_c00",
     "tags": [],
     "resourceType": "GMSequence",

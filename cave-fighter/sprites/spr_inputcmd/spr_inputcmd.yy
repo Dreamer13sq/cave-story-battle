@@ -119,7 +119,7 @@
     "eventToFunction": {},
     "eventStubScript": null,
     "parent": {"name":"spr_inputcmd","path":"sprites/spr_inputcmd/spr_inputcmd.yy",},
-    "resourceVersion": "1.3",
+    "resourceVersion": "1.4",
     "name": "spr_inputcmd",
     "tags": [],
     "resourceType": "GMSequence",

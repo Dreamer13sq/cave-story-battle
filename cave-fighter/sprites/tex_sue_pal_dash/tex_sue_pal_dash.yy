@@ -59,7 +59,7 @@
     "eventToFunction": {},
     "eventStubScript": null,
     "parent": {"name":"tex_sue_pal_dash","path":"sprites/tex_sue_pal_dash/tex_sue_pal_dash.yy",},
-    "resourceVersion": "1.3",
+    "resourceVersion": "1.4",
     "name": "tex_sue_pal_dash",
     "tags": [],
     "resourceType": "GMSequence",

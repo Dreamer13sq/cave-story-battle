@@ -79,7 +79,7 @@
     "eventToFunction": {},
     "eventStubScript": null,
     "parent": {"name":"spr_meter_dash","path":"sprites/spr_meter_dash/spr_meter_dash.yy",},
-    "resourceVersion": "1.3",
+    "resourceVersion": "1.4",
     "name": "spr_meter_dash",
     "tags": [],
     "resourceType": "GMSequence",

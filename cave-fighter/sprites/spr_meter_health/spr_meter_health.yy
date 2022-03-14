@@ -75,7 +75,7 @@
     "eventToFunction": {},
     "eventStubScript": null,
     "parent": {"name":"spr_meter_health","path":"sprites/spr_meter_health/spr_meter_health.yy",},
-    "resourceVersion": "1.3",
+    "resourceVersion": "1.4",
     "name": "spr_meter_health",
     "tags": [],
     "resourceType": "GMSequence",

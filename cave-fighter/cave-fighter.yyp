@@ -115,9 +115,9 @@
     {"CopyToMask":-1,"filePath":"datafiles/sue","resourceVersion":"1.0","name":"model.vbm","resourceType":"GMIncludedFile",},
   ],
   "MetaData": {
-    "IDEVersion": "2022.1.0.609",
+    "IDEVersion": "2022.2.1.618",
   },
-  "resourceVersion": "1.4",
+  "resourceVersion": "1.5",
   "name": "cave-fighter",
   "tags": [],
   "resourceType": "GMProject",
