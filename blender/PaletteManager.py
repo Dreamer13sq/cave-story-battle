@@ -1,6 +1,18 @@
 import bpy
+import mathutils
 import numpy
+import math
 import bmesh
+from bpy_extras.io_utils import ExportHelper
+
+def DotProduct(v1, v2):
+    return sum(x*y for x, y in zip(v1, v2))
+
+def CrossProduct(a, b):
+    c = [a[1]*b[2] - a[2]*b[1],
+         a[2]*b[0] - a[0]*b[2],
+         a[0]*b[1] - a[1]*b[0]]
+    return c
 
 def CmpColor(c1, c2):
     return c1[0] == c2[0] and c1[1] == c2[1] and c1[2] == c2[2] and c1[3] == c2[3]
@@ -20,15 +32,28 @@ def SRGBtoLinear(c):
         c[3]
         )
 
+def HueShift(color, amt):
+    k = [0.57735]*3
+    cosangle = math.cos(amt)
+    sinamt = math.sin(amt)
+    invcosangle = 1-cosangle
+    
+    cp = CrossProduct(k, color[:3])
+    dp = DotProduct(k, color[:3])
+    
+    return [
+        x*cosangle + cp[i] * sinamt + k[0]*dp*invcosangle
+        for i,x in enumerate(color)
+    ]
+
 def GetPalNodes(material):
     material = bpy.data.materials['PalMaker']
     frames = {x.name: x for x in material.node_tree.nodes if (x.type=='FRAME' and x.label[:4]=='pal-')}
-    activeframe = [x for x in frames.values()][0]
     return (
         material.node_tree,
         material.node_tree.nodes,
         frames,
-        activeframe
+        [x for x in frames.values()][0]
     )
 
 # ---------------------------------------------------------------------------------------
@@ -401,7 +426,7 @@ classlist.append(DMR_OP_PaletteMoveColor)
 class DMR_OP_PaletteToImage(bpy.types.Operator):
     """Tooltip"""
     bl_idname = "dmr.palette_to_image"
-    bl_label = "Convert Palette to Image"
+    bl_label = "Palette -> Image"
     bl_options = {'UNDO'}
     
     image : bpy.props.EnumProperty(name='Target Image',
@@ -432,7 +457,7 @@ classlist.append(DMR_OP_PaletteToImage)
 class DMR_OP_PaletteFromImage(bpy.types.Operator):
     """Tooltip"""
     bl_idname = "dmr.palette_from_image"
-    bl_label = "Generate Palette from Image"
+    bl_label = "Image -> Palette"
     bl_options = {'UNDO'}
     
     image : bpy.props.EnumProperty(name='Target Image',
@@ -665,7 +690,176 @@ class DMR_OP_Palette_FromVertexColor(bpy.types.Operator):
         return {'FINISHED'}
 classlist.append(DMR_OP_Palette_FromVertexColor)
 
+# ----------------------------------------------------------------------------------
+
+class DMR_OP_Palette_ColorHSV(bpy.types.Operator):
+    """Tooltip"""
+    bl_idname = "dmr.palette_color_hsv"
+    bl_label = "Change HSV"
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    index : bpy.props.IntProperty()
+    hue : bpy.props.FloatProperty(name='Hue', default=0.0, options={'SKIP_SAVE'}, step=1)
+    sat : bpy.props.FloatProperty(name='Saturation', default=0.0, options={'SKIP_SAVE'}, step=1)
+    val : bpy.props.FloatProperty(name='Value', default=0.0, options={'SKIP_SAVE'}, step=1)
+    
+    basecolors = []
+    
+    def invoke(self, context, event):
+        nodetree, nodes, nodeframes, activeframe = GetPalNodes(context.object.active_material)
+        colorramps = [x for x in nodetree.nodes if (x.type=='VALTORGB' and x.parent==activeframe)]
+        colorramps.sort(key=lambda x: x.label)
+        self.basecolors = [mathutils.Vector([x for x in y.color][:3]) for y in colorramps[self.index].color_ramp.elements]
+        return self.execute(context)
+    
+    def execute(self, context):
+        nodetree, nodes, nodeframes, activeframe = GetPalNodes(context.object.active_material)
+        colorramps = [x for x in nodetree.nodes if (x.type=='VALTORGB' and x.parent==activeframe)]
+        colorramps.sort(key=lambda x: x.label)
+        
+        for i,e in enumerate(colorramps[self.index].color_ramp.elements):
+            c = mathutils.Vector(HueShift(self.basecolors[i], self.hue))
+            c = c.lerp([c.length]*3, -self.sat)
+            c += mathutils.Vector([self.val]*3)
+            e.color[:3] = c;
+        
+        return {'FINISHED'}
+classlist.append(DMR_OP_Palette_ColorHSV)
+
+# ----------------------------------------------------------------------------------
+
+class DMR_OP_Palette_ImportPalette(bpy.types.Operator, ExportHelper):
+    """Tooltip"""
+    bl_idname = "dmr.palette_import"
+    bl_label = "Import Palette from File"
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    filename_ext = ".bmp"
+    filter_glob: bpy.props.StringProperty(default="*"+filename_ext, options={'HIDDEN'}, maxlen=255)
+    
+    def execute(self, context):
+        image = bpy.data.images.load(self.filepath, check_existing=False)
+        
+        nodetree, nodes, nodeframes, activeframe = GetPalNodes(context.object.active_material)
+        Palette_FromImage(nodetree, activeframe, image.name)
+        
+        bpy.data.images.remove(image)
+        
+        self.report({'INFO'}, 'Palette read from "%s"' % self.filepath)
+        
+        return {'FINISHED'}
+classlist.append(DMR_OP_Palette_ImportPalette)
+
+# ----------------------------------------------------------------------------------
+
+class DMR_OP_Palette_ExportPalette(bpy.types.Operator, ExportHelper):
+    """Tooltip"""
+    bl_idname = "dmr.palette_export"
+    bl_label = "Export Palette to File"
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    filename_ext = ".bmp"
+    filter_glob: bpy.props.StringProperty(default="*"+filename_ext, options={'HIDDEN'}, maxlen=255)
+    
+    width: bpy.props.IntProperty(name='Width', default=16)
+    
+    def execute(self, context):
+        image = bpy.data.images.new('__tempsprite', width=16, height=16)
+        image.colorspace_settings.name = 'Linear'
+        image.alpha_mode = 'STRAIGHT'
+        image.filepath_raw = self.filepath
+        image.file_format = 'BMP'
+        
+        nodetree, nodes, nodeframes, activeframe = GetPalNodes(context.object.active_material)
+        Palette_ToImage(nodetree, activeframe, image.name, self.width)
+        
+        image.save_render(self.filepath)
+        bpy.data.images.remove(image)
+        
+        self.report({'INFO'}, 'Palette written to "%s"' % self.filepath)
+        
+        return {'FINISHED'}
+classlist.append(DMR_OP_Palette_ExportPalette)
+
 # ====================================================================================
+
+class DMR_MT_CSFighterPalette_Submenu(bpy.types.Menu):
+    """Creates a Panel in the Object properties window"""
+    bl_label = "Palette Color Options"
+    index = 0
+    def draw(self, context):
+        layout = self.layout
+        layout.label(text='Color %d Options' % self.index)
+        layout.operator('dmr.palette_color_hsv').index=self.index
+
+if 1:
+    class DMR_MT_CSFighterPalette_Submenu0(DMR_MT_CSFighterPalette_Submenu): index=0
+    class DMR_MT_CSFighterPalette_Submenu1(DMR_MT_CSFighterPalette_Submenu): index=1
+    class DMR_MT_CSFighterPalette_Submenu2(DMR_MT_CSFighterPalette_Submenu): index=2
+    class DMR_MT_CSFighterPalette_Submenu3(DMR_MT_CSFighterPalette_Submenu): index=3
+    class DMR_MT_CSFighterPalette_Submenu4(DMR_MT_CSFighterPalette_Submenu): index=4
+    class DMR_MT_CSFighterPalette_Submenu5(DMR_MT_CSFighterPalette_Submenu): index=5
+    class DMR_MT_CSFighterPalette_Submenu6(DMR_MT_CSFighterPalette_Submenu): index=6
+    class DMR_MT_CSFighterPalette_Submenu7(DMR_MT_CSFighterPalette_Submenu): index=7
+    class DMR_MT_CSFighterPalette_Submenu8(DMR_MT_CSFighterPalette_Submenu): index=8
+    class DMR_MT_CSFighterPalette_Submenu9(DMR_MT_CSFighterPalette_Submenu): index=9
+    class DMR_MT_CSFighterPalette_Submenu10(DMR_MT_CSFighterPalette_Submenu): index=10
+    class DMR_MT_CSFighterPalette_Submenu11(DMR_MT_CSFighterPalette_Submenu): index=11
+    class DMR_MT_CSFighterPalette_Submenu12(DMR_MT_CSFighterPalette_Submenu): index=12
+    class DMR_MT_CSFighterPalette_Submenu13(DMR_MT_CSFighterPalette_Submenu): index=13
+    class DMR_MT_CSFighterPalette_Submenu14(DMR_MT_CSFighterPalette_Submenu): index=14
+    class DMR_MT_CSFighterPalette_Submenu15(DMR_MT_CSFighterPalette_Submenu): index=15
+    class DMR_MT_CSFighterPalette_Submenu16(DMR_MT_CSFighterPalette_Submenu): index=16
+    class DMR_MT_CSFighterPalette_Submenu17(DMR_MT_CSFighterPalette_Submenu): index=17
+    class DMR_MT_CSFighterPalette_Submenu18(DMR_MT_CSFighterPalette_Submenu): index=18
+    class DMR_MT_CSFighterPalette_Submenu19(DMR_MT_CSFighterPalette_Submenu): index=19
+    class DMR_MT_CSFighterPalette_Submenu20(DMR_MT_CSFighterPalette_Submenu): index=20
+    class DMR_MT_CSFighterPalette_Submenu21(DMR_MT_CSFighterPalette_Submenu): index=21
+    class DMR_MT_CSFighterPalette_Submenu22(DMR_MT_CSFighterPalette_Submenu): index=22
+    class DMR_MT_CSFighterPalette_Submenu23(DMR_MT_CSFighterPalette_Submenu): index=23
+    class DMR_MT_CSFighterPalette_Submenu24(DMR_MT_CSFighterPalette_Submenu): index=24
+    class DMR_MT_CSFighterPalette_Submenu25(DMR_MT_CSFighterPalette_Submenu): index=25
+    class DMR_MT_CSFighterPalette_Submenu26(DMR_MT_CSFighterPalette_Submenu): index=26
+    class DMR_MT_CSFighterPalette_Submenu27(DMR_MT_CSFighterPalette_Submenu): index=27
+    class DMR_MT_CSFighterPalette_Submenu28(DMR_MT_CSFighterPalette_Submenu): index=28
+    class DMR_MT_CSFighterPalette_Submenu29(DMR_MT_CSFighterPalette_Submenu): index=29
+    class DMR_MT_CSFighterPalette_Submenu30(DMR_MT_CSFighterPalette_Submenu): index=30
+    class DMR_MT_CSFighterPalette_Submenu31(DMR_MT_CSFighterPalette_Submenu): index=31
+
+    classlist.append(DMR_MT_CSFighterPalette_Submenu0)
+    classlist.append(DMR_MT_CSFighterPalette_Submenu1)
+    classlist.append(DMR_MT_CSFighterPalette_Submenu2)
+    classlist.append(DMR_MT_CSFighterPalette_Submenu3)
+    classlist.append(DMR_MT_CSFighterPalette_Submenu4)
+    classlist.append(DMR_MT_CSFighterPalette_Submenu5)
+    classlist.append(DMR_MT_CSFighterPalette_Submenu6)
+    classlist.append(DMR_MT_CSFighterPalette_Submenu7)
+    classlist.append(DMR_MT_CSFighterPalette_Submenu8)
+    classlist.append(DMR_MT_CSFighterPalette_Submenu9)
+    classlist.append(DMR_MT_CSFighterPalette_Submenu10)
+    classlist.append(DMR_MT_CSFighterPalette_Submenu11)
+    classlist.append(DMR_MT_CSFighterPalette_Submenu12)
+    classlist.append(DMR_MT_CSFighterPalette_Submenu13)
+    classlist.append(DMR_MT_CSFighterPalette_Submenu14)
+    classlist.append(DMR_MT_CSFighterPalette_Submenu15)
+    classlist.append(DMR_MT_CSFighterPalette_Submenu16)
+    classlist.append(DMR_MT_CSFighterPalette_Submenu17)
+    classlist.append(DMR_MT_CSFighterPalette_Submenu18)
+    classlist.append(DMR_MT_CSFighterPalette_Submenu19)
+    classlist.append(DMR_MT_CSFighterPalette_Submenu20)
+    classlist.append(DMR_MT_CSFighterPalette_Submenu21)
+    classlist.append(DMR_MT_CSFighterPalette_Submenu22)
+    classlist.append(DMR_MT_CSFighterPalette_Submenu23)
+    classlist.append(DMR_MT_CSFighterPalette_Submenu24)
+    classlist.append(DMR_MT_CSFighterPalette_Submenu25)
+    classlist.append(DMR_MT_CSFighterPalette_Submenu26)
+    classlist.append(DMR_MT_CSFighterPalette_Submenu27)
+    classlist.append(DMR_MT_CSFighterPalette_Submenu28)
+    classlist.append(DMR_MT_CSFighterPalette_Submenu29)
+    classlist.append(DMR_MT_CSFighterPalette_Submenu30)
+    classlist.append(DMR_MT_CSFighterPalette_Submenu31)
+
+# ----------------------------------------------------------------------------------
 
 class DMR_PT_CSFighterPalette(bpy.types.Panel):
     """Creates a Panel in the Object properties window"""
@@ -689,21 +883,25 @@ class DMR_PT_CSFighterPalette(bpy.types.Panel):
             
             layout.label(text=material.name + ' %s' % len(colorramps))
             c = layout.column(align=1)
+            rr = c.row(align=1)
+            rr.operator('dmr.palette_import', icon='IMPORT', text='From File')
+            rr.operator('dmr.palette_export', icon='EXPORT', text='To File')
+            c.operator('dmr.palette_from_vcolor')
             c.operator('dmr.palette_to_image')
             c.operator('dmr.palette_from_image')
-            c.operator('dmr.palette_from_vcolor')
             rr = c.row(align=1)
             rr.operator('dmr.palette_set_uv', text='UV From Index')
             rr.operator('dmr.palette_move_uv')
             c.operator('dmr.palette_toggle_range')
             
+            c = layout.column()
+            for nd in nodes:
+                if nd.type == 'NORMAL':
+                    c.prop(nd.outputs[0], 'default_value', text='')
+            
             c = layout.column(align=1)
             if len(colorramps) == 0:
                 layout.operator('dmr.palette_add_color', icon='ADD', text='').index=0
-            
-            for nd in nodes:
-                if nd.type == 'NORMAL':
-                    c.prop(nd.outputs[0], 'default_value', text='Light Direction')
             
             for i, cr_node in enumerate(colorramps):
                 b = c.box().row(align=1)
@@ -722,13 +920,13 @@ class DMR_PT_CSFighterPalette(bpy.types.Panel):
                 op = cc.operator('dmr.palette_remove_color', icon='REMOVE', text='').index=i
                 cc = b.column(align=1)
                 op = cc.operator('dmr.palette_set_uv', icon='UV', text='').index=i
+                cc.menu("DMR_MT_CSFighterPalette_Submenu%d"%i, icon='DOWNARROW_HLT', text="")
 
 classlist.append(DMR_PT_CSFighterPalette)
 
 def register():
     for c in classlist:
         bpy.utils.register_class(c)
-
 
 def unregister():
     for c in classlist.reverse():
