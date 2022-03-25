@@ -17,6 +17,7 @@ varying vec2 v_uv;
 uniform float u_zoffset;
 uniform float u_forwardsign;
 uniform mat4 u_matpose[200];
+uniform mat4 u_matshear;
 
 void main()
 {
@@ -46,15 +47,13 @@ void main()
 	v_color = in_Colour;
     v_uv = in_TextureCoord;
 	
-	u_mattran[1][1] *= 0.2;
-	
 	//float fighterx = u_mattran[3][0];
 	//u_mattran[3][0] = 0.0;
 	//u_matproj[3][0] += fighterx*1.1;
 	
 	u_mattran[3][1] -= u_zoffset;
 	
-    gl_Position = (u_matproj * u_matview * u_mattran) * vertexpos;
+    gl_Position = (u_matproj * u_matview * u_mattran * u_matshear) * vertexpos;
 	float side = (gl_Position.x * 0.1);
 	
 	//gl_Position.z = (gl_Position.z + u_zoffset) * 0.1;

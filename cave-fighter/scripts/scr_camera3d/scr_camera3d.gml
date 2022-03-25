@@ -64,6 +64,15 @@ function Camera3D() constructor
 		//matview = matrix_multiply(Mat4ScaleXYZ(1, -1, 1), matview);
 	}
 	
+	function GetLocationVec() 
+	{
+		return [
+			viewlocation[0] - viewforward[0]*viewdistance,
+			viewlocation[1] - viewforward[1]*viewdistance, 
+			viewlocation[2] - viewforward[2]*viewdistance
+			];
+	}
+	
 	function SetLocation(_x, _y, _z)
 	{
 		viewlocation[0] = _x;

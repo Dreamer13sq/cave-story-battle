@@ -69,6 +69,9 @@ if fighter.FlagGet(FL_Fighter.dashing)
 	}
 }
 
+var c = CAMERA3D.GetLocationVec();
+U_Fighter_SetShear(c, [c[0],y,0], fighter.GetLocationVec(), -1.0*fighter.forwardsign, 1.0);
+
 for (var i = 0; i < fighter.vbm.vbcount; i++)
 {
 	fighter.vbm.SubmitVBIndex(i, pr_trianglelist, fighter.activetexture);

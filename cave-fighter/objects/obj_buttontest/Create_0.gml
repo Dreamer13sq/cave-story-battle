@@ -18,7 +18,7 @@ CAMERA3D.SetLocation(0, 400, 100);
 CAMERA3D.LookAt(0, 0, 100);
 
 floory = 200;
-stagesize = 400;
+stagesize = 480;
 zoffset = 0;
 
 fighter = new Fighter_Sue();

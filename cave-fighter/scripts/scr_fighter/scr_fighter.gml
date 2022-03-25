@@ -740,6 +740,8 @@ function Fighter() constructor
 		array_copy(nd.matpose, 0, matpose, 0, array_length(matpose));
 	}
 	
+	function GetLocationVec() {return [x,y,z];}
+	
 	#endregion ================================================
 	
 	DefaultRunner = Fighter_Default_Runner;

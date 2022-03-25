@@ -60,6 +60,7 @@ shd_fighter_u_zoffset = shader_get_uniform(shd, "u_zoffset");
 shd_fighter_u_forwardsign = shader_get_uniform(shd, "u_forwardsign");
 shd_fighter_u_tintcolor = shader_get_uniform(shd, "u_tintcolor");
 shd_fighter_u_tintparam = shader_get_uniform(shd, "u_tintparam");
+shd_fighter_u_matshear = shader_get_uniform(shd, "u_matshear");
 
 // Input
 playerinputcount = 2;

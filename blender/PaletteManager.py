@@ -193,37 +193,57 @@ def PalCheck(material = bpy.data.materials['PalMaker']):
         dpnode.name = dpnode.label = nameprefix + 'dp'
         
         outcolornode = nodes.new('NodeReroute')
+        outcolornode.name = outcolornode.label = nameprefix + 'outcolor'
         outcolornode.parent = frame
         outcolornode.location = (700,40)
-        outcolornode.name = outcolornode.label = nameprefix + 'outcolor'
         
-        valuenode = nodes.new('ShaderNodeValue');
+        valuenode = nodes.new('ShaderNodeValue')
+        valuenode.name = valuenode.label = 'Num Colors = N'
         valuenode.parent = frame
         valuenode.location = (0,0)
         valuenode.width=50
         valuenode.hide=1
-        valuenode.name = valuenode.label = 'Num Colors'
         valuenode.outputs[0].default_value = len(rampnodes)
         
         divnode = nodes.new('ShaderNodeMath')
+        divnode.name = divnode.label = '1 / N'
         divnode.parent = frame
         divnode.location = (150,0)
         divnode.width=50
         divnode.hide=1
-        divnode.name = divnode.label = '1 / Num Colors'
         divnode.operation = 'DIVIDE'
         divnode.inputs[0].default_value = 1.0
         nodetree.links.new(valuenode.outputs[0], divnode.inputs[1])
         
         subnode = nodes.new('ShaderNodeMath')
+        subnode.name = subnode.label = 'N - 1'
         subnode.parent = frame
         subnode.location = (300,0)
         subnode.width=50
         subnode.hide=1
-        subnode.name = subnode.label = 'Num Colors - 1'
         subnode.operation = 'ADD'
         subnode.inputs[1].default_value = 1.0
         nodetree.links.new(valuenode.outputs[0], subnode.inputs[0])
+        
+        invnode = nodes.new('ShaderNodeMath')
+        invnode.name = invnode.label = '1 - 1 / N'
+        invnode.parent = frame
+        invnode.location = (450,0)
+        invnode.width=50
+        invnode.hide=1
+        invnode.operation = 'SUBTRACT'
+        invnode.inputs[0].default_value = 1.0
+        nodetree.links.new(divnode.outputs[0], invnode.inputs[1])
+        
+        halfnode = nodes.new('ShaderNodeMath')
+        halfnode.name = halfnode.label = '-0.5 / N'
+        halfnode.parent = frame
+        halfnode.location = (600,0)
+        halfnode.width=50
+        halfnode.hide=1
+        halfnode.operation = 'DIVIDE'
+        halfnode.inputs[0].default_value = -0.5
+        nodetree.links.new(valuenode.outputs[0], halfnode.inputs[1])
         
         # Color Ramps
         rampnodes.sort(key=lambda x: x.label)
@@ -275,6 +295,19 @@ def PalCheck(material = bpy.data.materials['PalMaker']):
                 nodetree.links.new(multnode.outputs[0], greaternode.inputs[1])
                 nodetree.links.new(greaternode.outputs[0], mixnode.inputs[0])
             else:
+                invinvnode = nodes.new('ShaderNodeMath')
+                invinvnode.parent = frame
+                invinvnode.location = (xx, yy)
+                invinvnode.width=40
+                invinvnode.hide=1
+                invinvnode.operation = 'SUBTRACT'
+                
+                mixnode = nodes.new('ShaderNodeMixRGB')
+                mixnode.parent = frame
+                mixnode.location = (xx+240, yy)
+                mixnode.width=50
+                mixnode.hide=1
+                
                 multnode = nodes.new('ShaderNodeMath')
                 multnode.parent = frame
                 multnode.location = (xx, yy)
@@ -289,12 +322,6 @@ def PalCheck(material = bpy.data.materials['PalMaker']):
                 greaternode.hide=1
                 greaternode.operation = 'SUBTRACT'
                 greaternode.inputs[1].default_value = i;
-                
-                mixnode = nodes.new('ShaderNodeMixRGB')
-                mixnode.parent = frame
-                mixnode.location = (xx+240, yy)
-                mixnode.width=50
-                mixnode.hide=1
                 
                 nodetree.links.new(subnode.outputs[0], multnode.inputs[0])
                 nodetree.links.new(uvnode.outputs[0], multnode.inputs[1])

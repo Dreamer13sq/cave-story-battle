@@ -63,3 +63,16 @@ function U_Fighter_SetTint(strength=0, midposition=0.0, exponent=0.0, color0=0, 
 		]);
 }
 
+function U_Fighter_SetShear(camposvec, gameposvec, characterposvec, xshearstrength, yshearstrength)
+{
+	var m = matrix_build_identity();
+	var xx = point_distance(characterposvec[0], 0, gameposvec[0], 0) /
+		point_distance(camposvec[0], camposvec[1], gameposvec[0], gameposvec[1]);
+	var yy = point_distance(characterposvec[1], characterposvec[2], gameposvec[1], gameposvec[2]) /
+		point_distance(camposvec[1], camposvec[2], gameposvec[1], gameposvec[2]);
+	
+	m[4] = xx * xshearstrength * sign(characterposvec[0]-gameposvec[0]);
+	m[8] = yy * yshearstrength *-sign(characterposvec[2]-gameposvec[2]);
+	
+	shader_set_uniform_matrix_array(HEADER.shd_fighter_u_matshear, m);
+}
