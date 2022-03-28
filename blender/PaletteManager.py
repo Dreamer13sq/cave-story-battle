@@ -5,6 +5,8 @@ import math
 import bmesh
 from bpy_extras.io_utils import ExportHelper
 
+MAXCOLORS = 32
+
 def DotProduct(v1, v2):
     return sum(x*y for x, y in zip(v1, v2))
 
@@ -62,6 +64,8 @@ def Palette_AddColor(node_tree, frame, index):
     nodetree, nodes, nodeframes, activeframe = GetPalNodes(bpy.context.object.active_material)
     colorramps = [x for x in nodes if (x.type=='VALTORGB' and x.parent==activeframe)]
     colorramps.sort(key=lambda x: x.label)
+    
+    index = max(0, min(len(colorramps)-1, index))
     
     ramp = nodes.new('ShaderNodeValToRGB')
     srcramp = ramp if len(colorramps) == 0 else colorramps[index]
@@ -141,8 +145,8 @@ def Palette_FromImage(node_tree, frame, image):
     
     [node_tree.nodes.remove(x) for x in node_tree.nodes if (x.type=='VALTORGB' and x.parent==frame)]
     
-    # Remove all colors
-    for r in range(0, height):
+    # Iterate Through Palette Colors
+    for r in range(0, min(height, MAXCOLORS)):
         elements = Palette_AddColor(node_tree, frame, 0).color_ramp.elements
         while len(elements) > 1: # Clear elements
             elements.remove(elements[-1])
@@ -150,6 +154,7 @@ def Palette_FromImage(node_tree, frame, image):
         currentcolor = image.pixels[r*w*4:r*w*4+4] # Get first color in row
         if image.colorspace_settings.name == 'sRGB':
             currentcolor = SRGBtoLinear(currentcolor)
+        
         elements[0].color = currentcolor
         elements[0].position = 0.0
         
@@ -162,6 +167,9 @@ def Palette_FromImage(node_tree, frame, image):
                 currentcolor = color
                 e = elements.new(c/w)
                 e.color = color
+    if height < MAXCOLORS:
+        for i in range(MAXCOLORS-height):
+            elements = Palette_AddColor(node_tree, frame, MAXCOLORS).color_ramp.elements
 
 # ---------------------------------------------------------------------------------------
 
