@@ -523,14 +523,19 @@ class DMR_OP_Palette_SetUV(bpy.types.Operator):
     bl_label = "Set UV from Index"
     bl_options = {'REGISTER', 'UNDO'}
     
+    movex : bpy.props.BoolProperty(name='Change X Position', default=0)
     index : bpy.props.IntProperty(name='Color Index', default=0)
+    xposition : bpy.props.FloatProperty(name='Default Shadow', default=1.0, min=0.0, max=1.0)
     
     @classmethod
     def poll(self, context):
         return context.object and context.object.active_material and context.object.data.uv_layers.active
     
     def draw(self, context):
+        self.layout.prop(self, 'movex')
         self.layout.prop(self, 'index')
+        if self.movex:
+            self.layout.prop(self, 'xposition')
     
     def execute(self, context):
         lastobjectmode = bpy.context.active_object.mode
@@ -538,23 +543,27 @@ class DMR_OP_Palette_SetUV(bpy.types.Operator):
         
         nodetree, nodes, nodeframes, activeframe = GetPalNodes(context.object.active_material)
         colorramps = [x for x in nodetree.nodes if (x.type=='VALTORGB' and x.parent==activeframe)]
-        
-        me = context.object.data
-        bm = bmesh.new()
-        bm.from_mesh(me)
-        
-        uv_lay = bm.loops.layers.uv.active
         yy = 1.0-((self.index+0.5)/len(colorramps))
+        xx = self.xposition
         
-        targetloops = [x for face in bm.faces if face.select for x in face.loops]
-        if len(targetloops) == 0:
-            targetloops = [x for face in bm.faces for x in face.loops]
-        for loop in targetloops:
-            loop[uv_lay].uv[1] = yy;
-        
-        bm.to_mesh(me)
-        bm.free()
-        me.update()
+        for obj in [x for x in context.selected_objects if x.type == 'MESH']:
+            me = obj.data
+            bm = bmesh.new()
+            bm.from_mesh(me)
+            
+            uv_lay = bm.loops.layers.uv.active
+            
+            targetloops = [x for face in bm.faces if face.select for x in face.loops]
+            if len(targetloops) == 0:
+                targetloops = [x for face in bm.faces for x in face.loops]
+            for loop in targetloops:
+                loop[uv_lay].uv[1] = yy;
+                if self.movex:
+                    loop[uv_lay].uv[0] = xx;
+            
+            bm.to_mesh(me)
+            bm.free()
+            me.update()
         
         bpy.ops.object.mode_set(mode=lastobjectmode)
         
