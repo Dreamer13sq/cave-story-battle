@@ -6,6 +6,7 @@ import bmesh
 from bpy_extras.io_utils import ExportHelper
 
 MAXCOLORS = 32
+NODEGROUPSIGNATURE = '<DFPALETTE>'
 
 def DotProduct(v1, v2):
     return sum(x*y for x, y in zip(v1, v2))
@@ -49,7 +50,6 @@ def HueShift(color, amt):
     ]
 
 def GetPalNodes(material):
-    material = bpy.data.materials['PalMaker']
     frames = {x.name: x for x in material.node_tree.nodes if (x.type=='FRAME' and x.label[:4]=='pal-')}
     return (
         material.node_tree,
@@ -58,18 +58,35 @@ def GetPalNodes(material):
         [x for x in frames.values()][0]
     )
 
+def GetPalFrames(node_tree):
+    return {x.name: x for x in node_tree.nodes if (x.type=='FRAME' and x.label[:4]=='pal-')}
+
+def GetPalGroups(self, context):
+    groups = [x for x in bpy.data.node_groups if NODEGROUPSIGNATURE in x.nodes.keys()]
+    if len(groups) == 0:
+        return [tuple(['0', '<No Groups Found>', ''])]
+    return (
+        (x.name, x.name, x.name)
+        for x in groups
+    )
+
+def GetPalLive():
+    nodegroupname = bpy.context.scene.dfighter_active_palette
+    if nodegroupname != '0':
+        return bpy.data.node_groups[nodegroupname]
+    return None
+
 # ---------------------------------------------------------------------------------------
 
-def Palette_AddColor(node_tree, frame, index):
-    nodetree, nodes, nodeframes, activeframe = GetPalNodes(bpy.context.object.active_material)
-    colorramps = [x for x in nodes if (x.type=='VALTORGB' and x.parent==activeframe)]
+def Palette_AddColor(node_tree, index):
+    nodes = node_tree.nodes    
+    colorramps = [x for x in nodes if x.type=='VALTORGB']
     colorramps.sort(key=lambda x: x.label)
     
     index = max(0, min(len(colorramps)-1, index))
     
     ramp = nodes.new('ShaderNodeValToRGB')
     srcramp = ramp if len(colorramps) == 0 else colorramps[index]
-    ramp.parent = activeframe
     ramp.label = srcramp.label
     
     elements = ramp.color_ramp.elements
@@ -83,24 +100,24 @@ def Palette_AddColor(node_tree, frame, index):
     for i, e in enumerate(srcelements):
         edest = elements[i]
         edest.color, edest.alpha, edest.position = (e.color, e.alpha, e.position)
-    PalCheck();
+    PalCheck(node_tree);
     
     return ramp
 
 # ---------------------------------------------------------------------------------------
 
-def Palette_RemoveColor(node_tree, frame, index):
-    nodetree, nodes, nodeframes, activeframe = GetPalNodes(bpy.context.object.active_material)
-    colorramps = [x for x in nodes if (x.type=='VALTORGB' and x.parent==activeframe)]
+def Palette_RemoveColor(node_tree, index):
+    nodes = node_tree.nodes
+    colorramps = [x for x in nodes if x.type=='VALTORGB']
     colorramps.sort(key=lambda x: x.label)
     
     nodes.remove(colorramps[index]);
-    PalCheck();
+    PalCheck(node_tree);
 
 # ---------------------------------------------------------------------------------------
 
-def Palette_MoveColor(node_tree, frame, index, move_up):
-    colorramps = [x for x in node_tree.nodes if (x.type=='VALTORGB' and x.parent==frame)]
+def Palette_MoveColor(node_tree, index, move_up):
+    colorramps = [x for x in node_tree.nodes if x.type=='VALTORGB']
     colorramps.sort(key=lambda x: x.label)
     
     targetramps = (
@@ -111,12 +128,12 @@ def Palette_MoveColor(node_tree, frame, index, move_up):
     
     targetramps[0].label = targetnames[1]
     targetramps[1].label = targetnames[0]
-    PalCheck();
+    PalCheck(node_tree);
 
 # ---------------------------------------------------------------------------------------
 
-def Palette_ToImage(node_tree, frame, image_name, width):
-    colorramps = [x for x in node_tree.nodes if (x.type=='VALTORGB' and x.parent==frame)]
+def Palette_ToImage(node_tree, image_name, width):
+    colorramps = [x for x in node_tree.nodes if x.type=='VALTORGB']
     colorramps.sort(key=lambda x: x.label)
     
     image = bpy.data.images[image_name]
@@ -125,6 +142,7 @@ def Palette_ToImage(node_tree, frame, image_name, width):
     pixels = []
     ramps = [x.color_ramp for x in colorramps]
     ramps.reverse()
+    
     for r in ramps:
         color = [x.color for x in r.elements]
         pos = [x.position for x in r.elements]
@@ -139,15 +157,16 @@ def Palette_ToImage(node_tree, frame, image_name, width):
 
 # ---------------------------------------------------------------------------------------
 
-def Palette_FromImage(node_tree, frame, image):
+def Palette_FromImage(node_tree, image):
     image = bpy.data.images[image]
     w, height = image.size
     
-    [node_tree.nodes.remove(x) for x in node_tree.nodes if (x.type=='VALTORGB' and x.parent==frame)]
+    # Remove all palette colors
+    [node_tree.nodes.remove(x) for x in node_tree.nodes if x.type=='VALTORGB']
     
     # Iterate Through Palette Colors
     for r in range(0, min(height, MAXCOLORS)):
-        elements = Palette_AddColor(node_tree, frame, 0).color_ramp.elements
+        elements = Palette_AddColor(node_tree, 0).color_ramp.elements
         while len(elements) > 1: # Clear elements
             elements.remove(elements[-1])
         
@@ -167,190 +186,133 @@ def Palette_FromImage(node_tree, frame, image):
                 currentcolor = color
                 e = elements.new(c/w)
                 e.color = color
+        
+        if len(elements) == 1:
+            e = elements.new(1.0)
+            e.color = color
+        
     if height < MAXCOLORS:
         for i in range(MAXCOLORS-height):
-            elements = Palette_AddColor(node_tree, frame, MAXCOLORS).color_ramp.elements
+            elements = Palette_AddColor(node_tree, MAXCOLORS).color_ramp.elements
 
 # ---------------------------------------------------------------------------------------
 
-def PalCheck(material = bpy.data.materials['PalMaker']):
-    nodetree, nodes, nodeframes, activeframe = GetPalNodes(material)
+def PalCheck(node_tree):
+    nodes = node_tree.nodes
     
     ysep = 32
     
-    for label, frame in nodeframes.items():
-        frame.name = frame.label
-        nameprefix = frame.name+'_'
+    for nd in [x for x in nodes if x.type in ['MIX_RGB', 'MATH', 'VALUE', 'REROUTE'] ]:
+        nodes.remove(nd)
+    
+    rampnodes = [x for x in nodes if x.type == 'VALTORGB']
+    rampnodes.sort(key=lambda x: x.name)
+    
+    # Nested Functions
+    def NewNode(name, type, x, y, width=40, hide=False):
+        nd = nodes.new(type)
+        nd.name = nd.label = name
+        nd.location = (x, y)
+        nd.width = width
+        nd.hide=hide
+        return nd
+    
+    def LinkNodes(n1, output_index, n2, input_index):
+        return node_tree.links.new(n1.outputs[output_index], n2.inputs[input_index])
+    
+    # Reroutes
+    uvnode = NewNode('uv', 'NodeReroute', -40, 80)
+    dpnode = NewNode('dp', 'NodeReroute', -40, 40)
+    outcolornode = NewNode('outcolor', 'NodeReroute', 700, 40)
+    
+    yy = ysep
+    
+    # Value nodes
+    valuenode = NewNode('Num Colors = N', 'ShaderNodeValue', 0, yy, 50, True)
+    valuenode.outputs[0].default_value = len(rampnodes)
+    
+    groupinput = [x for x in nodes if x.type == 'GROUP_INPUT'][0]
+    groupoutput = [x for x in nodes if x.type == 'GROUP_OUTPUT'][0]
+    
+    # Math Nodes
+    divnode = NewNode('1 / N', 'ShaderNodeMath', 150, yy, 50, True)
+    divnode.operation = 'DIVIDE'
+    divnode.inputs[0].default_value = 1.0
+    LinkNodes(valuenode, 0, divnode, 1)
+    
+    subnode = NewNode('N - 1', 'ShaderNodeMath', 300, yy, 50, True)
+    subnode.operation = 'ADD'
+    subnode.inputs[1].default_value = 1.0
+    LinkNodes(valuenode, 0, subnode, 0)
+    
+    invnode = NewNode('1 - 1/N', 'ShaderNodeMath', 450, yy, 50, True)
+    invnode.operation = 'SUBTRACT'
+    invnode.inputs[0].default_value = 1.0
+    LinkNodes(divnode, 0, invnode, 1)
+    
+    halfnode = NewNode('-0.5 / N', 'ShaderNodeMath', 600, yy, 50, True)
+    halfnode.operation = 'DIVIDE'
+    halfnode.inputs[0].default_value = -0.5
+    LinkNodes(valuenode, 0, halfnode, 1)
+    
+    # Color Ramps
+    rampnodes.sort(key=lambda x: x.label)
+    for i, nd in enumerate(rampnodes):
+        nd.hide = 1
+        nd.location[0] = 1
+        nd.location[1] = -(i+1) * ysep
+        nd.name = "row%02d" % (i)
+        nd.label = "Color %02d" % (i)
+        nd.color_ramp.color_mode = 'RGB'
+        nd.color_ramp.interpolation = 'CONSTANT'
+        LinkNodes(dpnode, 0, nd, 0)
+    
+    # Color Calculations
+    if len(rampnodes) > 0:
+        mixnode = rampnodes[-1]
+        xx = rampnodes[0].location[0]+280
+        yy = rampnodes[0].location[1]
+        lastmixnode = None
+    
+    for i in range(1, len(rampnodes)):
+        nd1 = rampnodes[i-1] if i == 1 else mixnode
+        nd2 = rampnodes[i]
         
-        framenodes = [x for x in nodes if x.parent == frame]
-        for nd in [x for x in framenodes if x.type in ['MIX_RGB', 'MATH', 'VALUE', 'REROUTE'] ]:
-            nodes.remove(nd)
-            framenodes.remove(nd)
+        multnode = NewNode('1/N * Index', 'ShaderNodeMath', xx, yy, 40, True)
+        multnode.operation = 'MULTIPLY'
+        multnode.inputs[1].default_value = i
         
-        framenodes.sort(key=lambda x: x.name)
-        rampnodes = [x for x in framenodes if x.type == 'VALTORGB']
+        greaternode = NewNode('UV.y is Index', 'ShaderNodeMath', xx+120, yy, 40, True)
+        greaternode.operation = 'GREATER_THAN'
         
-        uvnode = nodes.new('NodeReroute')
-        uvnode.parent = frame
-        uvnode.location = (-40,80)
-        uvnode.name = uvnode.label = nameprefix + 'uv'
+        mixnode = NewNode('Mix with Next', 'ShaderNodeMixRGB', xx+240, yy, 40, True)
         
-        dpnode = nodes.new('NodeReroute')
-        dpnode.parent = frame
-        dpnode.location = (-40,40)
-        dpnode.name = dpnode.label = nameprefix + 'dp'
+        LinkNodes(divnode, 0, multnode, 0)
+        LinkNodes(uvnode, 0, greaternode, 0)
+        LinkNodes(multnode, 0, greaternode, 1)
+        LinkNodes(greaternode, 0, mixnode, 0)
         
-        outcolornode = nodes.new('NodeReroute')
-        outcolornode.name = outcolornode.label = nameprefix + 'outcolor'
-        outcolornode.parent = frame
-        outcolornode.location = (700,40)
+        LinkNodes(nd1, 0, mixnode, 1)
+        LinkNodes(nd2, 0, mixnode, 2)
         
-        valuenode = nodes.new('ShaderNodeValue')
-        valuenode.name = valuenode.label = 'Num Colors = N'
-        valuenode.parent = frame
-        valuenode.location = (0,0)
-        valuenode.width=50
-        valuenode.hide=1
-        valuenode.outputs[0].default_value = len(rampnodes)
-        
-        divnode = nodes.new('ShaderNodeMath')
-        divnode.name = divnode.label = '1 / N'
-        divnode.parent = frame
-        divnode.location = (150,0)
-        divnode.width=50
-        divnode.hide=1
-        divnode.operation = 'DIVIDE'
-        divnode.inputs[0].default_value = 1.0
-        nodetree.links.new(valuenode.outputs[0], divnode.inputs[1])
-        
-        subnode = nodes.new('ShaderNodeMath')
-        subnode.name = subnode.label = 'N - 1'
-        subnode.parent = frame
-        subnode.location = (300,0)
-        subnode.width=50
-        subnode.hide=1
-        subnode.operation = 'ADD'
-        subnode.inputs[1].default_value = 1.0
-        nodetree.links.new(valuenode.outputs[0], subnode.inputs[0])
-        
-        invnode = nodes.new('ShaderNodeMath')
-        invnode.name = invnode.label = '1 - 1 / N'
-        invnode.parent = frame
-        invnode.location = (450,0)
-        invnode.width=50
-        invnode.hide=1
-        invnode.operation = 'SUBTRACT'
-        invnode.inputs[0].default_value = 1.0
-        nodetree.links.new(divnode.outputs[0], invnode.inputs[1])
-        
-        halfnode = nodes.new('ShaderNodeMath')
-        halfnode.name = halfnode.label = '-0.5 / N'
-        halfnode.parent = frame
-        halfnode.location = (600,0)
-        halfnode.width=50
-        halfnode.hide=1
-        halfnode.operation = 'DIVIDE'
-        halfnode.inputs[0].default_value = -0.5
-        nodetree.links.new(valuenode.outputs[0], halfnode.inputs[1])
-        
-        # Color Ramps
-        rampnodes.sort(key=lambda x: x.label)
-        for i, nd in enumerate(rampnodes):
-            nd.hide = 1
-            nd.location[0] = 1
-            nd.location[1] = -(i+1) * ysep
-            nd.name = nameprefix+"row%02d" % (i)
-            nd.label = "Color %02d" % (i)
-            nd.color_ramp.color_mode = 'RGB'
-            nd.color_ramp.interpolation = 'CONSTANT'
-            
-            nodetree.links.new(dpnode.outputs[0], nd.inputs[0])
-        
-        # Color Calculations
-        if len(rampnodes) > 0:
-            mixnode = rampnodes[-1]
-            xx = rampnodes[0].location[0]+280
-            yy = rampnodes[0].location[1]
-            lastmixnode = None
-        for i in range(1, len(rampnodes)):
-            nd1 = rampnodes[i-1] if i == 1 else mixnode
-            nd2 = rampnodes[i]
-            
-            if 1:
-                multnode = nodes.new('ShaderNodeMath')
-                multnode.parent = frame
-                multnode.location = (xx, yy)
-                multnode.width=40
-                multnode.hide=1
-                multnode.operation = 'MULTIPLY'
-                multnode.inputs[1].default_value = i
-                
-                greaternode = nodes.new('ShaderNodeMath')
-                greaternode.parent = frame
-                greaternode.location = (xx+120, yy)
-                greaternode.width=40
-                greaternode.hide=1
-                greaternode.operation = 'GREATER_THAN'
-                
-                mixnode = nodes.new('ShaderNodeMixRGB')
-                mixnode.parent = frame
-                mixnode.location = (xx+240, yy)
-                mixnode.width=50
-                mixnode.hide=1
-                
-                nodetree.links.new(divnode.outputs[0], multnode.inputs[0])
-                nodetree.links.new(uvnode.outputs[0], greaternode.inputs[0])
-                nodetree.links.new(multnode.outputs[0], greaternode.inputs[1])
-                nodetree.links.new(greaternode.outputs[0], mixnode.inputs[0])
-            else:
-                invinvnode = nodes.new('ShaderNodeMath')
-                invinvnode.parent = frame
-                invinvnode.location = (xx, yy)
-                invinvnode.width=40
-                invinvnode.hide=1
-                invinvnode.operation = 'SUBTRACT'
-                
-                mixnode = nodes.new('ShaderNodeMixRGB')
-                mixnode.parent = frame
-                mixnode.location = (xx+240, yy)
-                mixnode.width=50
-                mixnode.hide=1
-                
-                multnode = nodes.new('ShaderNodeMath')
-                multnode.parent = frame
-                multnode.location = (xx, yy)
-                multnode.width=40
-                multnode.hide=1
-                multnode.operation = 'MULTIPLY'
-                
-                greaternode = nodes.new('ShaderNodeMath')
-                greaternode.parent = frame
-                greaternode.location = (xx+120, yy)
-                greaternode.width=40
-                greaternode.hide=1
-                greaternode.operation = 'SUBTRACT'
-                greaternode.inputs[1].default_value = i;
-                
-                nodetree.links.new(subnode.outputs[0], multnode.inputs[0])
-                nodetree.links.new(uvnode.outputs[0], multnode.inputs[1])
-                nodetree.links.new(multnode.outputs[0], greaternode.inputs[0])
-                nodetree.links.new(greaternode.outputs[0], mixnode.inputs[0])
-            
-            nodetree.links.new(nd1.outputs[0], mixnode.inputs[1])
-            nodetree.links.new(nd2.outputs[0], mixnode.inputs[2])
-            
-            yy -= ysep
-        
-        nodetree.links.new(nodes['palx'].outputs[0], dpnode.inputs[0])
-        nodetree.links.new(nodes['paly'].outputs[0], uvnode.inputs[0])
-        
-        if len(rampnodes) > 0:
-            nodetree.links.new(mixnode.outputs[0], outcolornode.inputs[0])
-            nodetree.links.new(outcolornode.outputs[0], nodes['outroute'].inputs[0])
-        
-        
+        yy -= ysep
+    
+    # End linking
+    if 'palx' in nodes.keys():
+        LinkNodes(nodes['palx'], 0, dpnode, 0)
+    if 'paly' in nodes.keys():
+        LinkNodes(nodes['paly'], 0, uvnode, 0)
+    
+    LinkNodes(groupinput, 0, uvnode, 0)
+    LinkNodes(groupinput, 1, dpnode, 0)
+    
+    if len(rampnodes) > 0:
+        LinkNodes(mixnode, 0, outcolornode, 0)
+        LinkNodes(outcolornode, 0, groupoutput, 0)
+        if 'outroute' in nodes.keys():
+            LinkNodes(outcolornode, 0, nodes['outroute'], 0)
+
 print('='*80)
-PalCheck()
 
 # ================================================================================
 # ================================================================================
@@ -366,11 +328,10 @@ class DMR_OP_PaletteAddColor(bpy.types.Operator):
     
     @classmethod
     def poll(self, context):
-        return context.object and context.object.active_material
+        return GetPalLive()
     
     def execute(self, context):
-        nodetree, nodes, nodeframes, activeframe = GetPalNodes(context.object.active_material)
-        Palette_AddColor(nodetree, activeframe, self.index)
+        Palette_AddColor(GetPalLive(), self.index)
         
         return {'FINISHED'}
 classlist.append(DMR_OP_PaletteAddColor)
@@ -386,11 +347,10 @@ class DMR_OP_PaletteRemoveColor(bpy.types.Operator):
     
     @classmethod
     def poll(self, context):
-        return context.object and context.object.active_material
+        return GetPalLive()
     
     def execute(self, context):
-        nodetree, nodes, nodeframes, activeframe = GetPalNodes(context.object.active_material)
-        Palette_RemoveColor(nodetree, activeframe, self.index)
+        Palette_RemoveColor(GetPalLive(), self.index)
         return {'FINISHED'}
 classlist.append(DMR_OP_PaletteRemoveColor)
 
@@ -407,21 +367,21 @@ class DMR_OP_PaletteMoveColor(bpy.types.Operator):
     
     @classmethod
     def poll(self, context):
-        return context.object and context.object.active_material
+        return GetPalLive()
     
     def draw(self, context):
         self.layout.prop(self, 'remap_uvs')
     
     def execute(self, context):
-        nodetree, nodes, nodeframes, activeframe = GetPalNodes(context.object.active_material)
-        Palette_MoveColor(nodetree, activeframe, self.index, self.move_up)
+        node_tree = GetPalLive()
+        Palette_MoveColor(node_tree, self.index, self.move_up)
         
-        if self.remap_uvs:
+        if self.remap_uvs and context.active_object:
             lastobjectmode = context.active_object.mode
             bpy.ops.object.mode_set(mode = 'OBJECT') # Update selected
             
-            nodetree, nodes, nodeframes, activeframe = GetPalNodes(context.object.active_material)
-            colorramps = [x for x in nodetree.nodes if (x.type=='VALTORGB' and x.parent==activeframe)]
+            nodes = node_tree.nodes
+            colorramps = [x for x in node_tree.nodes if x.type=='VALTORGB']
             
             n = len(colorramps)
             yhalf = 0.5/n
@@ -467,11 +427,11 @@ class DMR_OP_PaletteToImage(bpy.types.Operator):
     image : bpy.props.EnumProperty(name='Target Image',
         items = lambda x,y: ((x.name, '%s (%dx%d)' % (x.name, x.size[0], x.size[1]), x.name) for x in bpy.data.images if x.size[0] > 0))
     
-    width : bpy.props.IntProperty(name='Width', default=16)
+    width : bpy.props.IntProperty(name='Width', default=MAXCOLORS)
     
     @classmethod
     def poll(self, context):
-        return context.object and context.object.active_material
+        return GetPalLive()
     
     def invoke(self, context, event):
         return context.window_manager.invoke_props_dialog(self, width=200)
@@ -481,8 +441,7 @@ class DMR_OP_PaletteToImage(bpy.types.Operator):
         self.layout.prop(self, 'width')
     
     def execute(self, context):
-        nodetree, nodes, nodeframes, activeframe = GetPalNodes(context.object.active_material)
-        Palette_ToImage(nodetree, activeframe, self.image, self.width)
+        Palette_ToImage(GetPalLive(), self.image, self.width)
         self.report({'INFO'}, 'Conversion to Image complete!')
         return {'FINISHED'}
 classlist.append(DMR_OP_PaletteToImage)
@@ -500,7 +459,7 @@ class DMR_OP_PaletteFromImage(bpy.types.Operator):
     
     @classmethod
     def poll(self, context):
-        return context.object and context.object.active_material
+        return GetPalLive()
     
     def invoke(self, context, event):
         return context.window_manager.invoke_props_dialog(self, width=200)
@@ -509,8 +468,7 @@ class DMR_OP_PaletteFromImage(bpy.types.Operator):
         self.layout.prop(self, 'image')
     
     def execute(self, context):
-        nodetree, nodes, nodeframes, activeframe = GetPalNodes(context.object.active_material)
-        Palette_FromImage(nodetree, activeframe, self.image)
+        Palette_FromImage(GetPalLive(), self.image)
         
         return {'FINISHED'}
 classlist.append(DMR_OP_PaletteFromImage)
@@ -541,8 +499,8 @@ class DMR_OP_Palette_SetUV(bpy.types.Operator):
         lastobjectmode = bpy.context.active_object.mode
         bpy.ops.object.mode_set(mode = 'OBJECT') # Update selected
         
-        nodetree, nodes, nodeframes, activeframe = GetPalNodes(context.object.active_material)
-        colorramps = [x for x in nodetree.nodes if (x.type=='VALTORGB' and x.parent==activeframe)]
+        node_tree, nodes, nodeframes, activeframe = GetPalNodes(context.object.active_material)
+        colorramps = [x for x in node_tree.nodes if (x.type=='VALTORGB' and x.parent==activeframe)]
         yy = 1.0-((self.index+0.5)/len(colorramps))
         xx = self.xposition
         
@@ -582,7 +540,7 @@ class DMR_OP_Palette_MoveUV(bpy.types.Operator):
     
     @classmethod
     def poll(self, context):
-        return context.object and context.object.active_material and context.object.data.uv_layers.active
+        return GetPalLive() and context.object and context.object.active_material and context.object.data.uv_layers.active
     
     def draw(self, context):
         self.layout.prop(self, 'offset')
@@ -591,8 +549,8 @@ class DMR_OP_Palette_MoveUV(bpy.types.Operator):
         lastobjectmode = context.active_object.mode
         bpy.ops.object.mode_set(mode = 'OBJECT') # Update selected
         
-        nodetree, nodes, nodeframes, activeframe = GetPalNodes(context.object.active_material)
-        colorramps = [x for x in nodetree.nodes if (x.type=='VALTORGB' and x.parent==activeframe)]
+        node_tree = GetPalLive()
+        colorramps = [x for x in node_tree.nodes if x.type=='VALTORGB']
         
         for obj in [x for x in context.selected_objects if x.type == 'MESH']:
             me = obj.data
@@ -627,14 +585,14 @@ class DMR_OP_Palette_ToggleRange(bpy.types.Operator):
     
     @classmethod
     def poll(self, context):
-        return context.object and context.object.active_material and context.object.data.uv_layers.active
+        return GetPalLive() and context.object and context.object.active_material and context.object.data.uv_layers.active
     
     def execute(self, context):
         lastobjectmode = context.active_object.mode
         bpy.ops.object.mode_set(mode = 'OBJECT') # Update selected
         
-        nodetree, nodes, nodeframes, activeframe = GetPalNodes(context.object.active_material)
-        colorramps = [x for x in nodetree.nodes if (x.type=='VALTORGB' and x.parent==activeframe)]
+        node_tree = GetPalLive()
+        colorramps = [x for x in node_tree.nodes if x.type=='VALTORGB']
         
         for obj in [x for x in context.selected_objects if x.type == 'MESH']:
             me = obj.data
@@ -674,14 +632,14 @@ class DMR_OP_Palette_FromVertexColor(bpy.types.Operator):
     
     @classmethod
     def poll(self, context):
-        return context.object and context.object.active_material and context.object.data.uv_layers.active
+        return GetPalLive() and context.object and context.object.active_material and context.object.data.uv_layers.active
     
     def execute(self, context):
         lastobjectmode = context.active_object.mode
         bpy.ops.object.mode_set(mode = 'OBJECT') # Update selected
         
-        nodetree, nodes, nodeframes, activeframe = GetPalNodes(context.object.active_material)
-        colorramps = [x for x in nodetree.nodes if (x.type=='VALTORGB' and x.parent==activeframe)]
+        node_tree = GetPalLive()
+        colorramps = [x for x in node_tree.nodes if x.type=='VALTORGB']
         
         colormap = {x.color_ramp.evaluate(0.75): i for i,x in enumerate(colorramps)}
         colorkeys = colormap.keys()
@@ -750,15 +708,15 @@ class DMR_OP_Palette_ColorHSV(bpy.types.Operator):
     basecolors = []
     
     def invoke(self, context, event):
-        nodetree, nodes, nodeframes, activeframe = GetPalNodes(context.object.active_material)
-        colorramps = [x for x in nodetree.nodes if (x.type=='VALTORGB' and x.parent==activeframe)]
+        node_tree = GetPalLive()
+        colorramps = [x for x in node_tree.nodes if x.type=='VALTORGB']
         colorramps.sort(key=lambda x: x.label)
         self.basecolors = [mathutils.Vector([x for x in y.color][:3]) for y in colorramps[self.index].color_ramp.elements]
         return self.execute(context)
     
     def execute(self, context):
-        nodetree, nodes, nodeframes, activeframe = GetPalNodes(context.object.active_material)
-        colorramps = [x for x in nodetree.nodes if (x.type=='VALTORGB' and x.parent==activeframe)]
+        node_tree = GetPalLive()
+        colorramps = [x for x in node_tree.nodes if x.type=='VALTORGB']
         colorramps.sort(key=lambda x: x.label)
         
         for i,e in enumerate(colorramps[self.index].color_ramp.elements):
@@ -781,11 +739,15 @@ class DMR_OP_Palette_ImportPalette(bpy.types.Operator, ExportHelper):
     filename_ext = ".bmp"
     filter_glob: bpy.props.StringProperty(default="*"+filename_ext, options={'HIDDEN'}, maxlen=255)
     
+    @classmethod
+    def poll(self, context):
+        return GetPalLive()
+    
     def execute(self, context):
         image = bpy.data.images.load(self.filepath, check_existing=False)
         
-        nodetree, nodes, nodeframes, activeframe = GetPalNodes(context.object.active_material)
-        Palette_FromImage(nodetree, activeframe, image.name)
+        node_tree = GetPalLive()
+        Palette_FromImage(node_tree, image.name)
         
         bpy.data.images.remove(image)
         
@@ -805,7 +767,11 @@ class DMR_OP_Palette_ExportPalette(bpy.types.Operator, ExportHelper):
     filename_ext = ".bmp"
     filter_glob: bpy.props.StringProperty(default="*"+filename_ext, options={'HIDDEN'}, maxlen=255)
     
-    width: bpy.props.IntProperty(name='Width', default=16)
+    width: bpy.props.IntProperty(name='Width', default=MAXCOLORS)
+    
+    @classmethod
+    def poll(self, context):
+        return GetPalLive()
     
     def execute(self, context):
         image = bpy.data.images.new('__tempsprite', width=16, height=16)
@@ -814,8 +780,8 @@ class DMR_OP_Palette_ExportPalette(bpy.types.Operator, ExportHelper):
         image.filepath_raw = self.filepath
         image.file_format = 'BMP'
         
-        nodetree, nodes, nodeframes, activeframe = GetPalNodes(context.object.active_material)
-        Palette_ToImage(nodetree, activeframe, image.name, self.width)
+        node_tree = GetPalLive()
+        Palette_ToImage(node_tree, image.name, self.width)
         
         image.save_render(self.filepath)
         bpy.data.images.remove(image)
@@ -915,17 +881,17 @@ class DMR_PT_CSFighterPalette(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
         
-        if context.object and context.object.active_material:
-            material = context.object.active_material
-            
-            nodetree, nodes, nodeframes, activeframe = GetPalNodes(context.object.active_material)
-            
-            framenodes = [x for x in nodes if x.parent == activeframe]
-            
-            colorramps = [x for x in framenodes if (x.type=='VALTORGB')]
+        layout.prop(context.scene, 'dfighter_active_palette')
+        
+        node_tree = GetPalLive()
+        
+        if node_tree:
+            nodes = node_tree.nodes
+            colorramps = [x for x in nodes if (x.type=='VALTORGB')]
             colorramps.sort(key=lambda x: x.label)
             
-            layout.label(text=material.name + ' %s' % len(colorramps))
+            # I/O operators
+            layout.label(text=node_tree.name + ' %s' % len(colorramps))
             c = layout.column(align=1)
             rr = c.row(align=1)
             rr.operator('dmr.palette_import', icon='IMPORT', text='From File')
@@ -933,20 +899,25 @@ class DMR_PT_CSFighterPalette(bpy.types.Panel):
             c.operator('dmr.palette_from_vcolor')
             c.operator('dmr.palette_to_image')
             c.operator('dmr.palette_from_image')
+            
+            # Palette color operators
             rr = c.row(align=1)
             rr.operator('dmr.palette_set_uv', text='UV From Index')
             rr.operator('dmr.palette_move_uv')
             c.operator('dmr.palette_toggle_range')
             
+            # Normal sphere
             c = layout.column()
             for nd in nodes:
                 if nd.type == 'NORMAL':
                     c.prop(nd.outputs[0], 'default_value', text='')
             
+            # Add color default
             c = layout.column(align=1)
             if len(colorramps) == 0:
                 layout.operator('dmr.palette_add_color', icon='ADD', text='').index=0
             
+            # Draw color ramps
             for i, cr_node in enumerate(colorramps):
                 b = c.box().row(align=1)
                 cc = b.column(align=1)
@@ -971,6 +942,10 @@ classlist.append(DMR_PT_CSFighterPalette)
 def register():
     for c in classlist:
         bpy.utils.register_class(c)
+    
+    bpy.types.Scene.dfighter_active_palette = bpy.props.EnumProperty(
+        name="Active Live Palette", items=GetPalGroups, default=0
+    )
 
 def unregister():
     for c in classlist.reverse():
