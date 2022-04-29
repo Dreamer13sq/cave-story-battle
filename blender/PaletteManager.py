@@ -7,6 +7,7 @@ from bpy_extras.io_utils import ExportHelper
 
 MAXCOLORS = 32
 NODEGROUPSIGNATURE = '<DFPALETTE>'
+NODEGROUPSIGNATUREUV = '<DFPALETTEUV>'
 
 def DotProduct(v1, v2):
     return sum(x*y for x, y in zip(v1, v2))
@@ -100,7 +101,7 @@ def Palette_AddColor(node_tree, index):
     for i, e in enumerate(srcelements):
         edest = elements[i]
         edest.color, edest.alpha, edest.position = (e.color, e.alpha, e.position)
-    PalCheck(node_tree);
+    PalUpdate(node_tree);
     
     return ramp
 
@@ -112,7 +113,7 @@ def Palette_RemoveColor(node_tree, index):
     colorramps.sort(key=lambda x: x.label)
     
     nodes.remove(colorramps[index]);
-    PalCheck(node_tree);
+    PalUpdate(node_tree);
 
 # ---------------------------------------------------------------------------------------
 
@@ -128,7 +129,7 @@ def Palette_MoveColor(node_tree, index, move_up):
     
     targetramps[0].label = targetnames[1]
     targetramps[1].label = targetnames[0]
-    PalCheck(node_tree);
+    PalUpdate(node_tree);
 
 # ---------------------------------------------------------------------------------------
 
@@ -197,8 +198,13 @@ def Palette_FromImage(node_tree, image):
 
 # ---------------------------------------------------------------------------------------
 
-def PalCheck(node_tree):
+def PalUpdate(node_tree):
     nodes = node_tree.nodes
+    
+    if 'pal-colors' not in nodes.keys():
+        frame = nodes.new('NodeFrame')
+        frame.name = frame.label = 'pal-colors'
+    frame = nodes['pal-colors']
     
     ysep = 32
     
@@ -215,6 +221,8 @@ def PalCheck(node_tree):
         nd.location = (x, y)
         nd.width = width
         nd.hide=hide
+        if frame:
+            nd.parent = frame
         return nd
     
     def LinkNodes(n1, output_index, n2, input_index):
@@ -265,6 +273,7 @@ def PalCheck(node_tree):
         nd.label = "Color %02d" % (i)
         nd.color_ramp.color_mode = 'RGB'
         nd.color_ramp.interpolation = 'CONSTANT'
+        nd.parent = frame
         LinkNodes(dpnode, 0, nd, 0)
     
     # Color Calculations
@@ -311,6 +320,10 @@ def PalCheck(node_tree):
         LinkNodes(outcolornode, 0, groupoutput, 0)
         if 'outroute' in nodes.keys():
             LinkNodes(outcolornode, 0, nodes['outroute'], 0)
+    
+    node_tree.links.new(nodes['pal-uv'].outputs[2], nodes['uv'].inputs[0])
+    node_tree.links.new(nodes['pal-uv'].outputs[1], nodes['dp'].inputs[0])
+    node_tree.links.new(nodes['outcolor'].outputs[0], nodes['output'].inputs[0])
 
 print('='*80)
 
@@ -499,8 +512,8 @@ class DMR_OP_Palette_SetUV(bpy.types.Operator):
         lastobjectmode = bpy.context.active_object.mode
         bpy.ops.object.mode_set(mode = 'OBJECT') # Update selected
         
-        node_tree, nodes, nodeframes, activeframe = GetPalNodes(context.object.active_material)
-        colorramps = [x for x in node_tree.nodes if (x.type=='VALTORGB' and x.parent==activeframe)]
+        node_tree = GetPalLive()
+        colorramps = [x for x in node_tree.nodes if x.type=='VALTORGB']
         yy = 1.0-((self.index+0.5)/len(colorramps))
         xx = self.xposition
         
@@ -791,6 +804,84 @@ class DMR_OP_Palette_ExportPalette(bpy.types.Operator, ExportHelper):
         return {'FINISHED'}
 classlist.append(DMR_OP_Palette_ExportPalette)
 
+# ----------------------------------------------------------------------------------
+
+class DMR_OP_Palette_NewLiveGroup(bpy.types.Operator):
+    """Tooltip"""
+    bl_idname = "dmr.palette_new_group"
+    bl_label = "New Live Palette Group"
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    name : bpy.props.StringProperty(name='Name', default='Live Palette')
+    
+    def execute(self, context):
+        node_tree = bpy.data.node_groups.new(self.name, 'ShaderNodeTree')
+        header = node_tree.nodes.new('NodeFrame')
+        header.name = header.label = NODEGROUPSIGNATURE
+        header.location = (0, 400)
+        
+        context.scene.dfighter_active_palette = node_tree.name
+        
+        # I/O
+        node_tree.inputs.new('NodeSocketVector', 'Palette UV')
+        node_tree.inputs.new('NodeSocketVector', 'Texture UV').default_value = (1,0,1)
+        node_tree.inputs.new('NodeSocketVector', 'Pal Params')
+        node_tree.inputs.new('NodeSocketVector', 'Surface Normal').default_value = (0,0,1)
+        node_tree.inputs.new('NodeSocketVector', 'Light Direction').default_value = (0.256158, -0.819705, 0.512316)
+        
+        node_tree.outputs.new('NodeSocketColor', 'Color')
+        node_tree.outputs.new('NodeSocketVector', 'UV')
+        
+        inputs = node_tree.nodes.new('NodeGroupInput')
+        inputs.name = 'input'
+        outputs = node_tree.nodes.new('NodeGroupOutput')
+        outputs.name = 'output'
+        
+        # UV
+        ng = node_tree.nodes.new('ShaderNodeGroup')
+        ng.name = 'pal-uv'
+        ng.node_tree = [x for x in bpy.data.node_groups if NODEGROUPSIGNATUREUV in x.nodes.keys()][0]
+        node_tree.links.new(inputs.outputs[0], ng.inputs[0])
+        node_tree.links.new(inputs.outputs[1], ng.inputs[1])
+        node_tree.links.new(inputs.outputs[2], ng.inputs[2])
+        node_tree.links.new(inputs.outputs[3], ng.inputs[3])
+        node_tree.links.new(inputs.outputs[4], ng.inputs[4])
+        ng.location = (-500, 0)
+        
+        PalUpdate(node_tree)
+        
+        node_tree.links.new(ng.outputs[0], outputs.inputs[1])
+        
+        inputs.location = (-1000, 0)
+        outputs.location = (1000, 0)
+        
+        return {'FINISHED'}
+classlist.append(DMR_OP_Palette_NewLiveGroup)
+
+# ----------------------------------------------------------------------------------
+
+class DMR_OP_Palette_RemoveLiveGroup(bpy.types.Operator):
+    """Tooltip"""
+    bl_idname = "dmr.palette_remove_group"
+    bl_label = "Remove Active Live Palette Group"
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    @classmethod
+    def poll(self, context):
+        return GetPalLive()
+    
+    def execute(self, context):
+        groups = [x[0] for x in GetPalGroups(self, context)]
+        n = len(groups)
+        active = GetPalLive()
+        
+        if n > 1:
+            context.scene.dfighter_active_palette = groups[min(groups.index(active.name), n-2)]
+        bpy.data.node_groups.remove(active)
+        
+        return {'FINISHED'}
+classlist.append(DMR_OP_Palette_RemoveLiveGroup)
+
 # ====================================================================================
 
 class DMR_MT_CSFighterPalette_Submenu(bpy.types.Menu):
@@ -881,7 +972,10 @@ class DMR_PT_CSFighterPalette(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
         
-        layout.prop(context.scene, 'dfighter_active_palette')
+        r = layout.row(align=True)
+        r.prop(context.scene, 'dfighter_active_palette', text='')
+        r.operator('dmr.palette_new_group', text='', icon='ADD')
+        r.operator('dmr.palette_remove_group', text='', icon='REMOVE')
         
         node_tree = GetPalLive()
         

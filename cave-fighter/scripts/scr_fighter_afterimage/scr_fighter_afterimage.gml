@@ -15,16 +15,33 @@ function E_Fighter_Afterimage() : Entity() constructor
 	
 	tintpreset = 0;
 	
+	colors = [
+		[0x230001, 0x0A0001],
+		[0xFF2002, 0x770002],
+		[0xFFD2B2, 0x774242]
+	];
+	
+	shearmat =  obj_buttontest.shearmat;
+	
 	function Render3D()
 	{
-		if (BoolStep(life, 3))
+		if (BoolStep(life, 1))
 		{
 			matrix_set(matrix_world, mattran);
 			gpu_set_cullmode(forwardsign? cull_clockwise: cull_counterclockwise);
 			shader_set_uniform_matrix_array(HEADER.shd_fighter_u_matpose, matpose);
 			shader_set_uniform_f(HEADER.shd_fighter_u_forwardsign, forwardsign);
 			shader_set_uniform_f(HEADER.shd_fighter_u_zoffset, 1+life/lifemax);
+			//
+			
+			U_Fighter_SetTint(1.0, 0.9500, 2.0000, 
+				merge_color(colors[0][1], colors[0][0], life/lifemax), 
+				merge_color(colors[1][1], colors[1][0], life/lifemax), 
+				merge_color(colors[2][1], colors[2][0], life/lifemax), 
+				);
+			
 			U_Fighter_SetTint_Preset(tintpreset, 1.0);
+			shader_set_uniform_matrix_array(HEADER.shd_fighter_u_matshear, shearmat);
 			
 			for (var i = 0; i < vbm.vbcount; i++)
 			{

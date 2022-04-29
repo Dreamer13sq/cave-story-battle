@@ -75,4 +75,5 @@ function U_Fighter_SetShear(camposvec, gameposvec, characterposvec, xshearstreng
 	m[8] = yy * yshearstrength *-sign(characterposvec[2]-gameposvec[2]);
 	
 	shader_set_uniform_matrix_array(HEADER.shd_fighter_u_matshear, m);
+	return m;
 }

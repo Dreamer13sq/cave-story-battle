@@ -25,6 +25,7 @@ fighter = new Fighter_Sue();
 fighter.x = 0;
 fighter.y = 0;
 fighter.inputmgr = input;
+shearmat = matrix_build_identity();
 
 vb_grid = FetchVB("grid.vb", HEADER.vbf_pct);
 vb_axisbox = FetchVB("axisbox.vb", HEADER.vbf_pct);
