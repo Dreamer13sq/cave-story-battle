@@ -824,8 +824,8 @@ class DMR_OP_Palette_NewLiveGroup(bpy.types.Operator):
         
         # I/O
         node_tree.inputs.new('NodeSocketVector', 'Palette UV')
-        node_tree.inputs.new('NodeSocketVector', 'Texture UV').default_value = (1,0,1)
-        node_tree.inputs.new('NodeSocketVector', 'Pal Params')
+        node_tree.inputs.new('NodeSocketVector', 'Texture UV')
+        node_tree.inputs.new('NodeSocketVector', 'Pal Params').default_value = (1,0,1)
         node_tree.inputs.new('NodeSocketVector', 'Surface Normal').default_value = (0,0,1)
         node_tree.inputs.new('NodeSocketVector', 'Light Direction').default_value = (0.256158, -0.819705, 0.512316)
         
