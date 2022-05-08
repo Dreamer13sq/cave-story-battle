@@ -1,6 +1,6 @@
 ///
 
-enum VKey
+enum KeyCode
 {
 	space = 32,
 	
@@ -8,7 +8,7 @@ enum VKey
 	
 	at = 64,
 	A, B, C, D, E, F, G, H, I, J, K, L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z,
-	a = VKey.A, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z,
+	a = KeyCode.A, b, c, d, e, f, g, h, i, j, k, l, m, n, o, p, q, r, s, t, u, v, w, x, y, z,
 	
 	bracketLeft = 219,
 	bracketRight = 221,
@@ -22,7 +22,7 @@ enum VKey
 	plus = 187,
 	minus = 189,
 	
-	tilde = 192, grave = VKey.tilde,
+	tilde = 192, grave = KeyCode.tilde,
 	pipe = 220,
 	
 	left = vk_left, 

@@ -753,7 +753,7 @@ function Fighter() constructor
 		
 		ButtonUpdate();
 		
-		if keyboard_check_pressed(VKey.p)
+		if keyboard_check_pressed(KeyCode.p)
 		{
 			if forwardsign == -1 {forwardsign = 1;}	
 			else {forwardsign = -1;}	

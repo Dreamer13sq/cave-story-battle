@@ -5,14 +5,25 @@
 #macro HEADER obj_header
 #macro CURRENT_FRAME global.g_currentframe
 #macro CAMERA3D global.g_camera3d
+#macro GRAPHICS global.g_graphics
 
 #endregion
+
+randomize();
+printf("Randomseed: %s", random_get_seed());
 
 CURRENT_FRAME = 0;
 CAMERA3D = new Camera3D();
 CAMERA3D.SetupCamera(480, 270, 50, 10, 1000);
 lastwindowsize = [window_get_width(), window_get_height()];
 windowresized = false;
+
+GRAPHICS = instance_create_depth(x, y, 0, obj_graphics);
+vertex_format_begin();
+vertex_format_add_position_3d();
+vertex_format_add_color();
+vertex_format_add_texcoord();
+GRAPHICS.DefineFormat(vertex_format_end(), "color");
 
 draw_set_font(fnt_cave);
 display_set_gui_size(480, 270);
@@ -71,16 +82,16 @@ for (var i = 0; i < playerinputcount; i++)
 }
 
 var inp = playerinput[0];
-inp.DefineInputKey(InputIndex.right, VKey.right);
-inp.DefineInputKey(InputIndex.up, VKey.up);
-inp.DefineInputKey(InputIndex.left, VKey.left);
-inp.DefineInputKey(InputIndex.down, VKey.down);
-inp.DefineInputKey(InputIndex.a, VKey.z);
-inp.DefineInputKey(InputIndex.b, VKey.x);
-inp.DefineInputKey(InputIndex.c, VKey.c);
-inp.DefineInputKey(InputIndex.dash, VKey.space);
-inp.DefineInputKey(InputIndex.start, VKey.enter);
-inp.DefineInputKey(InputIndex.select, VKey.shift);
+inp.DefineInputKey(InputIndex.right, KeyCode.right);
+inp.DefineInputKey(InputIndex.up, KeyCode.up);
+inp.DefineInputKey(InputIndex.left, KeyCode.left);
+inp.DefineInputKey(InputIndex.down, KeyCode.down);
+inp.DefineInputKey(InputIndex.a, KeyCode.z);
+inp.DefineInputKey(InputIndex.b, KeyCode.x);
+inp.DefineInputKey(InputIndex.c, KeyCode.c);
+inp.DefineInputKey(InputIndex.dash, KeyCode.space);
+inp.DefineInputKey(InputIndex.start, KeyCode.enter);
+inp.DefineInputKey(InputIndex.select, KeyCode.shift);
 
 // Vertex buffers
 vb_map = ds_map_create();

@@ -77,3 +77,58 @@ function U_Fighter_SetShear(camposvec, gameposvec, characterposvec, xshearstreng
 	shader_set_uniform_matrix_array(HEADER.shd_fighter_u_matshear, m);
 	return m;
 }
+
+function Mat4GetPerspectiveCorrection(cameraposition, gameplayposition, characterposition, xamt=1.0, yamt=1.0)
+{
+	return Mat4();
+	
+	var gx = gameplayposition[0], gy = characterposition[1], gz = gameplayposition[2];
+	
+	var xshear = ( // |charpos.xy - gamepos.xy| / |campos.xy - gamepos.xy|
+		point_distance(characterposition[0], characterposition[1], gx, gy) / 
+		point_distance(cameraposition[0], -cameraposition[1], gx, gy)
+		);
+	var yshear = ( // |charpos.yz - gamepos.yz| / |campos.yz - gamepos.yz|
+		point_distance(characterposition[1], characterposition[2], gy, gz) / 
+		point_distance(-cameraposition[1], cameraposition[2], gy, gz)
+		);
+	
+	var matshear = matrix_build_identity();
+	matshear[4] = xamt * xshear * sign(characterposition[0]-gx);
+	matshear[6] = yamt * yshear * sign(characterposition[2]-gz);
+	
+	var ztheta = -0.1;
+	matshear = matrix_multiply([
+		1.0, 0.0, 0.0, 0.0,
+		0.0, cos(ztheta), -sin(ztheta), 0.0,
+		0.0, sin(ztheta), cos(ztheta), 0.0,
+		0.0, 0.0, 0.0, 1.0],
+		matshear
+		);
+	
+	// Fix y-flip
+	//matshear[6] *= -1;
+	
+	return matshear;
+}
+
+function ApplyFrameMatrices(trk, frame, bonekeys, outmatflat)
+{
+	var n = array_length(bonekeys);
+	var trackindices = trk.trackindices;
+	var framematrices = trk.framematrices[frame];
+	
+	for (var i = 0; i < n; i++)
+	{
+		if (variable_struct_get(trackindices, bonekeys[i]))
+		{
+			Mat4ArrayFlatSet(outmatflat, i, 
+				Mat4ArrayFlatGet(framematrices, trackindices[$ bonekeys[i]])
+				);
+		}
+	}
+	
+	return outmatflat;
+}
+
+

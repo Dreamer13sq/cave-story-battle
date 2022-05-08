@@ -34,9 +34,9 @@ if (
 }
 
 CAMERA3D.PanLocation(
-	LevKeyHeld(VKey.d, VKey.a) * 5,
-	-LevKeyHeld(VKey.e, VKey.q) * 2,
-	LevKeyHeld(VKey.w, VKey.s) * 5
+	LevKeyHeld(KeyCode.d, KeyCode.a) * 5,
+	-LevKeyHeld(KeyCode.e, KeyCode.q) * 2,
+	LevKeyHeld(KeyCode.w, KeyCode.s) * 5
 	);
 
 if (lookat)

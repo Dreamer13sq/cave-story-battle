@@ -18,7 +18,7 @@ else
 
 if keyboard_check(vk_tab)
 {
-	if keyboard_check_pressed(VKey.R)
+	if keyboard_check_pressed(KeyCode.R)
 	{
 		game_restart();
 		return;

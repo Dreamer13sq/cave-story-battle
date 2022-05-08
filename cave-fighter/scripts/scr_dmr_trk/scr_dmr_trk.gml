@@ -13,35 +13,6 @@ enum TRK_Intrpl
 
 function TRKData() constructor
 {
-	// Returns true on success, false on failure
-	// Populates outarray with frame matrix array for frame.
-	function CopyFrameMatrixArray(f, out, out_offset=0)
-	{
-		if (f >= 0 && f < array_length(framematrices))
-		{
-			array_copy(out, out_offset, framematrices[f], 0, array_length(framematrices[f]));
-			return true;
-		}
-		return false;
-	}
-	
-	// Returns matrix array for frame. -1 if index is invalid
-	function GetFrameMatrixArray(f, out)
-	{
-		if (f >= 0 && f < array_length(framematrices))
-		{
-			return framematrices[f];
-		}
-		return -1;
-	}
-	
-	function toString()
-	{
-		return "{TRK " + 
-			string(array_length(framematrices)) + " matrices, " +
-			string(trackcount) + " tracks}" 
-	}
-	
 	matrixspace = 0; // 0 = None, 1 = Local, 2 = Pose, 3 = World, 4 = Evaluated
 	framematrices = []; // Array of flat matrix arrays for each frame
 	
@@ -49,6 +20,7 @@ function TRKData() constructor
 	tracks = []; // array of TRKData_Track
 	tracknames = [];	// (bone) names for each track
 	trackmap = {}; // {trackname: track} for each track
+	trackindices = {};	// {trackname: index} for each track
 	trackcount = 0;
 	
 	markerpositions = []; // Frame positions in animation
@@ -124,52 +96,54 @@ function OpenTRK(outtrk, path)
 function __TRKOpen_v1(b, outtrk)
 {
 	/* File spec:
-	    'TRK' (3B)
-	    TRK Version (1B)
-		
-	    flags (1B)
-		
-	    fps (1f)
-	    framecount (1I)
-	    numtracks (1I)
-	    duration (1f)
-	    positionstep (1f)
-		
-		tracknames[numtracks]
-	        namelength (1B)
-	        namechars[namelength]
-	            char (1B)
-		
-		matrixspace (1B)
-	        0 = No Matrices
-	        1 = LOCAL
-	        2 = POSE
-	        3 = WORLD
-	        4 = EVALUATED
-	    matrixdata[framecount]
-	        framematrices[numtracks]
-	            mat4 (16f)
-		
-	    trackspace (1B)
-	        0 = No Tracks
-	        1 = LOCAL
-	        2 = POSE
-	        3 = WORLD
-	    trackdata[numtracks]
-	        numframes (4B)
-	        framepositions[numframes]
-	            position (1f)
-	        framevectors[numframes]
-	            vector[3]
-	                value (1f)
+	
+    'TRK' (3B)
+    TRK Version (1B)
     
-	    nummarkers (4B)
-	    markernames[nummarkers]
-	        namelength (1B)
-	        namechars[namelength]
-	            char (1B)
-	    markerpositions[nummarkers]
-	        position (1f)
+    flags (1B)
+    
+    fps (1f)
+    framecount (1I)
+    numtracks (1I)
+    duration (1f)
+    positionstep (1f)
+    
+    tracknames[numtracks]
+        namelength (1B)
+        namechars[namelength]
+            char (1B)
+    
+    matrixspace (1B)
+        0 = No Matrices
+        1 = LOCAL
+        2 = POSE
+        3 = WORLD
+        4 = EVALUATED
+    matrixdata[framecount]
+        framematrices[numtracks]
+            mat4 (16f)
+    
+    trackspace (1B)
+        0 = No Tracks
+        1 = LOCAL
+        2 = POSE
+        3 = WORLD
+    trackdata[numtracks]
+        numframes (1I)
+        framepositions[numframes]
+            position (1f)
+        framevectors[numframes]
+            vector[3]
+                value (1f)
+    
+    nummarkers (1I)
+    markernames[nummarkers]
+        namelength (1B)
+        namechars[namelength]
+            char (1B)
+    markerpositions[nummarkers]
+        position (1f)
+	
 	*/
 	
 	var flag;
@@ -227,6 +201,7 @@ function __TRKOpen_v1(b, outtrk)
 			name += chr( buffer_read(b, buffer_u8) );
 		}
 		outtrk.tracknames[trackindex] = name;
+		outtrk.trackindices[$ name] = trackindex;
 		trackindex++;
 	}
 	
@@ -321,8 +296,10 @@ function __TRKOpen_v1(b, outtrk)
 				transformtracks[transformindex++] = track;
 			}
 			
+			name = outtrk.tracknames[trackindex++];
+			
 			outtrk.tracks[trackindex] = transformtracks;
-			outtrk.trackmap[$ outtrk.tracknames[trackindex++] ] = transformtracks;
+			outtrk.trackmap[$ name] = transformtracks;
 		}
 	}
 	

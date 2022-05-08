@@ -33,6 +33,7 @@ function Wrap(value, start, limit)
 // a mod n
 function Modulo(a, n)
 {
+	if (n <= 0) {return a;}
 	while a < 0 {a += n;} return a mod n;
 }
 	
