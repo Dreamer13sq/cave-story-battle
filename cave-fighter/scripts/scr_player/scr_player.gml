@@ -13,4 +13,5 @@ enum InputCmd
 	back, downback, down, downforward,
 	a, b, c, dash,
 	neutral,
+	none,
 }

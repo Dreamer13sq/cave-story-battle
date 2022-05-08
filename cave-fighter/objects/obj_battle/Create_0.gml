@@ -3,6 +3,7 @@
 event_user(0);
 
 fighter = instance_create_depth(x, y, 0, obj_fighter);
+controller = instance_create_depth(x, y, 0, obj_charactercontroller);
 world = instance_create_depth(x, y, 0, obj_world_vb);
 
 viewlocation = [0,0,80];

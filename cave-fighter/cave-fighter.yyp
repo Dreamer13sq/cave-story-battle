@@ -3,6 +3,7 @@
     {"id":{"name":"scr_entity_utils","path":"scripts/scr_entity_utils/scr_entity_utils.yy",},"order":1,},
     {"id":{"name":"scr_fighter_sue","path":"scripts/scr_fighter_sue/scr_fighter_sue.yy",},"order":1,},
     {"id":{"name":"obj_battle","path":"objects/obj_battle/obj_battle.yy",},"order":0,},
+    {"id":{"name":"obj_charactercontroller","path":"objects/obj_charactercontroller/obj_charactercontroller.yy",},"order":8,},
     {"id":{"name":"scr_math_3dops","path":"scripts/scr_math_3dops/scr_math_3dops.yy",},"order":2,},
     {"id":{"name":"spr_person","path":"sprites/spr_person/spr_person.yy",},"order":1,},
     {"id":{"name":"shd_pnct","path":"shaders/shd_pnct/shd_pnct.yy",},"order":1,},
