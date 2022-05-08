@@ -8,6 +8,7 @@ from bpy_extras.io_utils import ExportHelper
 MAXCOLORS = 32
 NODEGROUPSIGNATURE = '<DFPALETTE>'
 NODEGROUPSIGNATUREUV = '<DFPALETTEUV>'
+NODEGROUPSIGNATURESPECULAR = '<DFPALETTESPECULAR>'
 
 def DotProduct(v1, v2):
     return sum(x*y for x, y in zip(v1, v2))
@@ -226,12 +227,16 @@ def PalUpdate(node_tree):
         return nd
     
     def LinkNodes(n1, output_index, n2, input_index):
-        return node_tree.links.new(n1.outputs[output_index], n2.inputs[input_index])
+        return node_tree.links.new(
+            (nodes[n1] if isinstance(n1, str) else n1).outputs[output_index], 
+            (nodes[n2] if isinstance(n2, str) else n2).inputs[input_index]
+            )
     
     # Reroutes
     uvnode = NewNode('uv', 'NodeReroute', -40, 80)
     dpnode = NewNode('dp', 'NodeReroute', -40, 40)
-    outcolornode = NewNode('outcolor', 'NodeReroute', 700, 40)
+    outcolornode = NewNode('outcolor', 'NodeReroute', 800, 40)
+    outalphanode = NewNode('outalpha', 'NodeReroute', 800, 0)
     
     yy = ysep
     
@@ -279,12 +284,13 @@ def PalUpdate(node_tree):
     # Color Calculations
     if len(rampnodes) > 0:
         mixnode = rampnodes[-1]
+        mixalphanode = mixnode
         xx = rampnodes[0].location[0]+280
         yy = rampnodes[0].location[1]
-        lastmixnode = None
     
     for i in range(1, len(rampnodes)):
         nd1 = rampnodes[i-1] if i == 1 else mixnode
+        nd1alpha = rampnodes[i-1] if i == 1 else mixalphanode
         nd2 = rampnodes[i]
         
         multnode = NewNode('1/N * Index', 'ShaderNodeMath', xx, yy, 40, True)
@@ -294,15 +300,21 @@ def PalUpdate(node_tree):
         greaternode = NewNode('UV.y is Index', 'ShaderNodeMath', xx+120, yy, 40, True)
         greaternode.operation = 'GREATER_THAN'
         
+        # Mix with next node
         mixnode = NewNode('Mix with Next', 'ShaderNodeMixRGB', xx+240, yy, 40, True)
+        mixalphanode = NewNode('Mix Alpha Next', 'ShaderNodeMixRGB', xx+360, yy, 40, True)
         
         LinkNodes(divnode, 0, multnode, 0)
         LinkNodes(uvnode, 0, greaternode, 0)
         LinkNodes(multnode, 0, greaternode, 1)
         LinkNodes(greaternode, 0, mixnode, 0)
+        LinkNodes(greaternode, 0, mixalphanode, 0)
         
         LinkNodes(nd1, 0, mixnode, 1)
         LinkNodes(nd2, 0, mixnode, 2)
+        
+        LinkNodes(nd1alpha, 1 if i == 1 else 0, mixalphanode, 1)
+        LinkNodes(nd2, 1, mixalphanode, 2)
         
         yy -= ysep
     
@@ -317,13 +329,16 @@ def PalUpdate(node_tree):
     
     if len(rampnodes) > 0:
         LinkNodes(mixnode, 0, outcolornode, 0)
+        LinkNodes(mixalphanode, 0, outalphanode, 0)
         LinkNodes(outcolornode, 0, groupoutput, 0)
         if 'outroute' in nodes.keys():
             LinkNodes(outcolornode, 0, nodes['outroute'], 0)
     
-    node_tree.links.new(nodes['pal-uv'].outputs[2], nodes['uv'].inputs[0])
-    node_tree.links.new(nodes['pal-uv'].outputs[1], nodes['dp'].inputs[0])
-    node_tree.links.new(nodes['outcolor'].outputs[0], nodes['output'].inputs[0])
+    LinkNodes('pal-uv', 2, 'uv', 0)
+    LinkNodes('pal-uv', 1, 'dp', 0)
+    LinkNodes('outcolor', 0, 'pal-specular', 3)
+    LinkNodes('outalpha', 0, 'pal-specular', 2)
+    LinkNodes('pal-specular', 0, 'output', 0)
 
 print('='*80)
 
@@ -749,7 +764,7 @@ class DMR_OP_Palette_ImportPalette(bpy.types.Operator, ExportHelper):
     bl_label = "Import Palette from File"
     bl_options = {'REGISTER', 'UNDO'}
     
-    filename_ext = ".bmp"
+    filename_ext = ".png"
     filter_glob: bpy.props.StringProperty(default="*"+filename_ext, options={'HIDDEN'}, maxlen=255)
     
     @classmethod
@@ -777,7 +792,7 @@ class DMR_OP_Palette_ExportPalette(bpy.types.Operator, ExportHelper):
     bl_label = "Export Palette to File"
     bl_options = {'REGISTER', 'UNDO'}
     
-    filename_ext = ".bmp"
+    filename_ext = ".png"
     filter_glob: bpy.props.StringProperty(default="*"+filename_ext, options={'HIDDEN'}, maxlen=255)
     
     width: bpy.props.IntProperty(name='Width', default=MAXCOLORS)
@@ -791,11 +806,14 @@ class DMR_OP_Palette_ExportPalette(bpy.types.Operator, ExportHelper):
         image.colorspace_settings.name = 'Linear'
         image.alpha_mode = 'STRAIGHT'
         image.filepath_raw = self.filepath
-        image.file_format = 'BMP'
+        image.file_format = 'PNG'
         
         node_tree = GetPalLive()
         Palette_ToImage(node_tree, image.name, self.width)
         
+        colormode = context.scene.render.image_settings.color_mode
+        context.scene.render.image_settings.color_mode = 'RGBA'
+        context.scene.render.image_settings.color_mode = colormode
         image.save_render(self.filepath)
         bpy.data.images.remove(image)
         
@@ -847,13 +865,20 @@ class DMR_OP_Palette_NewLiveGroup(bpy.types.Operator):
         node_tree.links.new(inputs.outputs[3], ng.inputs[3])
         node_tree.links.new(inputs.outputs[4], ng.inputs[4])
         ng.location = (-500, 0)
+        node_tree.links.new(ng.outputs[0], outputs.inputs[1])
+        
+        # Specular
+        ng = node_tree.nodes.new('ShaderNodeGroup')
+        ng.name = 'pal-specular'
+        ng.node_tree = [x for x in bpy.data.node_groups if NODEGROUPSIGNATURESPECULAR in x.nodes.keys()][0]
+        node_tree.links.new(inputs.outputs[3], ng.inputs[0])
+        node_tree.links.new(inputs.outputs[4], ng.inputs[1])
+        ng.location = (800, 400)
         
         PalUpdate(node_tree)
         
-        node_tree.links.new(ng.outputs[0], outputs.inputs[1])
-        
         inputs.location = (-1000, 0)
-        outputs.location = (1000, 0)
+        outputs.location = (1200, 0)
         
         return {'FINISHED'}
 classlist.append(DMR_OP_Palette_NewLiveGroup)
@@ -972,7 +997,8 @@ class DMR_PT_CSFighterPalette(bpy.types.Panel):
     def draw(self, context):
         layout = self.layout
         
-        r = layout.row(align=True)
+        c = layout.column(align=True)
+        r = c.row(align=True)
         r.prop(context.scene, 'dfighter_active_palette', text='')
         r.operator('dmr.palette_new_group', text='', icon='ADD')
         r.operator('dmr.palette_remove_group', text='', icon='REMOVE')
@@ -980,19 +1006,22 @@ class DMR_PT_CSFighterPalette(bpy.types.Panel):
         node_tree = GetPalLive()
         
         if node_tree:
+            c.prop(node_tree, 'name', text='')
+            
             nodes = node_tree.nodes
             colorramps = [x for x in nodes if (x.type=='VALTORGB')]
             colorramps.sort(key=lambda x: x.label)
             
             # I/O operators
-            layout.label(text=node_tree.name + ' %s' % len(colorramps))
+            #layout.label(text=node_tree.name + ' %s' % len(colorramps))
             c = layout.column(align=1)
             rr = c.row(align=1)
-            rr.operator('dmr.palette_import', icon='IMPORT', text='From File')
-            rr.operator('dmr.palette_export', icon='EXPORT', text='To File')
+            rr.operator('dmr.palette_import', icon='IMPORT', text='Import')
+            rr.operator('dmr.palette_export', icon='EXPORT', text='Export')
+            rr = c.row(align=1)
+            rr.operator('dmr.palette_from_image', text='From Image')
+            rr.operator('dmr.palette_to_image', text='To Image')
             c.operator('dmr.palette_from_vcolor')
-            c.operator('dmr.palette_to_image')
-            c.operator('dmr.palette_from_image')
             
             # Palette color operators
             rr = c.row(align=1)

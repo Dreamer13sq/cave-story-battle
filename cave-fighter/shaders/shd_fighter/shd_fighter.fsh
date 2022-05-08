@@ -73,6 +73,11 @@ void Palette()
 	vec4 outcolor = vec4(texcolor.rgb, 1.0);
 	vec3 ambient = vec3(0.8, 0.7, 1.0);
 	
+	// Specular
+	float speamt = pow(texcolor.a, 4.0);
+	
+	outcolor += outcolor * (float(shine > (1.0-speamt))) * (1.0-speamt) * (1.74-length(outcolor.rgb)) * AO;
+	
 	//outcolor = mix(outcolor, texture2D(u_texture, vec2(1.0, uv.y)) + vec4(0.2), AO * shine);
 	
 	outcolor.rgb = mix(outcolor.rgb*ambient, outcolor.rgb, 
