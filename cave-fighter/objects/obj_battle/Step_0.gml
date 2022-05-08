@@ -7,6 +7,11 @@ viewlocation[0] += LevKeyHeld(vk_right, vk_left);
 viewlocation[2] += LevKeyHeld(vk_up, vk_down);
 viewdistance -= LevMouseWheel() * 10;
 
+viewforward = matrix_transform_vertex(
+	matrix_multiply(Mat4Rotate(viewxrot,0,0), Mat4Rotate(0,0,viewzrot)),
+	0, -1, -0.1
+	);
+
 var _camvalstate = [
 	window_get_width(), window_get_height(),
 	viewdistance,

@@ -5,6 +5,7 @@ draw_clear(0x221111);
 gpu_push_state();
 gpu_set_ztestenable(true);
 gpu_set_zwriteenable(true);
+gpu_set_cullmode(cull_clockwise);
 
 GRAPHICS.ShaderSet(shd_fighter);
 

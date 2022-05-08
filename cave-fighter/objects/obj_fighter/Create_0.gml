@@ -12,6 +12,8 @@ trkarray = [];
 trkcount = characterfolder.GetTRKs(trkarray);
 trkindex = irandom(trkcount-1);
 trkactive = trkarray[trkindex];
+animkey = "";
+allowinterrupt = true;
 
 palarray = [];
 palcount = characterfolder.GetPALs(palarray);

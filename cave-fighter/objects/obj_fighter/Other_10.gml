@@ -12,7 +12,6 @@ function Update(ts)
 	if (lev != 0)
 	{
 		palindex = Modulo(palindex+lev, palcount);
-		palactive = palarray[palindex];
 	}
 	
 	mattran = Mat4Transform(
@@ -31,8 +30,19 @@ function Update(ts)
 		}
 	}
 	
-	playbackframe = Modulo(playbackframe+1, trkactive.framecount);
-	ApplyFrameMatrices(trkactive, playbackframe, vbm.bonenames, matpose);
+	// Progress playback
+	if (playbackframe < trkactive.framecount-1)
+	{
+		playbackframe += 1;
+		ApplyFrameMatrices(trkactive, playbackframe, vbm.bonenames, matpose);
+	}
+	// 
+	else
+	{
+		OnAnimationEnd();	
+	}
+	
+	allowinterrupt = allowinterrupt || playbackframe > trkactive.framecount/2;
 }
 
 function Render()
@@ -46,7 +56,7 @@ function Render()
 	GRAPHICS.activeshader.UniformMatrix4("u_mattran", mattran);
 	GRAPHICS.activeshader.UniformMatrix4("u_matpose", matpose);
 	GRAPHICS.activeshader.UniformMatrix4("u_matshear", matshear);
-	GRAPHICS.activeshader.UniformSampler2D("u_texture", sprite_get_texture(palactive, 0));
+	GRAPHICS.activeshader.UniformSampler2D("u_texture", sprite_get_texture(palarray[palindex], 0));
 	
 	for (var i = 0; i < vbm.vbcount; i++)
 	{

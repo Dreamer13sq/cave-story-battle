@@ -76,7 +76,7 @@ void Palette()
 	// Specular
 	float speamt = pow(texcolor.a, 4.0);
 	
-	outcolor += outcolor * (float(shine > (1.0-speamt))) * (1.0-speamt) * (1.74-length(outcolor.rgb)) * AO;
+	outcolor += outcolor * (float(shine > (1.0-speamt))) * (1.0-speamt) * (1.74-length(outcolor.rgb)) * AO * 0.5;
 	
 	//outcolor = mix(outcolor, texture2D(u_texture, vec2(1.0, uv.y)) + vec4(0.2), AO * shine);
 	
@@ -93,7 +93,7 @@ void Standard()
 	// Uniforms -------------------------------------------------------
 	float alpha = 1.0;
 	float emission = 0.0;
-	float roughness = 0.5;
+	float roughness = 0.4;
 	float rim = 1.0;
 	vec4 colorblend = vec4(1.0, 1.0, 1.0, 0.0);
 	vec4 colorfill = vec4(1.0, 1.0, 1.0, 0.0);
@@ -126,12 +126,12 @@ void Standard()
 	//vec4 diffusecolor = v_color;
 	float texX = mix(v_uv.x, 0.7, v_color.r);
 	vec4 diffusecolor = vec4(texture2D(u_texture, vec2(texX, v_uv[1])).rgb, 1.0);
+	diffusecolor *= 1.1;
 	
 	// Output ----------------------------------------------------------------
 	vec3 outcolor = diffusecolor.rgb * (dp+1.0) / 2.0;	// Shadow
 	vec3 ambient = vec3(0.01, 0.0, 0.05);
 	ambient = vec3(0.09, 0.04, 0.1);
-	ambient = vec3(0.1, 0.02, 0.04);
 	outcolor += ambient * (1.0-dp);	// Ambient
 	outcolor += (diffusecolor.rgb + (pow(1.0-roughness, SPE_EXP))) * shine*shine * (1.0-roughness);	// Specular
 	outcolor += vec3(0.5) * fresnel;	// Rim
