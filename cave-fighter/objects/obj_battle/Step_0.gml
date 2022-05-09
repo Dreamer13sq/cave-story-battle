@@ -3,8 +3,8 @@
 fighter.Update();
 world.Update();
 
-viewlocation[0] += LevKeyHeld(vk_right, vk_left);
-viewlocation[2] += LevKeyHeld(vk_up, vk_down);
+//viewlocation[0] += LevKeyHeld(vk_right, vk_left);
+//viewlocation[2] += LevKeyHeld(vk_up, vk_down);
 viewdistance -= LevMouseWheel() * 10;
 
 viewforward = matrix_transform_vertex(

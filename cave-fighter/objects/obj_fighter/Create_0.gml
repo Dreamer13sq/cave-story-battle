@@ -6,7 +6,11 @@ event_user(1);	// Methods
 state = 0;
 
 characterfolder = new CharFolder();
-characterfolder.SearchFolder("D:/GitHub/DreamFighterAttackEditor/DreamFighter-AttackEditor/bin/Debug/workspace/", 3);
+if (characterfolder.SearchFolder("D:/GitHub/DreamFighterAttackEditor/DreamFighter-AttackEditor/bin/Debug/workspace/", 3) == -1)
+{
+	characterfolder.SearchFolder("C:/Users/Dreamer/Documents/GitHub/DreamFighterAttackEditor/DreamFighter-AttackEditor/bin/Debug/workspace/", 3)
+}
+
 
 trkarray = [];
 trkcount = characterfolder.GetTRKs(trkarray);

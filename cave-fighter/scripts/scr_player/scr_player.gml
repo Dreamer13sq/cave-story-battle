@@ -36,7 +36,8 @@ enum InputCmd
 		(1 << InputCmd.dash)
 	),
 	
-	FL_AnyDirection = 1 << 15,
+	FL_AnyDirection = 1 << 14,
+	FL_ButtonLenient = 1 << 15,
 }
 
 function InputCmdChar(value)

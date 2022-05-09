@@ -18,6 +18,19 @@ enum FighterStateMode
 	
 }
 
+keymap = [
+	[vk_right],
+	[vk_up],
+	[vk_left],
+	[vk_down],
+	[ord("Z")],
+	[ord("X")],
+	[ord("C")],
+	[vk_space],
+	[vk_enter],
+	[vk_shift],
+];
+
 padmap = [
 	[gp_padr],
 	[gp_padu],
@@ -47,6 +60,11 @@ buffertimetrigger = 12;
 
 // [conditions, sequence, name]
 sequencedefs = [
+	["2 ~14 ~4 ~*BC", "Super Bck", "block"],
+	["2 ~36 ~6 ~*BC", "Super Fwd", "block"],
+	["2 ~14 ~4 ~5 ~*BC", "Super Bck (Space)", "block"],
+	["2 ~36 ~6 ~5 ~*BC", "Super Fwd (Space)", "block"],
+	
 	["~36 ~32 ~36 A", "Zigzag Fwd A", "assist"],
 	["~36 ~32 ~36 B", "Zigzag Fwd B", "assist"],
 	["~36 ~32 ~36 C", "Zigzag Fwd C", "assist"],
@@ -68,15 +86,19 @@ sequencedefs = [
 	["A B C", "Triangle C", "assist"],
 	["A B", "Triangle B", "assist"],
 	
+	["BC", "Skill", "assist"],
+	
 	["4AD", "Throw Back", "block"],
 	["6AD", "Throw (Forward)", "block"],
 	["AD", "Throw", "block"],
 	
 	["~2 ~8", "Super Jump", "air.001"],
+	["~2 ~456 ~8", "Super Jump (3)", "air.001"],
+	//["~2 ~456 ~8", "Super Jump (4)", "air.001"],
 	["~4D", "Backdash", "dash"],
 	["~6D", "Dash", "dash"],
-	["~6 5 ~6", "Dash (Input)", "dash"],
-	["~4 5 ~4", "Backdash (Input)", "dash"],
+	["~6 ~6", "Dash (Input)", "dash"],
+	["~4 ~4", "Backdash (Input)", "dash"],
 	
 	["~123C", "Crouch Heavy", "crouch-attack0a"],
 	["~123B", "Crouch Medium", "crouch-attack0a"],

@@ -19,8 +19,6 @@ function UpdateInput()
 				break;
 			}
 		}
-		
-		if (device == -1) {return;}
 	}
 	
 	// Parse Inputs
@@ -30,13 +28,28 @@ function UpdateInput()
 	var mapentry, n;
 	for (var i = 0; i < array_length(padmap); i++)
 	{
-		mapentry = padmap[i];
+		// Key
+		mapentry = keymap[i];
 		n = array_length(mapentry);
 		for (var j = 0; j < n; j++)
 		{
-			if ( gamepad_button_check(device, mapentry[j]) )
+			if ( keyboard_check(mapentry[j]) )
 			{
 				iheld |= 1 << i;
+			}
+		}
+		
+		// Pad
+		if (device != -1)
+		{
+			mapentry = padmap[i];
+			n = array_length(mapentry);
+			for (var j = 0; j < n; j++)
+			{
+				if ( gamepad_button_check(device, mapentry[j]) )
+				{
+					iheld |= 1 << i;
+				}
 			}
 		}
 	}
@@ -72,17 +85,26 @@ function Update()
 		// At least one direction is held
 		else
 		{
-			var dir = darctan2(
-				Lev((iheld & (1 << InputIndex.up)), (iheld & (1 << InputIndex.down))),
-				Lev((iheld & (1 << InputIndex.right)), (iheld & (1 << InputIndex.left)))
-				);
+			var _xlev = Lev((iheld & (1 << InputIndex.right)), (iheld & (1 << InputIndex.left)));
+			var _ylev = Lev((iheld & (1 << InputIndex.up)), (iheld & (1 << InputIndex.down)));
+			
+			var dir = darctan2(_ylev, _xlev);
+			
 			dir = Modulo(round(dir * 8 / 360), 8);
 			
 			// New Direction
 			if (dir != icommanddirection)
 			{
-				icommanddirection = dir;
-				_inputcmd |= 1 << (InputCmd.forward + icommanddirection);
+				if (_xlev==0 && _ylev==0)
+				{
+					icommanddirection = -1;
+					_inputcmd |= 1 << InputCmd.neutral;
+				}
+				else
+				{
+					icommanddirection = dir;
+					_inputcmd |= 1 << (InputCmd.forward + dir);
+				}
 			}
 		}
 	}
@@ -169,6 +191,8 @@ function ParseSequence(seqstring)
 			case(" "): _newbundle = true; break;
 			// Direction Input Leniency
 			case("~"): outseq[@ index] |= InputCmd.FL_AnyDirection; break;
+			// Direction Input Leniency
+			case("*"): outseq[@ index] |= InputCmd.FL_ButtonLenient; break;
 		}
 		
 		// Make new bundle
@@ -231,6 +255,27 @@ function CheckCommands()
 			if ( (seqstep & InputCmd.mask_neutral) == 0)
 			{
 				while( (entry_button == 0) && (entry & InputCmd.mask_neutral) != 0 )
+				{
+					commandoffset = Modulo(commandoffset+1, icommandcount);
+					
+					if (commandoffset == icommandsindex)
+					{
+						entry = 0;
+						entry_direction = 0;
+						entry_button = 0;
+						break;	
+					}
+					
+					entry = icommands[commandoffset];
+					entry_direction = entry & InputCmd.mask_direction;
+					entry_button = entry & InputCmd.mask_button;
+				}
+			}
+			
+			// Skip direction inputs if wildcard (?)
+			if ( (seqstep & InputCmd.FL_ButtonLenient) == 0)
+			{
+				while( (entry & InputCmd.mask_button) != 0 )
 				{
 					commandoffset = Modulo(commandoffset+1, icommandcount);
 					

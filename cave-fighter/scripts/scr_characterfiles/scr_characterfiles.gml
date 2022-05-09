@@ -128,7 +128,7 @@ function CharFolder() constructor
 		if (!directory_exists(rootpath))
 		{
 			printf("CharFiles::SearchFolder(): Invalid Path specified \"%s\"", rootpath);
-			return;
+			return -1;
 		}
 		
 		var _pathmap = ds_map_create();
@@ -162,6 +162,8 @@ function CharFolder() constructor
 		}
 		
 		ds_map_destroy(_pathmap);
+		
+		return 0;
 	}
 }
 
