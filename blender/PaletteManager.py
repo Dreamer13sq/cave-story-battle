@@ -854,6 +854,18 @@ class DMR_OP_Palette_NewLiveGroup(bpy.types.Operator):
         inputs.name = 'input'
         outputs = node_tree.nodes.new('NodeGroupOutput')
         outputs.name = 'output'
+        outputs.label = 'output'
+        outputs.location = (1200, 0)
+        
+        nd = node_tree.nodes.new('NodeGroupOutput')
+        nd.name = 'output-ao'
+        nd.label = 'Ambient Occlusion'
+        nd.location = (1200, -100)
+        
+        nd = node_tree.nodes.new('NodeGroupOutput')
+        nd.name = 'output-ao'
+        nd.label = 'Roughness'
+        nd.location = (1200, -200)
         
         # UV
         ng = node_tree.nodes.new('ShaderNodeGroup')
@@ -865,7 +877,8 @@ class DMR_OP_Palette_NewLiveGroup(bpy.types.Operator):
         node_tree.links.new(inputs.outputs[3], ng.inputs[3])
         node_tree.links.new(inputs.outputs[4], ng.inputs[4])
         ng.location = (-500, 0)
-        node_tree.links.new(ng.outputs[0], outputs.inputs[1])
+        for nd in [x for x in node_tree.nodes if 'outputs' in nd.name]:
+            node_tree.links.new(ng.outputs[0], nd.inputs[1])
         
         # Specular
         ng = node_tree.nodes.new('ShaderNodeGroup')
@@ -878,7 +891,7 @@ class DMR_OP_Palette_NewLiveGroup(bpy.types.Operator):
         PalUpdate(node_tree)
         
         inputs.location = (-1000, 0)
-        outputs.location = (1200, 0)
+        
         
         return {'FINISHED'}
 classlist.append(DMR_OP_Palette_NewLiveGroup)
