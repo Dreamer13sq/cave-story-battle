@@ -63,6 +63,11 @@ def GetPalNodes(material):
 def GetPalFrames(node_tree):
     return {x.name: x for x in node_tree.nodes if (x.type=='FRAME' and x.label[:4]=='pal-')}
 
+def GetPalRamps(node_tree):
+    ramps = [x for x in node_tree.nodes if x.type == 'VALTORGB']
+    ramps.sort(key= lambda x: int(x.label[-2:]))
+    return ramps
+
 def GetPalGroups(self, context):
     groups = [x for x in bpy.data.node_groups if NODEGROUPSIGNATURE in x.nodes.keys()]
     if len(groups) == 0:
@@ -80,16 +85,23 @@ def GetPalLive():
 
 # ---------------------------------------------------------------------------------------
 
-def Palette_AddColor(node_tree, index):
+def Palette_AddColor(node_tree, index, do_update=True):
     nodes = node_tree.nodes    
-    colorramps = [x for x in nodes if x.type=='VALTORGB']
-    colorramps.sort(key=lambda x: x.label)
+    colorramps = GetPalRamps(node_tree)
     
     index = max(0, min(len(colorramps)-1, index))
     
+    # Add 1 to ramps ahead of index
+    for i in range(0, len(colorramps)):
+        if i >= index:
+            colorramps[i].label = str(i+1)
+        else:
+            colorramps[i].label = str(i)
+    
+    # Sync new ramp with source ramp
     ramp = nodes.new('ShaderNodeValToRGB')
+    ramp.label = str(index)
     srcramp = ramp if len(colorramps) == 0 else colorramps[index]
-    ramp.label = srcramp.label
     
     elements = ramp.color_ramp.elements
     srcelements = srcramp.color_ramp.elements
@@ -102,7 +114,9 @@ def Palette_AddColor(node_tree, index):
     for i, e in enumerate(srcelements):
         edest = elements[i]
         edest.color, edest.alpha, edest.position = (e.color, e.alpha, e.position)
-    PalUpdate(node_tree);
+    
+    if do_update:
+        PalUpdate(node_tree);
     
     return ramp
 
@@ -110,17 +124,14 @@ def Palette_AddColor(node_tree, index):
 
 def Palette_RemoveColor(node_tree, index):
     nodes = node_tree.nodes
-    colorramps = [x for x in nodes if x.type=='VALTORGB']
-    colorramps.sort(key=lambda x: x.label)
-    
+    colorramps = GetPalRamps(node_tree)
     nodes.remove(colorramps[index]);
     PalUpdate(node_tree);
 
 # ---------------------------------------------------------------------------------------
 
 def Palette_MoveColor(node_tree, index, move_up):
-    colorramps = [x for x in node_tree.nodes if x.type=='VALTORGB']
-    colorramps.sort(key=lambda x: x.label)
+    colorramps = GetPalRamps(node_tree)
     
     targetramps = (
         colorramps[max(0, index)], 
@@ -135,8 +146,7 @@ def Palette_MoveColor(node_tree, index, move_up):
 # ---------------------------------------------------------------------------------------
 
 def Palette_ToImage(node_tree, image_name, width):
-    colorramps = [x for x in node_tree.nodes if x.type=='VALTORGB']
-    colorramps.sort(key=lambda x: x.label)
+    colorramps = GetPalRamps(node_tree)
     
     image = bpy.data.images[image_name]
     image.scale(width, len(colorramps))
@@ -166,9 +176,11 @@ def Palette_FromImage(node_tree, image):
     # Remove all palette colors
     [node_tree.nodes.remove(x) for x in node_tree.nodes if x.type=='VALTORGB']
     
+    PalUpdate(node_tree);
+    
     # Iterate Through Palette Colors
     for r in range(0, min(height, MAXCOLORS)):
-        elements = Palette_AddColor(node_tree, 0).color_ramp.elements
+        elements = Palette_AddColor(node_tree, 0, False).color_ramp.elements
         while len(elements) > 1: # Clear elements
             elements.remove(elements[-1])
         
@@ -192,10 +204,12 @@ def Palette_FromImage(node_tree, image):
         if len(elements) == 1:
             e = elements.new(1.0)
             e.color = color
-        
+    
     if height < MAXCOLORS:
         for i in range(MAXCOLORS-height):
-            elements = Palette_AddColor(node_tree, MAXCOLORS).color_ramp.elements
+            elements = Palette_AddColor(node_tree, MAXCOLORS, False).color_ramp.elements
+    
+    PalUpdate(node_tree)
 
 # ---------------------------------------------------------------------------------------
 
@@ -212,8 +226,7 @@ def PalUpdate(node_tree):
     for nd in [x for x in nodes if x.type in ['MIX_RGB', 'MATH', 'VALUE', 'REROUTE'] ]:
         nodes.remove(nd)
     
-    rampnodes = [x for x in nodes if x.type == 'VALTORGB']
-    rampnodes.sort(key=lambda x: x.name)
+    rampnodes = GetPalRamps(node_tree)
     
     # Nested Functions
     def NewNode(name, type, x, y, width=40, hide=False):
@@ -269,13 +282,12 @@ def PalUpdate(node_tree):
     LinkNodes(valuenode, 0, halfnode, 1)
     
     # Color Ramps
-    rampnodes.sort(key=lambda x: x.label)
     for i, nd in enumerate(rampnodes):
         nd.hide = 1
         nd.location[0] = 1
         nd.location[1] = -(i+1) * ysep
         nd.name = "row%02d" % (i)
-        nd.label = "Color %02d" % (i)
+        nd.label = str(i)
         nd.color_ramp.color_mode = 'RGB'
         nd.color_ramp.interpolation = 'CONSTANT'
         nd.parent = frame
@@ -409,7 +421,7 @@ class DMR_OP_PaletteMoveColor(bpy.types.Operator):
             bpy.ops.object.mode_set(mode = 'OBJECT') # Update selected
             
             nodes = node_tree.nodes
-            colorramps = [x for x in node_tree.nodes if x.type=='VALTORGB']
+            colorramps = GetPalRamps(node_tree)
             
             n = len(colorramps)
             yhalf = 0.5/n
@@ -528,7 +540,7 @@ class DMR_OP_Palette_SetUV(bpy.types.Operator):
         bpy.ops.object.mode_set(mode = 'OBJECT') # Update selected
         
         node_tree = GetPalLive()
-        colorramps = [x for x in node_tree.nodes if x.type=='VALTORGB']
+        colorramps = GetPalRamps(node_tree)
         yy = 1.0-((self.index+0.5)/len(colorramps))
         xx = self.xposition
         
@@ -578,7 +590,7 @@ class DMR_OP_Palette_MoveUV(bpy.types.Operator):
         bpy.ops.object.mode_set(mode = 'OBJECT') # Update selected
         
         node_tree = GetPalLive()
-        colorramps = [x for x in node_tree.nodes if x.type=='VALTORGB']
+        colorramps = GetPalRamps(node_tree)
         
         for obj in [x for x in context.selected_objects if x.type == 'MESH']:
             me = obj.data
@@ -620,7 +632,7 @@ class DMR_OP_Palette_ToggleRange(bpy.types.Operator):
         bpy.ops.object.mode_set(mode = 'OBJECT') # Update selected
         
         node_tree = GetPalLive()
-        colorramps = [x for x in node_tree.nodes if x.type=='VALTORGB']
+        colorramps = GetPalRamps(node_tree)
         
         for obj in [x for x in context.selected_objects if x.type == 'MESH']:
             me = obj.data
@@ -667,7 +679,7 @@ class DMR_OP_Palette_FromVertexColor(bpy.types.Operator):
         bpy.ops.object.mode_set(mode = 'OBJECT') # Update selected
         
         node_tree = GetPalLive()
-        colorramps = [x for x in node_tree.nodes if x.type=='VALTORGB']
+        colorramps = GetPalRamps(node_tree)
         
         colormap = {x.color_ramp.evaluate(0.75): i for i,x in enumerate(colorramps)}
         colorkeys = colormap.keys()
@@ -737,15 +749,13 @@ class DMR_OP_Palette_ColorHSV(bpy.types.Operator):
     
     def invoke(self, context, event):
         node_tree = GetPalLive()
-        colorramps = [x for x in node_tree.nodes if x.type=='VALTORGB']
-        colorramps.sort(key=lambda x: x.label)
+        colorramps = GetPalRamps(node_tree)
         self.basecolors = [mathutils.Vector([x for x in y.color][:3]) for y in colorramps[self.index].color_ramp.elements]
         return self.execute(context)
     
     def execute(self, context):
         node_tree = GetPalLive()
-        colorramps = [x for x in node_tree.nodes if x.type=='VALTORGB']
-        colorramps.sort(key=lambda x: x.label)
+        colorramps = GetPalRamps(node_tree)
         
         for i,e in enumerate(colorramps[self.index].color_ramp.elements):
             c = mathutils.Vector(HueShift(self.basecolors[i], self.hue))
@@ -1022,8 +1032,7 @@ class DMR_PT_CSFighterPalette(bpy.types.Panel):
             c.prop(node_tree, 'name', text='')
             
             nodes = node_tree.nodes
-            colorramps = [x for x in nodes if (x.type=='VALTORGB')]
-            colorramps.sort(key=lambda x: x.label)
+            colorramps = GetPalRamps(node_tree)
             
             # I/O operators
             #layout.label(text=node_tree.name + ' %s' % len(colorramps))
