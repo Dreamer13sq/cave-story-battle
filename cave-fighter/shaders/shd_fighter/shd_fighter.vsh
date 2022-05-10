@@ -33,6 +33,7 @@ varying vec4 v_color;
 varying vec3 v_dirtolight_cs;	// Used for basic shading
 varying vec3 v_dirtocamera_cs;	// ^
 varying vec3 v_normal_cs;
+varying float v_normaloffset;
 
 /// Uniforms, set in code. Per Draw Call -------------------------------
 uniform mat4 u_matproj;
@@ -43,6 +44,7 @@ uniform float u_zoffset;
 uniform float u_forwardsign;
 uniform mat4 u_matshear;
 uniform mat4 u_matpose[200];
+uniform float u_norm;
 
 void main()
 {
@@ -57,6 +59,12 @@ void main()
 	
 	vertexpos = m * vertexpos;
 	normal = m * normal;
+	
+	/*
+	float d = distance(u_matview[3].xyz, (vertexpos * u_mattran).xyz);
+	v_normaloffset = 0.002 * u_norm * d;
+	vertexpos += normal * v_normaloffset;
+	*/
 	
 	// Varyings ----------------------------------------------------------
     v_color = clamp(in_Color, 0.0, 1.0);

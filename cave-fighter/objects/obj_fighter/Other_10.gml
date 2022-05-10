@@ -58,9 +58,6 @@ function Render()
 	GRAPHICS.activeshader.UniformMatrix4("u_matshear", matshear);
 	GRAPHICS.activeshader.UniformSampler2D("u_texture", sprite_get_texture(palarray[palindex], 0));
 	
-	for (var i = 0; i < vbm.vbcount; i++)
-	{
-		vbm.SubmitVBIndex(i);
-	}
+	for (var i = 0; i < vbm.vbcount; i++) {vbm.SubmitVBIndex(i);}
 }
 

@@ -74,9 +74,9 @@ sequencedefs = [
 	["2 2 C", "Double Dwn C", ""],
 	
 	// Start on down, Need to end on back
-	["2 ~14 ~4 C", "Special Bck C", "air.001"],
-	["2 ~14 ~4 B", "Special Bck B", "air.001"],
-	["2 ~14 ~4 A", "Special Bck A", "air.001"],
+	["2 ~14 ~4 C", "Special Bck C", "air-rise"],
+	["2 ~14 ~4 B", "Special Bck B", "air-rise"],
+	["2 ~14 ~4 A", "Special Bck A", "air-rise"],
 	
 	// Start on down, Need to end on forward
 	["2 ~36 ~6 C", "Special Fwd C", "idle"],
@@ -92,9 +92,9 @@ sequencedefs = [
 	["6AD", "Throw (Forward)", "block"],
 	["AD", "Throw", "block"],
 	
-	["~2 ~8", "Super Jump", "air.001"],
-	["~2 ~456 ~8", "Super Jump (3)", "air.001"],
-	//["~2 ~456 ~8", "Super Jump (4)", "air.001"],
+	["~2 ~8", "Super Jump", "air-rise"],
+	["~2 ~456 ~8", "Super Jump (3)", "air-rise"],
+	//["~2 ~456 ~8", "Super Jump (4)", "air-rise"],
 	["~4D", "Backdash", "dash"],
 	["~6D", "Dash", "dash"],
 	["~6 ~6", "Dash (Input)", "dash"],

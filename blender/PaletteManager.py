@@ -237,6 +237,8 @@ def PalUpdate(node_tree):
         nd.hide=hide
         if width > -1:
             nd.width = width
+        if frame:
+            nd.parent = frame
         return nd
     
     def LinkNodes(n1, output_index, n2, input_index):

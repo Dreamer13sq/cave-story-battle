@@ -15,6 +15,7 @@ varying vec4 v_color;
 varying vec3 v_dirtolight_cs;
 varying vec3 v_dirtocamera_cs;
 varying vec3 v_normal_cs;
+varying float v_normaloffset;
 
 // Uniforms passed in before draw call
 //uniform vec4 u_drawmatrix[4]; // [alpha emission roughness rim colorblend[4] colorfill[4]]
@@ -35,6 +36,8 @@ void main()
 	{
 		Standard();
 	}
+	
+	gl_FragColor.rgb *= float(1.0-v_normaloffset);
 }
 
 void Palette()
@@ -78,10 +81,10 @@ void Palette()
 	float speamt = pow(roughness, 4.0);
 	
 	//outcolor += outcolor * (float(shine > (1.0-speamt))) * (1.0-speamt) * (1.74-length(outcolor.rgb)) * AO * 0.5;
-	outcolor.rgb += ((outcolor.rgb + (1.0-outcolor.rgb) * 0.1) + (pow(1.1-roughness, 16.0)) ) * (
-		float( shine > (1.0-pow(roughness, 2.5) * AO) ) * 
-		(1.0-pow(roughness, 2.0)) * 
-		pow(1.75-length(outcolor.rgb), 2.0)
+	outcolor.rgb += ((outcolor.rgb + (1.0-outcolor.rgb) * 0.1) + (pow(1.1-roughness, 32.0)) ) * (
+		float( shine > (1.0-pow(roughness, 4.0) * AO) ) * 
+		(1.0-pow(roughness, 0.5)) * 
+		pow(2.0-length(outcolor.rgb), 2.0)
 	);
 	
 	//outcolor = mix(outcolor, texture2D(u_texture, vec2(1.0, uv.y)) + vec4(0.2), AO * shine);

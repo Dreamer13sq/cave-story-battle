@@ -6,9 +6,9 @@ event_user(1);	// Methods
 state = 0;
 
 characterfolder = new CharFolder();
-if (characterfolder.SearchFolder("D:/GitHub/DreamFighterAttackEditor/DreamFighter-AttackEditor/bin/Debug/workspace/", 3) == -1)
+if (characterfolder.SearchFolder("D:/GitHub/Cave-Story-Fighter/cave-fighter/datafiles/curly/", 3) == -1)
 {
-	characterfolder.SearchFolder("C:/Users/Dreamer/Documents/GitHub/DreamFighterAttackEditor/DreamFighter-AttackEditor/bin/Debug/workspace/", 3)
+	characterfolder.SearchFolder("C:/Users/Dreamer/Documents/GitHub/Cave-Story-Fighter/cave-fighter/datafiles/curly/", 3)
 }
 
 
