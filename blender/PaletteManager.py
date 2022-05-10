@@ -344,8 +344,8 @@ def PalUpdate(node_tree):
     
     LinkNodes('pal-uv', 2, 'uv', 0)
     LinkNodes('pal-uv', 1, 'dp', 0)
-    LinkNodes('outcolor', 0, 'pal-specular', 3)
-    LinkNodes('outalpha', 0, 'pal-specular', 2)
+    LinkNodes('outcolor', 0, 'pal-specular', 4)
+    LinkNodes('outalpha', 0, 'pal-specular', 3)
     LinkNodes('pal-specular', 0, 'output', 0)
     
     LinkNodes('outalpha', 0, 'output-roughness', 0)
@@ -902,7 +902,8 @@ class DMR_OP_Palette_NewLiveGroup(bpy.types.Operator):
         ng_spe = NewNode('pal-specular', '', 'ShaderNodeGroup', 1000, 400)
         ng_spe.node_tree = [x for x in bpy.data.node_groups if NODEGROUPSIGNATURESPECULAR in x.nodes.keys()][0]
         LinkNodes(inputs, 3, ng_spe, 0)
-        LinkNodes(inputs, 4, ng_spe, 1)
+        LinkNodes(inputs, 1, ng_spe, 1)
+        LinkNodes(inputs, 4, ng_spe, 2)
         
         # Param Preview
         paluvXYZ = NewNode('palXYZ', 'Palette UV', 'ShaderNodeSeparateXYZ', -500, -400, True)
@@ -922,7 +923,7 @@ class DMR_OP_Palette_NewLiveGroup(bpy.types.Operator):
         LinkNodes(paluvXYZ, 0, 'output-ao', 0)
         LinkNodes('outalpha', 0, 'output-roughness', 0)
         LinkNodes(ng_spe, 1, 'output-specular', 0)
-        LinkNodes(paluvXYZ, 0, ng_spe, 4)
+        LinkNodes(paluvXYZ, 0, ng_spe, 5)
         
         # Generate nodes
         for i in range(0, MAXCOLORS):
@@ -984,6 +985,38 @@ class DMR_OP_Palette_SetActiveOutput(bpy.types.Operator):
         
         return {'FINISHED'}
 classlist.append(DMR_OP_Palette_SetActiveOutput)
+
+# ----------------------------------------------------------------------------------
+
+class DMR_OP_Palette_PalUVsToVC(bpy.types.Operator):
+    """Tooltip"""
+    bl_idname = "dmr.palette_uvs_to_vc"
+    bl_label = "Palette UVs to Vertex Colors"
+    bl_description = "Sets VC.rg to UV"
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    uv_layer_name : bpy.props.StringProperty(default='UVPal')
+    vc_layer_name : bpy.props.StringProperty(default='PalControl')
+    
+    @classmethod
+    def poll(self, context):
+        return len(context.selected_objects)
+    
+    def execute(self, context):
+        for obj in context.selected_objects:
+            if obj.type != 'MESH':
+                continue
+            if self.uv_layer_name in obj.data.uv_layers.keys() and self.vc_layer_name in obj.data.vertex_colors.keys():
+                uvlayer = obj.data.uv_layers[self.uv_layer_name].data
+                vclayer = obj.data.vertex_colors[self.vc_layer_name].data
+                
+                for l in obj.data.loops:
+                    vc = vclayer[l.index].color
+                    uv = uvlayer[l.index].uv
+                    vclayer[l.index].color = (uv[0], 1.0-(uv[1] % 1.0), vc[2], vc[3])
+        
+        return {'FINISHED'}
+classlist.append(DMR_OP_Palette_PalUVsToVC)
 
 # ====================================================================================
 
@@ -1105,6 +1138,7 @@ class DMR_PT_CSFighterPalette(bpy.types.Panel):
             rr.operator('dmr.palette_set_uv', text='UV From Index')
             rr.operator('dmr.palette_move_uv')
             c.operator('dmr.palette_toggle_range')
+            c.operator('dmr.palette_uvs_to_vc')
             
             # Output Visibility
             rr = layout.row()

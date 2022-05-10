@@ -25,9 +25,7 @@ attribute vec4 in_Bone;	// (b1,b2,b3,b4)
 attribute vec4 in_Weight;	// (w1,w2,w3,w4)
 
 // Passed to Fragment Shader -------------------------------------------
-varying vec3 v_pos;
-varying vec3 v_normal;
-varying vec2 v_uv;
+varying vec2 v_uv_surface;
 varying vec4 v_color;
 
 varying vec3 v_dirtolight_cs;	// Used for basic shading
@@ -67,8 +65,8 @@ void main()
 	*/
 	
 	// Varyings ----------------------------------------------------------
-    v_color = clamp(in_Color, 0.0, 1.0);
-    v_uv = vec2(in_TextureCoord.x, mod(in_TextureCoord.y, 1.0));
+    v_color = in_Color;
+    v_uv_surface = vec2(in_TextureCoord.x, mod(in_TextureCoord.y, 1.0));
 	//v_uv[1] = 1.0-v_uv[1];
 	
 	// Shading Variables ----------------------------------------------

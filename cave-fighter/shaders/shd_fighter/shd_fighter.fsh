@@ -1,5 +1,11 @@
 /*
-	Renders vbs with basic shading.
+	Renders vbs with stylistic shading.
+	
+	Params:
+		vc[0] = Color AO
+		vc[1] = Color Index
+		vc[2] = Dot Product Strength
+		vc[3] = ???
 */
 
 // Constants
@@ -9,7 +15,7 @@ const float RIM_EXP = 4.0;	// Higher values sharpen, Lower values smooth
 const float EULERNUMBER = 2.71828;	// Funny E number used in logarithmic stuff
 
 // Passed from Vertex Shader
-varying vec2 v_uv;
+varying vec2 v_uv_surface;
 varying vec4 v_color;
 
 varying vec3 v_dirtolight_cs;
@@ -22,6 +28,14 @@ varying float v_normaloffset;
 
 uniform sampler2D u_texture;
 uniform bool u_usestandard;
+
+// =================================================================================================
+
+float noise(vec2 co){
+    return fract(sin(dot(co, vec2(12.9898, 78.233))) * 43758.5453);
+}
+
+// =================================================================================================
 
 void Palette();
 void Standard();
@@ -37,7 +51,7 @@ void main()
 		Standard();
 	}
 	
-	gl_FragColor.rgb *= float(1.0-v_normaloffset);
+	//gl_FragColor.rgb *= float(1.0-v_normaloffset);
 }
 
 void Palette()
@@ -49,25 +63,17 @@ void Palette()
 	vec3 e = normalize(v_dirtocamera_cs);	// Camera Direction
 	vec3 r = reflect(-l, n);				// Reflect Angle
 	
-	float COLORINDEX = v_uv.y;
-	float AO = v_uv.x;
-	float DPSTRENGTH = v_color.r;
-	float DPMIN = v_color.g;
-	float DPMAX = v_color.b;
+	float AO = v_color.x;
+	float COLORINDEX = v_color.y;
+	float DPSTRENGTH = v_color.z;
 	
-	//dp -= 0.01;
-	//dp = 1.0/(1.0 + pow(dp/(1.0-dp), -0.77) );
 	float shine = dot(e, r);	// Specular
 	
-	//shine = pow( sqrt((shine+1.0)*0.5), pow(1.0/(roughness+0.001), 4.0) ) * 1.0 * (1.0-roughness);
-	//shine = shine > roughness*roughness? (1.0-roughness): shine;
-	
 	float dp = clamp(dot(n, l), 0.0, 1.0);	// Dot Product
-	//dp = clamp(dp * (1.0-shine) + shine, 0.0, 1.0);
 	
 	float lightvalue = mix(
-		v_uv.x,
-		AO * clamp(dp, DPMIN, DPMAX),
+		AO,
+		AO * dp,
 		DPSTRENGTH
 	);
 	
@@ -80,10 +86,11 @@ void Palette()
 	float roughness = texcolor.a;
 	float speamt = pow(roughness, 4.0);
 	
-	//outcolor += outcolor * (float(shine > (1.0-speamt))) * (1.0-speamt) * (1.74-length(outcolor.rgb)) * AO * 0.5;
+	float specularamt = float( shine > (1.0-pow(roughness, 4.0) * AO) ) * (1.0-pow(roughness, 0.5));
+	//float anisotrophicamt = noise();
+	
 	outcolor.rgb += ((outcolor.rgb + (1.0-outcolor.rgb) * 0.1) + (pow(1.1-roughness, 32.0)) ) * (
-		float( shine > (1.0-pow(roughness, 4.0) * AO) ) * 
-		(1.0-pow(roughness, 0.5)) * 
+		specularamt *
 		pow(2.0-length(outcolor.rgb), 2.0)
 	);
 	
@@ -94,6 +101,7 @@ void Palette()
 		);
 	
     gl_FragColor = outcolor;
+    
     //gl_FragColor = v_color;
 }
 
@@ -107,11 +115,11 @@ void Standard()
 	vec4 colorblend = vec4(1.0, 1.0, 1.0, 0.0);
 	vec4 colorfill = vec4(1.0, 1.0, 1.0, 0.0);
 	
-	float COLORINDEX = v_uv.y;
-	float AO = v_uv.x;
-	float DPSTRENGTH = v_color.r;
-	float DPMIN = v_color.g;
-	float DPMAX = v_color.b;
+	float AO = v_color.x;
+	float COLORINDEX = v_color.y;
+	float DPSTRENGTH = v_color.z;
+	float DPMIN = 0.0;
+	float DPMAX = 1.0;
 	
 	// Varyings -------------------------------------------------------
 	// There's some error when normalizing in vertex shader. Looks smoother here
@@ -126,15 +134,15 @@ void Standard()
 	float shine = dot(e, r);	// Specular
 	
 	dp = pow(dp, DP_EXP);
-	dp *= mix(0.9, 1.0, v_uv.x);
+	dp *= mix(0.9, 1.0, v_color.z);
 	shine = pow( sqrt((shine+1.0)*0.5), pow(1.0/(roughness+0.001), 4.0) ) * 1.0 * (1.0-roughness);
 	fresnel = pow(fresnel, RIM_EXP)*rim;
 	
 	// Colors ----------------------------------------------------------------
 	// Use only v_color if bottom left pixel is completely white (no texture given)
 	//vec4 diffusecolor = v_color;
-	float texX = mix(v_uv.x, 0.7, v_color.r);
-	vec4 diffusecolor = vec4(texture2D(u_texture, vec2(texX, v_uv[1])).rgb, 1.0);
+	float texX = mix(v_color.x, 0.7, v_color.z);
+	vec4 diffusecolor = vec4(texture2D(u_texture, vec2(texX, v_color.y)).rgb, 1.0);
 	diffusecolor *= 1.1;
 	
 	// Output ----------------------------------------------------------------
@@ -151,4 +159,6 @@ void Standard()
 	
     gl_FragColor = vec4(outcolor, alpha);
 }
+
+
 
