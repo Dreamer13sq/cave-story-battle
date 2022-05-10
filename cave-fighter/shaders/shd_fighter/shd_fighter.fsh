@@ -67,16 +67,12 @@ void Palette()
 	float COLORINDEX = v_color.y;
 	float DPSTRENGTH = v_color.z;
 	
-	float shine = dot(e, r);	// Specular
-	
+	float shine = max(0.0, dot(e, r));	// Specular
 	float dp = clamp(dot(n, l), 0.0, 1.0);	// Dot Product
+	float fresnel = 1.0-max(0.0, dot(n, e));	// Fake Fresnel
 	
-	float lightvalue = mix(
-		AO,
-		AO * dp,
-		DPSTRENGTH
-	);
-	
+	// 
+	float lightvalue = mix(AO, AO * dp, DPSTRENGTH);
 	vec2 uv = vec2(lightvalue, COLORINDEX);
 	vec4 texcolor = texture2D(u_texture, uv);
 	vec4 outcolor = vec4(texcolor.rgb, 1.0);
@@ -86,23 +82,20 @@ void Palette()
 	float roughness = texcolor.a;
 	float speamt = pow(roughness, 4.0);
 	
-	float specularamt = float( shine > (1.0-pow(roughness, 4.0) * AO) ) * (1.0-pow(roughness, 0.5));
+	float specularamt = float( (shine+pow(fresnel*(2.0-roughness), 2.0)) > (1.0-(pow(roughness, 4.0)) * AO) ) * (1.0-pow(roughness, 0.5));
+	vec3 specularcolor = (outcolor.rgb + (1.0-outcolor.rgb) * 0.1) + (pow(1.1-roughness, 32.0));
 	//float anisotrophicamt = noise();
 	
-	outcolor.rgb += ((outcolor.rgb + (1.0-outcolor.rgb) * 0.1) + (pow(1.1-roughness, 32.0)) ) * (
+	outcolor.rgb += specularcolor * (
 		specularamt *
 		pow(2.0-length(outcolor.rgb), 2.0)
 	);
-	
-	//outcolor = mix(outcolor, texture2D(u_texture, vec2(1.0, uv.y)) + vec4(0.2), AO * shine);
 	
 	outcolor.rgb = mix(outcolor.rgb*ambient, outcolor.rgb, 
 		clamp(pow(length(outcolor.rgb), 1.0), 0.0, 1.0)
 		);
 	
     gl_FragColor = outcolor;
-    
-    //gl_FragColor = v_color;
 }
 
 void Standard()
