@@ -273,6 +273,7 @@ function CheckCommands()
 			}
 			
 			// Skip direction inputs if wildcard (?)
+			if 0
 			if ( (seqstep & InputCmd.FL_ButtonLenient) == 0)
 			{
 				while( (entry & InputCmd.mask_button) != 0 )

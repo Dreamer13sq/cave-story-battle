@@ -55,7 +55,7 @@ void Palette()
 	//dp -= 0.01;
 	//dp = 1.0/(1.0 + pow(dp/(1.0-dp), -0.77) );
 	float shine = dot(e, r);	// Specular
-	float roughness = 0.2;
+	
 	//shine = pow( sqrt((shine+1.0)*0.5), pow(1.0/(roughness+0.001), 4.0) ) * 1.0 * (1.0-roughness);
 	//shine = shine > roughness*roughness? (1.0-roughness): shine;
 	
@@ -74,9 +74,15 @@ void Palette()
 	vec3 ambient = vec3(0.8, 0.7, 1.0);
 	
 	// Specular
-	float speamt = pow(texcolor.a, 4.0);
+	float roughness = texcolor.a;
+	float speamt = pow(roughness, 4.0);
 	
-	outcolor += outcolor * (float(shine > (1.0-speamt))) * (1.0-speamt) * (1.74-length(outcolor.rgb)) * AO * 0.5;
+	//outcolor += outcolor * (float(shine > (1.0-speamt))) * (1.0-speamt) * (1.74-length(outcolor.rgb)) * AO * 0.5;
+	outcolor.rgb += ((outcolor.rgb + (1.0-outcolor.rgb) * 0.1) + (pow(1.1-roughness, 16.0)) ) * (
+		float( shine > (1.0-pow(roughness, 2.5) * AO) ) * 
+		(1.0-pow(roughness, 2.0)) * 
+		pow(1.75-length(outcolor.rgb), 2.0)
+	);
 	
 	//outcolor = mix(outcolor, texture2D(u_texture, vec2(1.0, uv.y)) + vec4(0.2), AO * shine);
 	
