@@ -223,60 +223,54 @@ def PalUpdate(node_tree):
     
     ysep = 32
     
-    for nd in [x for x in nodes if x.type in ['MIX_RGB', 'MATH', 'VALUE', 'REROUTE'] ]:
+    for nd in [x for x in nodes if x.type in ['MIX_RGB', 'MATH', 'VALUE'] ]:
         nodes.remove(nd)
     
     rampnodes = GetPalRamps(node_tree)
     
     # Nested Functions
-    def NewNode(name, type, x, y, width=40, hide=False):
-        nd = nodes.new(type)
-        nd.name = nd.label = name
+    def NewNode(name, label, type, x, y, hide=False, width=-1):
+        nd = node_tree.nodes.new(type)
+        nd.name = name
+        nd.label = label
         nd.location = (x, y)
-        nd.width = width
         nd.hide=hide
-        if frame:
-            nd.parent = frame
+        if width > -1:
+            nd.width = width
         return nd
     
     def LinkNodes(n1, output_index, n2, input_index):
         return node_tree.links.new(
-            (nodes[n1] if isinstance(n1, str) else n1).outputs[output_index], 
-            (nodes[n2] if isinstance(n2, str) else n2).inputs[input_index]
+            (node_tree.nodes[n1] if isinstance(n1, str) else n1).outputs[output_index], 
+            (node_tree.nodes[n2] if isinstance(n2, str) else n2).inputs[input_index]
             )
-    
-    # Reroutes
-    uvnode = NewNode('uv', 'NodeReroute', -40, 80)
-    dpnode = NewNode('dp', 'NodeReroute', -40, 40)
-    outcolornode = NewNode('outcolor', 'NodeReroute', 800, 40)
-    outalphanode = NewNode('outalpha', 'NodeReroute', 800, 0)
     
     yy = ysep
     
     # Value nodes
-    valuenode = NewNode('Num Colors = N', 'ShaderNodeValue', 0, yy, 50, True)
+    valuenode = NewNode('Num Colors = N', '', 'ShaderNodeValue', 0, yy, True, 50)
     valuenode.outputs[0].default_value = len(rampnodes)
     
     groupinput = [x for x in nodes if x.type == 'GROUP_INPUT'][0]
     groupoutput = [x for x in nodes if x.type == 'GROUP_OUTPUT'][0]
     
     # Math Nodes
-    divnode = NewNode('1 / N', 'ShaderNodeMath', 150, yy, 50, True)
+    divnode = NewNode('1 / N', '', 'ShaderNodeMath', 150, yy, True, 50)
     divnode.operation = 'DIVIDE'
     divnode.inputs[0].default_value = 1.0
     LinkNodes(valuenode, 0, divnode, 1)
     
-    subnode = NewNode('N - 1', 'ShaderNodeMath', 300, yy, 50, True)
+    subnode = NewNode('N - 1', '', 'ShaderNodeMath', 300, yy, True, 50)
     subnode.operation = 'ADD'
     subnode.inputs[1].default_value = 1.0
     LinkNodes(valuenode, 0, subnode, 0)
     
-    invnode = NewNode('1 - 1/N', 'ShaderNodeMath', 450, yy, 50, True)
+    invnode = NewNode('1 - 1/N', '', 'ShaderNodeMath', 450, yy, True, 50)
     invnode.operation = 'SUBTRACT'
     invnode.inputs[0].default_value = 1.0
     LinkNodes(divnode, 0, invnode, 1)
     
-    halfnode = NewNode('-0.5 / N', 'ShaderNodeMath', 600, yy, 50, True)
+    halfnode = NewNode('-0.5 / N', '', 'ShaderNodeMath', 600, yy, True, 50)
     halfnode.operation = 'DIVIDE'
     halfnode.inputs[0].default_value = -0.5
     LinkNodes(valuenode, 0, halfnode, 1)
@@ -291,7 +285,7 @@ def PalUpdate(node_tree):
         nd.color_ramp.color_mode = 'RGB'
         nd.color_ramp.interpolation = 'CONSTANT'
         nd.parent = frame
-        LinkNodes(dpnode, 0, nd, 0)
+        LinkNodes('dp', 0, nd, 0)
     
     # Color Calculations
     if len(rampnodes) > 0:
@@ -305,19 +299,19 @@ def PalUpdate(node_tree):
         nd1alpha = rampnodes[i-1] if i == 1 else mixalphanode
         nd2 = rampnodes[i]
         
-        multnode = NewNode('1/N * Index', 'ShaderNodeMath', xx, yy, 40, True)
+        multnode = NewNode('1/N * Index', '', 'ShaderNodeMath', xx, yy, True, 40)
         multnode.operation = 'MULTIPLY'
         multnode.inputs[1].default_value = i
         
-        greaternode = NewNode('UV.y is Index', 'ShaderNodeMath', xx+120, yy, 40, True)
+        greaternode = NewNode('UV.y is Index', '', 'ShaderNodeMath', xx+120, yy, True, 40)
         greaternode.operation = 'GREATER_THAN'
         
         # Mix with next node
-        mixnode = NewNode('Mix with Next', 'ShaderNodeMixRGB', xx+240, yy, 40, True)
-        mixalphanode = NewNode('Mix Alpha Next', 'ShaderNodeMixRGB', xx+360, yy, 40, True)
+        mixnode = NewNode('Mix with Next', '', 'ShaderNodeMixRGB', xx+240, yy, True, 40)
+        mixalphanode = NewNode('Mix Alpha Next', '', 'ShaderNodeMixRGB', xx+360, yy, True, 40)
         
         LinkNodes(divnode, 0, multnode, 0)
-        LinkNodes(uvnode, 0, greaternode, 0)
+        LinkNodes('uv', 0, greaternode, 0)
         LinkNodes(multnode, 0, greaternode, 1)
         LinkNodes(greaternode, 0, mixnode, 0)
         LinkNodes(greaternode, 0, mixalphanode, 0)
@@ -332,25 +326,27 @@ def PalUpdate(node_tree):
     
     # End linking
     if 'palx' in nodes.keys():
-        LinkNodes(nodes['palx'], 0, dpnode, 0)
+        LinkNodes(nodes['palx'], 0, 'dp', 0)
     if 'paly' in nodes.keys():
-        LinkNodes(nodes['paly'], 0, uvnode, 0)
+        LinkNodes(nodes['paly'], 0, 'uv', 0)
     
-    LinkNodes(groupinput, 0, uvnode, 0)
-    LinkNodes(groupinput, 1, dpnode, 0)
+    LinkNodes(groupinput, 0, 'uv', 0)
+    LinkNodes(groupinput, 1, 'dp', 0)
     
     if len(rampnodes) > 0:
-        LinkNodes(mixnode, 0, outcolornode, 0)
-        LinkNodes(mixalphanode, 0, outalphanode, 0)
-        LinkNodes(outcolornode, 0, groupoutput, 0)
+        LinkNodes(mixnode, 0, 'outcolor', 0)
+        LinkNodes(mixalphanode, 0, 'outalpha', 0)
+        LinkNodes('outcolor', 0, groupoutput, 0)
         if 'outroute' in nodes.keys():
-            LinkNodes(outcolornode, 0, nodes['outroute'], 0)
+            LinkNodes('outcolor', 0, nodes['outroute'], 0)
     
     LinkNodes('pal-uv', 2, 'uv', 0)
     LinkNodes('pal-uv', 1, 'dp', 0)
     LinkNodes('outcolor', 0, 'pal-specular', 3)
     LinkNodes('outalpha', 0, 'pal-specular', 2)
     LinkNodes('pal-specular', 0, 'output', 0)
+    
+    LinkNodes('outalpha', 0, 'output-roughness', 0)
 
 print('='*80)
 
@@ -848,6 +844,22 @@ class DMR_OP_Palette_NewLiveGroup(bpy.types.Operator):
         header.name = header.label = NODEGROUPSIGNATURE
         header.location = (0, 400)
         
+        def NewNode(name, label, type, x, y, hide=False, width=-1):
+            nd = node_tree.nodes.new(type)
+            nd.name = name
+            nd.label = label
+            nd.location = (x, y)
+            nd.hide=hide
+            if width > -1:
+                nd.width = width
+            return nd
+        
+        def LinkNodes(n1, output_index, n2, input_index):
+            return node_tree.links.new(
+                (node_tree.nodes[n1] if isinstance(n1, str) else n1).outputs[output_index], 
+                (node_tree.nodes[n2] if isinstance(n2, str) else n2).inputs[input_index]
+                )
+        
         context.scene.dfighter_active_palette = node_tree.name
         
         # I/O
@@ -862,46 +874,61 @@ class DMR_OP_Palette_NewLiveGroup(bpy.types.Operator):
         
         inputs = node_tree.nodes.new('NodeGroupInput')
         inputs.name = 'input'
-        outputs = node_tree.nodes.new('NodeGroupOutput')
-        outputs.name = 'output'
-        outputs.label = 'output'
-        outputs.location = (1200, 0)
-        
-        nd = node_tree.nodes.new('NodeGroupOutput')
-        nd.name = 'output-ao'
-        nd.label = 'Ambient Occlusion'
-        nd.location = (1200, -100)
-        
-        nd = node_tree.nodes.new('NodeGroupOutput')
-        nd.name = 'output-ao'
-        nd.label = 'Roughness'
-        nd.location = (1200, -200)
-        
-        # UV
-        ng = node_tree.nodes.new('ShaderNodeGroup')
-        ng.name = 'pal-uv'
-        ng.node_tree = [x for x in bpy.data.node_groups if NODEGROUPSIGNATUREUV in x.nodes.keys()][0]
-        node_tree.links.new(inputs.outputs[0], ng.inputs[0])
-        node_tree.links.new(inputs.outputs[1], ng.inputs[1])
-        node_tree.links.new(inputs.outputs[2], ng.inputs[2])
-        node_tree.links.new(inputs.outputs[3], ng.inputs[3])
-        node_tree.links.new(inputs.outputs[4], ng.inputs[4])
-        ng.location = (-500, 0)
-        for nd in [x for x in node_tree.nodes if 'outputs' in nd.name]:
-            node_tree.links.new(ng.outputs[0], nd.inputs[1])
-        
-        # Specular
-        ng = node_tree.nodes.new('ShaderNodeGroup')
-        ng.name = 'pal-specular'
-        ng.node_tree = [x for x in bpy.data.node_groups if NODEGROUPSIGNATURESPECULAR in x.nodes.keys()][0]
-        node_tree.links.new(inputs.outputs[3], ng.inputs[0])
-        node_tree.links.new(inputs.outputs[4], ng.inputs[1])
-        ng.location = (800, 400)
-        
-        PalUpdate(node_tree)
-        
         inputs.location = (-1000, 0)
         
+        outputs = node_tree.nodes.new('NodeGroupOutput')
+        outputs.name = 'output'
+        outputs.label = 'Base Output'
+        outputs.location = (1200, 0)
+        
+        # Reroutes
+        NewNode('uv', '', 'NodeReroute', -40, 80)
+        NewNode('dp', '', 'NodeReroute', -40, 40)
+        NewNode('outcolor', '', 'NodeReroute', 800, 40)
+        NewNode('outalpha', '', 'NodeReroute', 800, 0)
+        
+        # UV
+        ng_uv = NewNode('pal-uv', '', 'ShaderNodeGroup', -500, 0)
+        ng_uv.node_tree = [x for x in bpy.data.node_groups if NODEGROUPSIGNATUREUV in x.nodes.keys()][0]
+        LinkNodes(inputs, 0, ng_uv, 0)
+        LinkNodes(inputs, 1, ng_uv, 1)
+        LinkNodes(inputs, 2, ng_uv, 2)
+        LinkNodes(inputs, 3, ng_uv, 3)
+        LinkNodes(inputs, 4, ng_uv, 4)
+        
+        # Specular
+        ng_spe = NewNode('pal-specular', '', 'ShaderNodeGroup', 1000, 400)
+        ng_spe.node_tree = [x for x in bpy.data.node_groups if NODEGROUPSIGNATURESPECULAR in x.nodes.keys()][0]
+        LinkNodes(inputs, 3, ng_spe, 0)
+        LinkNodes(inputs, 4, ng_spe, 1)
+        
+        # Param Preview
+        paluvXYZ = NewNode('palXYZ', 'Palette UV', 'ShaderNodeSeparateXYZ', -500, -400, True)
+        LinkNodes(inputs, 0, paluvXYZ, 0)
+        paramsXYZ = NewNode('paramsXYZ', 'Params XYZ', 'ShaderNodeSeparateXYZ', -500, -500, True)
+        LinkNodes(inputs, 2, paramsXYZ, 0)
+        
+        for i,entry in enumerate([
+            ('output-light', 'Light Value'),
+            ('output-ao', 'Ambient Occlusion'),
+            ('output-roughness', 'Roughness'),
+            ('output-specular', 'Specular'),
+        ]):
+            NewNode(entry[0], entry[1], 'NodeGroupOutput', 1200, -200-50*i, True)
+        
+        LinkNodes(ng_uv, 1, 'output-light', 0)
+        LinkNodes(paluvXYZ, 0, 'output-ao', 0)
+        LinkNodes('outalpha', 0, 'output-roughness', 0)
+        LinkNodes(ng_spe, 1, 'output-specular', 0)
+        LinkNodes(paluvXYZ, 0, ng_spe, 4)
+        
+        # Generate nodes
+        for i in range(0, MAXCOLORS):
+            Palette_AddColor(node_tree, i, False)
+        PalUpdate(node_tree)
+        
+        for nd in [nd for nd in node_tree.nodes if 'output' in nd.name]:
+            LinkNodes(ng_uv, 0, nd, 1)
         
         return {'FINISHED'}
 classlist.append(DMR_OP_Palette_NewLiveGroup)
@@ -929,6 +956,32 @@ class DMR_OP_Palette_RemoveLiveGroup(bpy.types.Operator):
         
         return {'FINISHED'}
 classlist.append(DMR_OP_Palette_RemoveLiveGroup)
+
+# ----------------------------------------------------------------------------------
+
+class DMR_OP_Palette_SetActiveOutput(bpy.types.Operator):
+    """Tooltip"""
+    bl_idname = "dmr.palette_set_active_output"
+    bl_label = "Set Active Node Group Output"
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    node_name : bpy.props.StringProperty()
+    
+    @classmethod
+    def poll(self, context):
+        return GetPalLive()
+    
+    def execute(self, context):
+        node_tree = GetPalLive()
+        
+        if self.node_name in node_tree.nodes.keys():
+            for nd in [x for x in node_tree.nodes if 'output' in x.name]:
+                nd.is_active_output = False
+            node_tree.nodes[self.node_name].is_active_output = True
+            print('Active set to "%s"' % self.node_name)
+        
+        return {'FINISHED'}
+classlist.append(DMR_OP_Palette_SetActiveOutput)
 
 # ====================================================================================
 
@@ -1050,6 +1103,16 @@ class DMR_PT_CSFighterPalette(bpy.types.Panel):
             rr.operator('dmr.palette_set_uv', text='UV From Index')
             rr.operator('dmr.palette_move_uv')
             c.operator('dmr.palette_toggle_range')
+            
+            # Output Visibility
+            rr = layout.row()
+            rr.label(text='Isolate:')
+            rr = rr.row(align=1)
+            rr.operator('dmr.palette_set_active_output', icon='COLOR', text='').node_name = 'output'
+            rr.operator('dmr.palette_set_active_output', icon='OUTLINER_OB_LIGHT', text='').node_name = 'output-light'
+            rr.operator('dmr.palette_set_active_output', icon='MOD_MASK', text='').node_name = 'output-ao'
+            rr.operator('dmr.palette_set_active_output', icon='NODE_MATERIAL', text='').node_name = 'output-roughness'
+            rr.operator('dmr.palette_set_active_output', icon='PROP_OFF', text='').node_name = 'output-specular'
             
             # Normal sphere
             c = layout.column()
