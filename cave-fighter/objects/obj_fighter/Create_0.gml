@@ -2,19 +2,21 @@
 
 event_user(0);	// Game Loop
 event_user(1);	// Methods
+event_user(2);	// Fighter Runner
 
-enum FighterStateMode
+enum FL_FFlag
 {
 	inmotion =	1<<0,
-	standing =	1<<1,
-	crouching =	1<<2,
-	ground =	1<<3,
-	air =		1<<4,
-	blockstun =	1<<5,
-	hitstun =	1<<6,
-	sliding =	1<<7,
-	air_rise =	1<<8,
-	air_fall =	1<<9,
+	allowinterrupt =	1<<1,
+	standing =	1<<2,
+	crouching =	1<<3,
+	ground =	1<<4,
+	air =		1<<5,
+	blockstun =	1<<6,
+	hitstun =	1<<7,
+	sliding =	1<<8,
+	air_rise =	1<<9,
+	air_fall =	1<<10,
 }
 
 x = 0;
@@ -27,6 +29,8 @@ zrot = 0;
 
 state = 0;
 fighterstate = 0;
+frame = 1;
+lastframe = 0;
 
 walkforwardspeed = 3;
 walkbackspeed = 2.7;
@@ -39,13 +43,11 @@ shearbool = false;
 characterfolder = new CharFolder();
 ReloadFiles();
 
-
 trkarray = [];
 trkcount = characterfolder.GetTRKs(trkarray);
 trkindex = irandom(trkcount-1);
 trkactive = trkarray[trkindex];
 animkey = "";
-allowinterrupt = true;
 
 palarray = [];
 palcount = characterfolder.GetPALs(palarray);
@@ -59,9 +61,13 @@ matpose = Mat4ArrayFlat(200);
 mattran = Mat4();
 matshear = Mat4();
 
-playbackframe = 0;
-
 image_speed = 0;
+
+// Action ===========================================================================
+
+actionkey = "";
+actionmap = ds_map_create();
+actionactive = 0;
 
 function FighterModel()
 {

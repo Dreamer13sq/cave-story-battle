@@ -35,54 +35,54 @@ buffertimetrigger = 7;
 
 // [conditions, sequence, name]
 sequencedefs = [
-	["2 ~14 ~4 ~*BC", "Super Bck", "block", FighterStateMode.ground],
-	["2 ~36 ~6 ~*BC", "Super Fwd", "block", FighterStateMode.ground],
-	["2 ~14 ~4 ~5 ~*BC", "Super Bck (Space)", "block", FighterStateMode.ground],
-	["2 ~36 ~6 ~5 ~*BC", "Super Fwd (Space)", "block", FighterStateMode.ground],
+	["2 ~14 ~4 ~*BC", "Super Bck", "block", FL_FFlag.ground],
+	["2 ~36 ~6 ~*BC", "Super Fwd", "block", FL_FFlag.ground],
+	["2 ~14 ~4 ~5 ~*BC", "Super Bck (Space)", "block", FL_FFlag.ground],
+	["2 ~36 ~6 ~5 ~*BC", "Super Fwd (Space)", "block", FL_FFlag.ground],
 	
-	["~36 ~32 ~36 A", "Zigzag Fwd A", "assist", FighterStateMode.ground],
-	["~36 ~32 ~36 B", "Zigzag Fwd B", "assist", FighterStateMode.ground],
-	["~36 ~32 ~36 C", "Zigzag Fwd C", "assist", FighterStateMode.ground],
+	["~36 ~32 ~36 A", "Zigzag Fwd A", "assist", FL_FFlag.ground],
+	["~36 ~32 ~36 B", "Zigzag Fwd B", "assist", FL_FFlag.ground],
+	["~36 ~32 ~36 C", "Zigzag Fwd C", "assist", FL_FFlag.ground],
 	
-	["2 2 A", "Double Dwn A", "", FighterStateMode.ground],
-	["2 2 B", "Double Dwn B", "", FighterStateMode.ground],
-	["2 2 C", "Double Dwn C", "", FighterStateMode.ground],
+	["2 2 A", "Double Dwn A", "", FL_FFlag.ground],
+	["2 2 B", "Double Dwn B", "", FL_FFlag.ground],
+	["2 2 C", "Double Dwn C", "", FL_FFlag.ground],
 	
 	// Start on down, Need to end on back
-	["2 ~14 ~4 C", "Special Bck C", "air-rise", FighterStateMode.ground],
-	["2 ~14 ~4 B", "Special Bck B", "air-rise", FighterStateMode.ground],
-	["2 ~14 ~4 A", "Special Bck A", "air-rise", FighterStateMode.ground],
+	["2 ~14 ~4 C", "Special Bck C", "air-rise", FL_FFlag.ground],
+	["2 ~14 ~4 B", "Special Bck B", "air-rise", FL_FFlag.ground],
+	["2 ~14 ~4 A", "Special Bck A", "air-rise", FL_FFlag.ground],
 	
 	// Start on down, Need to end on forward
-	["2 ~36 ~6 C", "Special Fwd C", "idle", FighterStateMode.ground],
-	["2 ~36 ~6 B", "Special Fwd B", "idle", FighterStateMode.ground],
-	["2 ~36 ~6 A", "Special Fwd A", "idle", FighterStateMode.ground],
+	["2 ~36 ~6 C", "Special Fwd C", "idle", FL_FFlag.ground],
+	["2 ~36 ~6 B", "Special Fwd B", "idle", FL_FFlag.ground],
+	["2 ~36 ~6 A", "Special Fwd A", "idle", FL_FFlag.ground],
 	
-	["A B C", "Triangle C", "assist", FighterStateMode.ground],
-	["A B", "Triangle B", "assist", FighterStateMode.ground],
+	["A B C", "Triangle C", "assist", FL_FFlag.ground],
+	["A B", "Triangle B", "assist", FL_FFlag.ground],
 	
 	["BC", "Skill", "assist", 0],
 	
-	["4AD", "Throw Back", "block", FighterStateMode.ground],
-	["6AD", "Throw (Forward)", "block", FighterStateMode.ground],
-	["AD", "Throw", "block", FighterStateMode.ground],
+	["4AD", "Throw Back", "block", FL_FFlag.ground],
+	["6AD", "Throw (Forward)", "block", FL_FFlag.ground],
+	["AD", "Throw", "block", FL_FFlag.ground],
 	
-	["~2 ~8", "Super Jump", "air-rise", FighterStateMode.ground],
-	["~2 ~456 ~8", "Super Jump (3)", "air-rise", FighterStateMode.ground],
+	["~2 ~8", "Super Jump", "air-rise", FL_FFlag.ground],
+	["~2 ~456 ~8", "Super Jump (3)", "air-rise", FL_FFlag.ground],
 	//["~2 ~456 ~8", "Super Jump (4)", "air-rise"],
 	["~4D", "Backdash", "dash", 0],
 	["~6D", "Dash", "dash", 0],
 	["~6 ~6", "Dash (Input)", "dash", 0],
 	["~4 ~4", "Backdash (Input)", "dash", 0],
 	
-	["~123C", "Crouch Heavy", "crouch-attack0c", FighterStateMode.crouching],
-	["~123B", "Crouch Medium", "crouch-attack0b", FighterStateMode.crouching],
-	["~123A", "Crouch Light", "crouch-attack0a", FighterStateMode.crouching],
+	["~123C", "Crouch Heavy", "crouch-attack0c", FL_FFlag.crouching],
+	["~123B", "Crouch Medium", "crouch-attack0b", FL_FFlag.crouching],
+	["~123A", "Crouch Light", "crouch-attack0a", FL_FFlag.crouching],
 	
-	["C", "Heavy", "attack0b", FighterStateMode.standing],
-	["B", "Medium", "attack0b", FighterStateMode.standing],
-	["A", "Light", "attack0a", FighterStateMode.standing],
-	["D", "Parry", "block", FighterStateMode.standing],
+	["C", "Heavy", "attack0b", FL_FFlag.standing],
+	["B", "Medium", "attack0b", FL_FFlag.standing],
+	["A", "Light", "attack0a", FL_FFlag.standing],
+	["D", "Parry", "block", FL_FFlag.standing],
 ];
 
 var n = array_length(sequencedefs);

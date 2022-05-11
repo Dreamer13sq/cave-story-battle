@@ -22,7 +22,7 @@ function ShaderData(shd) constructor
 			{
 				uniformhandles[? handlekey] = shader_get_sampler_index(shaderhandle, handlekey);		
 			}
-			printf("%s[%s]: %s", name, handlekey, uniformhandles[? handlekey]);
+			//printf("%s[%s]: %s", name, handlekey, uniformhandles[? handlekey]);
 		}
 		return uniformhandles[? handlekey];
 	}

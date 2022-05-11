@@ -1,7 +1,8 @@
-/// @desc Methods
+/// @desc Common
 
 function Update(ts)
 {
+	// Update speeds
 	location[0] += speedvec[0];
 	location[1] += speedvec[1];
 	location[2] += speedvec[2];
@@ -10,105 +11,88 @@ function Update(ts)
 	location[1] += postspeedvec[1];
 	location[2] += postspeedvec[2];
 	
-	UpdateFighterState(ts);
-	
-	// Movement
-	location[0] += LevKeyHeld(KeyCode.D, KeyCode.A);
-	location[2] += LevKeyHeld(KeyCode.W, KeyCode.S);
-	zrot += LevKeyHeld(KeyCode.Q, KeyCode.E);
-	
-	var lev;
-	
-	lev = LevKeyPressed(KeyCode.greaterThan, KeyCode.lessThan);
-	if (lev != 0)
+	// Newframe
+	if (lastframe == floor(frame))
 	{
-		palindex = Modulo(palindex+lev, palcount);
+		frame += 1;
 	}
+	
+	if (lastframe != floor(frame))
+	{
+		FighterRunner();
+		
+		// Progress playback
+		if (frame-1 < trkactive.framecount-1)
+		{
+			ApplyFrameMatrices(trkactive, frame-1, vbm.bonenames, matpose);
+		}
+		// 
+		else
+		{
+			OnAnimationEnd();
+		}
+		
+		lastframe = floor(frame);
+	}
+	
+	UpdateFighterState(ts);
 	
 	mattran = Mat4Transform(
 		location[0], location[2], location[1],
 		0, 0, zrot,
 		1, 1, 1
 		);
-	
-	if (trkactive)
-	{
-		lev = LevKeyPressed(KeyCode.bracketRight, KeyCode.bracketLeft);
-		if (lev != 0)
-		{
-			trkindex = Modulo(trkindex+lev, trkcount);
-			trkactive = trkarray[trkindex];	
-		}
-	}
-	
-	// Progress playback
-	if (playbackframe < trkactive.framecount-1)
-	{
-		playbackframe += 1;
-		ApplyFrameMatrices(trkactive, playbackframe, vbm.bonenames, matpose);
-	}
-	// 
-	else
-	{
-		OnAnimationEnd();	
-	}
-	
-	allowinterrupt = (
-		!GetStateFlag(FighterStateMode.inmotion) ||
-		allowinterrupt || 
-		playbackframe > trkactive.framecount/2
-		);
 }
 
 function UpdateFighterState(ts)
 {
-	if (location[1] <= 0 && speedvec[1] < 0)
+	if (location[1] <= 0 && speedvec[1] <= 0)
 	{
 		location[1] = 0;
 		speedvec[1] = 0;
 		
-		SetStateFlag(FighterStateMode.ground);
-		SetStateFlag(FighterStateMode.standing);
-		ClearStateFlag(FighterStateMode.air);
+		SetStateFlag(FL_FFlag.ground);
+		SetStateFlag(FL_FFlag.standing);
+		ClearStateFlag(FL_FFlag.air);
 	}
 	
 	if (location[1] > 0)
 	{
 		speedvec[1] += grav;
 		
-		SetStateFlag(FighterStateMode.air);
-		ClearStateFlag(FighterStateMode.crouching);
-		ClearStateFlag(FighterStateMode.standing);
-		ClearStateFlag(FighterStateMode.ground);
+		SetStateFlag(FL_FFlag.air);
+		ClearStateFlag(FL_FFlag.crouching);
+		ClearStateFlag(FL_FFlag.standing);
+		ClearStateFlag(FL_FFlag.ground);
 		
 		if (speedvec[1] >= 1) 
 		{
-			SetStateFlag(FighterStateMode.air_rise);
-			ClearStateFlag(FighterStateMode.air_fall);
+			SetStateFlag(FL_FFlag.air_rise);
+			ClearStateFlag(FL_FFlag.air_fall);
 		}
 		else if (speedvec[1] <= 1)
 		{
-			SetStateFlag(FighterStateMode.air_fall);
-			ClearStateFlag(FighterStateMode.air_rise);
+			SetStateFlag(FL_FFlag.air_fall);
+			ClearStateFlag(FL_FFlag.air_rise);
 		}
 	}
 	
-	if ( !GetStateFlag(FighterStateMode.inmotion) )
+	if ( !GetStateFlag(FL_FFlag.inmotion) )
 	{
-		if ( GetStateFlag(FighterStateMode.air) )
+		if ( GetStateFlag(FL_FFlag.air) )
 		{
-			if ( GetStateFlag(FighterStateMode.air_rise) ) {SetAnimation("air-rise");}
-			if ( GetStateFlag(FighterStateMode.air_fall) ) {SetAnimation("air");}
+			if ( GetStateFlag(FL_FFlag.air_rise) ) {SetAction("air-rise", false);}
+			if ( GetStateFlag(FL_FFlag.air_fall) ) {SetAction("air", false);}
 		}
 		else
 		{
-			if ( GetStateFlag(FighterStateMode.crouching) )
+			if ( GetStateFlag(FL_FFlag.crouching) )
 			{
-				SetAnimation("crouch");	
+				SetAction("crouch", false);	
 			}
 			else
 			{
-				SetAnimation("battle")	
+				SetAction("neutral", false);
 			}
 		}
 	}

@@ -2,7 +2,7 @@
 
 event_user(0);
 
-fighter = instance_create_depth(x, y, 0, obj_fighter);
+fighter = instance_create_depth(x, y, 0, obj_fighter_curly);
 controller = instance_create_depth(x, y, 0, obj_charactercontroller);
 world = instance_create_depth(x, y, 0, obj_world_vb);
 

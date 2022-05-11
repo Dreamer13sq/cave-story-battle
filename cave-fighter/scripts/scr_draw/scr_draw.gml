@@ -98,12 +98,12 @@ function Mat4GetPerspectiveCorrection(cameraposition, gameplayposition, characte
 	matshear[6] = yamt * yshear * sign(characterposition[2]-gz);
 	
 	var ztheta = -0.1;
-	matshear = matrix_multiply([
+	matshear = matrix_multiply(matshear,
+		[
 		1.0, 0.0, 0.0, 0.0,
 		0.0, cos(ztheta), -sin(ztheta), 0.0,
 		0.0, sin(ztheta), cos(ztheta), 0.0,
-		0.0, 0.0, 0.0, 1.0],
-		matshear
+		0.0, 0.0, 0.0, 1.0]
 		);
 	
 	// Fix y-flip

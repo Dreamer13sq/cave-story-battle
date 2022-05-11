@@ -147,11 +147,11 @@ function Update()
 
 function FighterController()
 {
-	var _inmotion = fighter.GetStateFlag(FighterStateMode.inmotion);
-	var _allowinterrupt = fighter.allowinterrupt;
+	var _inmotion = fighter.GetStateFlag(FL_FFlag.inmotion);
+	var _allowinterrupt = fighter.GetStateFlag(FL_FFlag.allowinterrupt);
 	
 	// On Ground
-	if ( !fighter.GetStateFlag(FighterStateMode.air) )
+	if ( !fighter.GetStateFlag(FL_FFlag.air) )
 	{
 		fighter.speedvec[0] = 0;
 		
@@ -160,17 +160,17 @@ function FighterController()
 			// Crouching
 			if (IHeld(InputIndex.down))
 			{
-				fighter.SetStateFlag(FighterStateMode.crouching);	
-				fighter.ClearStateFlag(FighterStateMode.standing);	
+				fighter.SetStateFlag(FL_FFlag.crouching);	
+				fighter.ClearStateFlag(FL_FFlag.standing);	
 			}
 			else
 			{
-				fighter.ClearStateFlag(FighterStateMode.crouching);
-				fighter.SetStateFlag(FighterStateMode.standing);	
+				fighter.ClearStateFlag(FL_FFlag.crouching);
+				fighter.SetStateFlag(FL_FFlag.standing);	
 			}
 			
 			// Not Crouching
-			if ( !fighter.GetStateFlag(FighterStateMode.crouching) )
+			if ( !fighter.GetStateFlag(FL_FFlag.crouching) )
 			{
 				// Walk
 				fighter.speedvec[0] += IHeld(InputIndex.right)? fighter.walkforwardspeed: 0;
@@ -305,10 +305,9 @@ function CheckCommands()
 					printf(commandexecuted);
 					icommandframes[icommandsindex] = buffertimechain;
 					
-					if (fighter.allowinterrupt)
+					if ( fighter.GetStateFlag(FL_FFlag.allowinterrupt) )
 					{
-						fighter.SetStateFlag(FighterStateMode.inmotion);
-						fighter.SetAnimation(sequencedefs[s][2], true);
+						fighter.SetAction(sequencedefs[s][2]);
 					}
 					
 					return;
