@@ -6,10 +6,9 @@ fighter = instance_create_depth(x, y, 0, obj_fighter);
 controller = instance_create_depth(x, y, 0, obj_charactercontroller);
 world = instance_create_depth(x, y, 0, obj_world_vb);
 
-viewlocation = [0,0,80];
+viewlocation = [0,0,100];
 viewforward = Vec3Normalized([0,-1,-0]);
-viewdistance = 400;
-viewdistance = 300;
+viewdistance = 500;
 viewxrot = 0;
 viewzrot = 0;
 cameraeyeposition = [0,0,80];

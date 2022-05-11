@@ -91,9 +91,7 @@ void Palette()
 		pow(2.0-length(outcolor.rgb), 2.0)
 	);
 	
-	outcolor.rgb = mix(outcolor.rgb*ambient, outcolor.rgb, 
-		clamp(pow(length(outcolor.rgb), 1.0), 0.0, 1.0)
-		);
+	//outcolor.rgb = mix(outcolor.rgb*ambient, outcolor.rgb, clamp(pow(length(outcolor.rgb), 1.0), 0.0, 1.0) );
 	
     gl_FragColor = outcolor;
 }

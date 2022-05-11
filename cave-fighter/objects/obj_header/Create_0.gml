@@ -11,6 +11,7 @@
 
 randomize();
 printf("Randomseed: %s", random_get_seed());
+math_set_epsilon(0.00001);
 
 CURRENT_FRAME = 0;
 CAMERA3D = new Camera3D();

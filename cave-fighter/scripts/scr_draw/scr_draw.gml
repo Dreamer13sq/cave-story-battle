@@ -80,7 +80,7 @@ function U_Fighter_SetShear(camposvec, gameposvec, characterposvec, xshearstreng
 
 function Mat4GetPerspectiveCorrection(cameraposition, gameplayposition, characterposition, xamt=1.0, yamt=1.0)
 {
-	return Mat4();
+	//return Mat4();
 	
 	var gx = gameplayposition[0], gy = characterposition[1], gz = gameplayposition[2];
 	

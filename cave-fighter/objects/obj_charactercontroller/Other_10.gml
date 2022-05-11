@@ -134,6 +134,7 @@ function Update()
 	}
 	
 	// Check Commands
+	FighterController();
 	CheckCommands();
 	
 	if (icommandframes[icommandsindex] == buffertimetrigger)
@@ -144,68 +145,45 @@ function Update()
 	
 }
 
-function ParseSequence(seqstring)
+function FighterController()
 {
-	/*
-		==KEY==
-		A, B, C, D : Buttons
-		1, 2, 3, 4, 5, 6, 7, 8, 9 : Directions (Numpad notation)
-		
-		~ : Direction-Lenient (Valid as long as any of the given directions are inputted)
-		
-	*/
-	var c;
-	var outseq = [0];
-	var index = 0;
-	var _newbundle = false;
-	var n = string_length(seqstring);
+	var _inmotion = fighter.GetStateFlag(FighterStateMode.inmotion);
+	var _allowinterrupt = fighter.allowinterrupt;
 	
-	seqstring = string_upper(seqstring);
-	
-	// Check chars
-	for (var i = 0; i < n; i++)
+	// On Ground
+	if ( !fighter.GetStateFlag(FighterStateMode.air) )
 	{
-		c = string_char_at(seqstring, i+1);
-		switch(c)
-		{
-			// Directions
-			case("1"): outseq[@ index] |= 1 << InputCmd.downback; break;
-			case("2"): outseq[@ index] |= 1 << InputCmd.down; break;
-			case("3"): outseq[@ index] |= 1 << InputCmd.downforward; break;
-			case("4"): outseq[@ index] |= 1 << InputCmd.back; break;
-			case("5"): outseq[@ index] |= 1 << InputCmd.neutral; break;
-			case("6"): outseq[@ index] |= 1 << InputCmd.forward; break;
-			case("7"): outseq[@ index] |= 1 << InputCmd.upback; break;
-			case("8"): outseq[@ index] |= 1 << InputCmd.up; break;
-			case("9"): outseq[@ index] |= 1 << InputCmd.upforward; break;
-			
-			// Buttons
-			case("A"): outseq[@ index] |= 1 << InputCmd.a; break;
-			case("B"): outseq[@ index] |= 1 << InputCmd.b; break;
-			case("C"): outseq[@ index] |= 1 << InputCmd.c; break;
-			case("D"): outseq[@ index] |= 1 << InputCmd.dash; break;
-			
-			// Logics -----------------------------------------------
-			
-			// New Bundle
-			case(" "): _newbundle = true; break;
-			// Direction Input Leniency
-			case("~"): outseq[@ index] |= InputCmd.FL_AnyDirection; break;
-			// Direction Input Leniency
-			case("*"): outseq[@ index] |= InputCmd.FL_ButtonLenient; break;
-		}
+		fighter.speedvec[0] = 0;
 		
-		// Make new bundle
-		if (_newbundle && outseq[@ index] != 0)
+		if (_allowinterrupt)
 		{
-			index++;
-			array_push(outseq, 0);
+			// Crouching
+			if (IHeld(InputIndex.down))
+			{
+				fighter.SetStateFlag(FighterStateMode.crouching);	
+				fighter.ClearStateFlag(FighterStateMode.standing);	
+			}
+			else
+			{
+				fighter.ClearStateFlag(FighterStateMode.crouching);
+				fighter.SetStateFlag(FighterStateMode.standing);	
+			}
+			
+			// Not Crouching
+			if ( !fighter.GetStateFlag(FighterStateMode.crouching) )
+			{
+				// Walk
+				fighter.speedvec[0] += IHeld(InputIndex.right)? fighter.walkforwardspeed: 0;
+				fighter.speedvec[0] -= IHeld(InputIndex.left)? fighter.walkbackspeed: 0;
+				
+				// Jump
+				if (IPressed(InputIndex.up))
+				{
+					fighter.speedvec[1] = fighter.jumpheight;
+				}
+			}
 		}
-		
-		_newbundle = false;
 	}
-	
-	return outseq;
 }
 
 function CheckCommands()
@@ -223,9 +201,17 @@ function CheckCommands()
 	var lastcommandframe = 0;
 	var parse;
 	
+	var _fighterstate = fighter.fighterstate;
+	
 	for (var s = 0; s < _count; s++)
 	{
-		seq = sequences[s];
+		// Compare state
+		if ( (sequences[s][1] & _fighterstate) != sequences[s][1] )
+		{
+			continue;
+		}
+		
+		seq = sequences[s][0];
 		seqlength = array_length(seq);
 		commandoffset = icommandsindex;
 		lastcommandframe = 0;
@@ -321,7 +307,8 @@ function CheckCommands()
 					
 					if (fighter.allowinterrupt)
 					{
-						fighter.SetAnimation(sequencedefs[s][2]);
+						fighter.SetStateFlag(FighterStateMode.inmotion);
+						fighter.SetAnimation(sequencedefs[s][2], true);
 					}
 					
 					return;

@@ -321,3 +321,15 @@ function HexToReal(hex_string)
 		
 	return _value;
 }
+
+function StringBinary(value, num_digits=8)
+{
+	var s = "";
+	for (var i = 0; i < num_digits; i++)
+	{
+		s += (value & (1<<i))? "1": "0";
+	}
+	
+	return s;
+}
+

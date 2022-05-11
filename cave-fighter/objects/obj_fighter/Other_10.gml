@@ -2,6 +2,17 @@
 
 function Update(ts)
 {
+	location[0] += speedvec[0];
+	location[1] += speedvec[1];
+	location[2] += speedvec[2];
+	
+	location[0] += postspeedvec[0];
+	location[1] += postspeedvec[1];
+	location[2] += postspeedvec[2];
+	
+	UpdateFighterState(ts);
+	
+	// Movement
 	location[0] += LevKeyHeld(KeyCode.D, KeyCode.A);
 	location[2] += LevKeyHeld(KeyCode.W, KeyCode.S);
 	zrot += LevKeyHeld(KeyCode.Q, KeyCode.E);
@@ -15,7 +26,7 @@ function Update(ts)
 	}
 	
 	mattran = Mat4Transform(
-		location[0], location[1], location[2],
+		location[0], location[2], location[1],
 		0, 0, zrot,
 		1, 1, 1
 		);
@@ -42,7 +53,65 @@ function Update(ts)
 		OnAnimationEnd();	
 	}
 	
-	allowinterrupt = allowinterrupt || playbackframe > trkactive.framecount/2;
+	allowinterrupt = (
+		!GetStateFlag(FighterStateMode.inmotion) ||
+		allowinterrupt || 
+		playbackframe > trkactive.framecount/2
+		);
+}
+
+function UpdateFighterState(ts)
+{
+	if (location[1] <= 0 && speedvec[1] < 0)
+	{
+		location[1] = 0;
+		speedvec[1] = 0;
+		
+		SetStateFlag(FighterStateMode.ground);
+		SetStateFlag(FighterStateMode.standing);
+		ClearStateFlag(FighterStateMode.air);
+	}
+	
+	if (location[1] > 0)
+	{
+		speedvec[1] += grav;
+		
+		SetStateFlag(FighterStateMode.air);
+		ClearStateFlag(FighterStateMode.crouching);
+		ClearStateFlag(FighterStateMode.standing);
+		ClearStateFlag(FighterStateMode.ground);
+		
+		if (speedvec[1] >= 1) 
+		{
+			SetStateFlag(FighterStateMode.air_rise);
+			ClearStateFlag(FighterStateMode.air_fall);
+		}
+		else if (speedvec[1] <= 1)
+		{
+			SetStateFlag(FighterStateMode.air_fall);
+			ClearStateFlag(FighterStateMode.air_rise);
+		}
+	}
+	
+	if ( !GetStateFlag(FighterStateMode.inmotion) )
+	{
+		if ( GetStateFlag(FighterStateMode.air) )
+		{
+			if ( GetStateFlag(FighterStateMode.air_rise) ) {SetAnimation("air-rise");}
+			if ( GetStateFlag(FighterStateMode.air_fall) ) {SetAnimation("air");}
+		}
+		else
+		{
+			if ( GetStateFlag(FighterStateMode.crouching) )
+			{
+				SetAnimation("crouch");	
+			}
+			else
+			{
+				SetAnimation("battle")	
+			}
+		}
+	}
 }
 
 function Render()

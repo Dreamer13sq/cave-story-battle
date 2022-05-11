@@ -163,6 +163,7 @@
     {"CopyToMask":-1,"filePath":"datafiles/curly/events","resourceVersion":"1.0","name":"idle.trk","resourceType":"GMIncludedFile",},
     {"CopyToMask":-1,"filePath":"datafiles/curly","resourceVersion":"1.0","name":"model.vbm","resourceType":"GMIncludedFile",},
     {"CopyToMask":-1,"filePath":"datafiles/curly/events","resourceVersion":"1.0","name":"air-rise.trk","resourceType":"GMIncludedFile",},
+    {"CopyToMask":-1,"filePath":"datafiles/curly/events","resourceVersion":"1.0","name":"crouch-attack0b.trk","resourceType":"GMIncludedFile",},
   ],
   "MetaData": {
     "IDEVersion": "2022.3.0.625",
