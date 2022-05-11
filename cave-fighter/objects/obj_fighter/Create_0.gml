@@ -32,14 +32,12 @@ walkforwardspeed = 3;
 walkbackspeed = 2.7;
 jumpheight = 10;
 grav = -0.4;
+shearbool = false;
 
 // ===========================================================================
 
 characterfolder = new CharFolder();
-if (characterfolder.SearchFolder("D:/GitHub/Cave-Story-Fighter/cave-fighter/datafiles/curly/", 3) == -1)
-{
-	characterfolder.SearchFolder("C:/Users/Dreamer/Documents/GitHub/Cave-Story-Fighter/cave-fighter/datafiles/curly/", 3)
-}
+ReloadFiles();
 
 
 trkarray = [];

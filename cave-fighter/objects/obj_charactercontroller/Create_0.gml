@@ -75,8 +75,8 @@ sequencedefs = [
 	["~6 ~6", "Dash (Input)", "dash", 0],
 	["~4 ~4", "Backdash (Input)", "dash", 0],
 	
-	["~123C", "Crouch Heavy", "crouch-attack0a", FighterStateMode.crouching],
-	["~123B", "Crouch Medium", "crouch-attack0a", FighterStateMode.crouching],
+	["~123C", "Crouch Heavy", "crouch-attack0c", FighterStateMode.crouching],
+	["~123B", "Crouch Medium", "crouch-attack0b", FighterStateMode.crouching],
 	["~123A", "Crouch Light", "crouch-attack0a", FighterStateMode.crouching],
 	
 	["C", "Heavy", "attack0b", FighterStateMode.standing],

@@ -57,4 +57,10 @@ function ToggleStateFlag(flags) {fighterstate ^= flags;}
 
 #endregion =============================================
 
-
+function ReloadFiles()
+{
+	if (characterfolder.SearchFolder("D:/GitHub/Cave-Story-Fighter/cave-fighter/datafiles/curly/", 3) == -1)
+	{
+		characterfolder.SearchFolder("C:/Users/Dreamer/Documents/GitHub/Cave-Story-Fighter/cave-fighter/datafiles/curly/", 3)
+	}	
+}

@@ -1164,6 +1164,9 @@ class DMR_PT_CSFighterPalette(bpy.types.Panel):
             # Draw color ramps
             for i, cr_node in enumerate(colorramps):
                 b = c.box().row(align=1)
+                cc = b.row(align=1)
+                cc.scale_x = 0.3
+                cc.label(text='%02d' % i)
                 cc = b.column(align=1)
                 cc.scale_y = 0.7
                 cc.template_color_ramp(cr_node, "color_ramp", expand=True)

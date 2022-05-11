@@ -122,6 +122,8 @@ function Render()
 		Position()
 	);
 	
+	if (!shearbool) {matshear = Mat4();}
+	
 	GRAPHICS.activeshader.UniformMatrix4("u_mattran", mattran);
 	GRAPHICS.activeshader.UniformMatrix4("u_matpose", matpose);
 	GRAPHICS.activeshader.UniformMatrix4("u_matshear", matshear);
