@@ -47,9 +47,13 @@ function ToggleStateFlag(flags) {fighterstate ^= flags;}
 
 function ReloadFiles()
 {
-	if (characterfolder.SearchFolder("D:/GitHub/Cave-Story-Fighter/cave-fighter/datafiles/curly/", 3) == -1)
+	var _path = "fighter/curly/";
+	if (characterfolder.SearchFolder("D:/GitHub/Cave-Story-Fighter/cave-fighter/datafiles/"+_path, 3) == -1)
 	{
-		characterfolder.SearchFolder("C:/Users/Dreamer/Documents/GitHub/Cave-Story-Fighter/cave-fighter/datafiles/curly/", 3)
+		if (characterfolder.SearchFolder("C:/Users/Dreamer/Documents/GitHub/Cave-Story-Fighter/cave-fighter/datafiles/"+_path, 3) == -1)
+		{
+			characterfolder.SearchFolder(_path, 3);
+		}
 	}
 	
 	trkarray = [];
