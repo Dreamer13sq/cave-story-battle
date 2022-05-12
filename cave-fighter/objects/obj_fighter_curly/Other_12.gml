@@ -34,6 +34,15 @@ function FighterRunner()
 			}
 			break;
 		
+		case("jumpland"): // -------------------------------------------------
+			if ( FrameIsStart() )
+			{
+				SetStateFlag(FL_FFlag.standing | FL_FFlag.allowinterrupt);
+				ClearStateFlag(FL_FFlag.air);
+			}
+			if ( FrameIsEnd() ) {SetAction("neutral");}
+			break;
+		
 		case("crouching"): // -------------------------------------------------
 			if ( FrameIsStart() )
 			{

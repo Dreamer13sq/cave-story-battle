@@ -52,7 +52,7 @@ function UpdateFighterState(ts)
 		location[1] = 0;
 		speedvec[1] = 0;
 		
-		SetAction("standing");
+		SetAction("jumpland");
 	}
 	
 	if (location[1] > 0)
