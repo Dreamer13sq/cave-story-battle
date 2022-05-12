@@ -46,14 +46,13 @@ function Update(ts)
 
 function UpdateFighterState(ts)
 {
-	if (location[1] <= 0 && speedvec[1] <= 0)
+	// Just Landing
+	if (location[1] <= 0 && speedvec[1] < 0)
 	{
 		location[1] = 0;
 		speedvec[1] = 0;
 		
-		SetStateFlag(FL_FFlag.ground);
-		SetStateFlag(FL_FFlag.standing);
-		ClearStateFlag(FL_FFlag.air);
+		SetAction("standing");
 	}
 	
 	if (location[1] > 0)
@@ -86,14 +85,7 @@ function UpdateFighterState(ts)
 		}
 		else
 		{
-			if ( GetStateFlag(FL_FFlag.crouching) )
-			{
-				SetAction("crouch", false);	
-			}
-			else
-			{
-				SetAction("neutral", false);
-			}
+			
 		}
 	}
 }

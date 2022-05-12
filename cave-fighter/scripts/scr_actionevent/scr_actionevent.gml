@@ -43,3 +43,8 @@ enum ActionEventCommand
 	}
 */
 
+function ParseActionEventText(s)
+{
+	
+}
+

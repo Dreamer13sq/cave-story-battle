@@ -168,6 +168,8 @@
     {"CopyToMask":-1,"filePath":"datafiles/curly/events","resourceVersion":"1.0","name":"idle.trk","resourceType":"GMIncludedFile",},
     {"CopyToMask":-1,"filePath":"datafiles/curly/events","resourceVersion":"1.0","name":"jumpsquat.trk","resourceType":"GMIncludedFile",},
     {"CopyToMask":-1,"filePath":"datafiles/curly/events","resourceVersion":"1.0","name":"neutral.trk","resourceType":"GMIncludedFile",},
+    {"CopyToMask":-1,"filePath":"datafiles/curly/events","resourceVersion":"1.0","name":"crouching.trk","resourceType":"GMIncludedFile",},
+    {"CopyToMask":-1,"filePath":"datafiles/curly/events","resourceVersion":"1.0","name":"standing.trk","resourceType":"GMIncludedFile",},
   ],
   "MetaData": {
     "IDEVersion": "2022.3.0.625",

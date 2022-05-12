@@ -4,6 +4,7 @@ event_user(0);
 event_user(1);
 
 fighter = obj_fighter;
+fighter.controller = self;
 
 device = -1;
 

@@ -12,7 +12,6 @@ function FighterRunner()
 		case("neutral"): // -------------------------------------------------
 			if ( FrameIsStart() )
 			{
-				printf("neutral start");
 				SetStateFlag(FL_FFlag.standing | FL_FFlag.allowinterrupt);
 				ClearStateFlag(FL_FFlag.inmotion | FL_FFlag.crouching | FL_FFlag.air);
 			}
@@ -31,8 +30,26 @@ function FighterRunner()
 			if ( FrameIsEnd() ) 
 			{
 				SetAction("air-rise");
-				speedvec[1] = jumpheight;
+				SetSpeedY( FighterVar("jumpheight") );
 			}
+			break;
+		
+		case("crouching"): // -------------------------------------------------
+			if ( FrameIsStart() )
+			{
+				SetStateFlag(FL_FFlag.crouching | FL_FFlag.allowinterrupt);
+				ClearStateFlag(FL_FFlag.inmotion | FL_FFlag.standing | FL_FFlag.air);
+			}
+			if ( FrameIsEnd() ) {SetAction("crouch");}
+			break;
+		
+		case("standing"): // -------------------------------------------------
+			if ( FrameIsStart() )
+			{
+				SetStateFlag(FL_FFlag.standing | FL_FFlag.allowinterrupt);
+				ClearStateFlag(FL_FFlag.inmotion | FL_FFlag.crouching | FL_FFlag.air);
+			}
+			if ( FrameIsEnd() ) {SetAction("neutral");}
 			break;
 		
 		case("air-rise"):

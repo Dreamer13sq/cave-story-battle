@@ -35,8 +35,9 @@ lastframe = 0;
 walkforwardspeed = 3;
 walkbackspeed = 2.7;
 jumpheight = 10;
+jumpspeedforward = 3;
+jumpspeedback = 3;
 grav = -0.4;
-shearbool = false;
 
 // ===========================================================================
 
@@ -61,7 +62,11 @@ matpose = Mat4ArrayFlat(200);
 mattran = Mat4();
 matshear = Mat4();
 
+shearbool = false;
+
 image_speed = 0;
+
+controller = -1;
 
 // Action ===========================================================================
 

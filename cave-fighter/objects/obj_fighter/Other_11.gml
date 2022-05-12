@@ -20,15 +20,6 @@ function SetAnimation(key, force_reset=false)
 function OnAnimationEnd()
 {
 	frame = 1;
-	return;
-	
-	
-	if (animkey != "neutral" && animkey != "crouch" && animkey != "air" && animkey != "assist")
-	{
-		if (string_pos("crouch", animkey)) {SetAction("crouch");}
-		else if (string_pos("air", animkey)) {SetAction("air");}
-		else {SetAction("neutral");}
-	}
 }
 
 #region Utility =============================================
@@ -123,6 +114,20 @@ function ActionEventRunner()
 function FrameIs(_frame) {return floor(frame) == _frame;}
 function FrameIsEnd() {return floor(frame) == trkactive.framecount;}
 function FrameIsStart() {return floor(frame) == 1;}
+
+function SetSpeedX(spd) {speedvec[0] = spd;}
+function SetSpeedY(spd) {speedvec[1] = spd;}
+function AddSpeedX(spd) {speedvec[0] += spd;}
+function AddSpeedY(spd) {speedvec[1] += spd;}
+
+function FighterVar(key)
+{
+	return variable_struct_get(self, string_lower(key));
+}
+
+function InputPressed(input_index) {return controller == -1? false: controller.IPressed(input_index);}
+function InputHeld(input_index) {return controller == -1? false: controller.IHeld(input_index);}
+function InputReleased(input_index) {return controller == -1? false: controller.IReleased(input_index);}
 
 #endregion =======================================================
 

@@ -26,6 +26,7 @@ for (var i = 0; i < icommandcount; i++)
 
 xx = 20;
 yy = 240;
+if 0
 for (var i = 0; i < icommandcount; i++)
 {
 	DrawText(xx, yy, icommandframes[i], (i == icommandsindex)? c_lime: c_white);

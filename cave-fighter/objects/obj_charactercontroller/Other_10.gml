@@ -160,13 +160,17 @@ function FighterController()
 			// Crouching
 			if (IHeld(InputIndex.down))
 			{
-				fighter.SetStateFlag(FL_FFlag.crouching);	
-				fighter.ClearStateFlag(FL_FFlag.standing);	
+				if ( !fighter.GetStateFlag(FL_FFlag.crouching) )
+				{
+					fighter.SetAction("crouching");	
+				}
 			}
 			else
 			{
-				fighter.ClearStateFlag(FL_FFlag.crouching);
-				fighter.SetStateFlag(FL_FFlag.standing);	
+				if ( fighter.GetStateFlag(FL_FFlag.crouching) )
+				{
+					fighter.SetAction("standing");	
+				}
 			}
 			
 			// Not Crouching
