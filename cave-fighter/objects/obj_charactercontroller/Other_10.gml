@@ -137,6 +137,26 @@ function Update()
 	FighterController();
 	CheckCommands();
 	
+	if (bufferedactionstep > 0)
+	{
+		if (fighter.GetStateFlag(FL_FFlag.allowinterrupt))
+		{
+			bufferedactionstep = 0;
+			fighter.SetAction(bufferedaction);
+		}
+		else
+		{
+			bufferedactionstep--;
+		}
+	}
+	
+	if (bufferedactionstep == 0)
+	{
+		bufferedaction = "";
+		bufferedactionindex = 0xFF;
+		bufferedactionstep = 0;	
+	}
+	
 	if (icommandframes[icommandsindex] == buffertimetrigger)
 	{
 		printf("-----");
@@ -206,8 +226,9 @@ function CheckCommands()
 	var parse;
 	
 	var _fighterstate = fighter.fighterstate;
+	var _end = bufferedaction == ""? _count: min(bufferedactionindex, _count);
 	
-	for (var s = 0; s < _count; s++)
+	for (var s = 0; s < _end; s++)
 	{
 		// Compare state
 		if ( (sequences[s][1] & _fighterstate) != sequences[s][1] )
@@ -309,9 +330,11 @@ function CheckCommands()
 					printf(commandexecuted);
 					icommandframes[icommandsindex] = buffertimechain;
 					
-					if ( fighter.GetStateFlag(FL_FFlag.allowinterrupt) )
+					//if ( fighter.GetStateFlag(FL_FFlag.allowinterrupt) )
 					{
-						fighter.SetAction(sequencedefs[s][2]);
+						bufferedaction = sequencedefs[s][2];
+						bufferedactionstep = bufferedactiontime;
+						bufferedactionindex = s;
 					}
 					
 					return;

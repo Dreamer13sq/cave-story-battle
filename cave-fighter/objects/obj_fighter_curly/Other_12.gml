@@ -70,7 +70,7 @@ function FighterRunner()
 			
 			if ( FrameIsEnd() )
 			{
-				ClearStateFlag(FL_FFlag.inmotion);	
+				SetAction("neutral");
 			}
 			
 			break;

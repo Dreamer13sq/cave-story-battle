@@ -33,6 +33,6 @@ for (var i = 0; i < icommandcount; i++)
 	xx += 24;
 }
 
-DrawText(20, 220, commandexecuted);
+DrawText(20, 220, bufferedactionstep);
 
 
