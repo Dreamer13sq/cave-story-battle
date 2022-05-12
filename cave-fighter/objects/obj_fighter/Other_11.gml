@@ -80,6 +80,7 @@ function SetAction(key, force_restart=true)
 		frame = 1;
 		
 		FighterRunner();
+		UpdateFighterState(0);
 	}
 }
 

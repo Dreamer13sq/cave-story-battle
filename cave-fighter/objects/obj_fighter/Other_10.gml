@@ -11,6 +11,11 @@ function Update(ts)
 	location[1] += postspeedvec[1];
 	location[2] += postspeedvec[2];
 	
+	if (location[1] > 0)
+	{
+		speedvec[1] += grav;
+	}
+	
 	// Newframe
 	if (lastframe == floor(frame))
 	{
@@ -57,8 +62,6 @@ function UpdateFighterState(ts)
 	
 	if (location[1] > 0)
 	{
-		speedvec[1] += grav;
-		
 		SetStateFlag(FL_FFlag.air);
 		ClearStateFlag(FL_FFlag.crouching);
 		ClearStateFlag(FL_FFlag.standing);
