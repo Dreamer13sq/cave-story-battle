@@ -26,6 +26,15 @@ function FighterRunner()
 			}
 			break;
 		
+		case("jumpsquat"): // -------------------------------------------------
+			if ( FrameIsStart() ) {SetStateFlag(FL_FFlag.inmotion);}
+			if ( FrameIsEnd() ) 
+			{
+				SetAction("air-rise");
+				speedvec[1] = jumpheight;
+			}
+			break;
+		
 		case("air-rise"):
 		case("air"): // -------------------------------------------------
 			if ( FrameIsStart() )
@@ -53,7 +62,7 @@ function FighterRunner()
 			if ( FrameIsStart() ) {SetStateFlag(FL_FFlag.inmotion);}
 			if ( FrameIsEnd() ) {ClearStateFlag(FL_FFlag.inmotion);}
 			break;
-			
+		
 		// ======================================================================
 		
 		case("dash"): // -------------------------------------------------

@@ -179,7 +179,7 @@ function FighterController()
 				// Jump
 				if (IPressed(InputIndex.up))
 				{
-					fighter.speedvec[1] = fighter.jumpheight;
+					fighter.SetAction("jumpsquat");
 				}
 			}
 		}
