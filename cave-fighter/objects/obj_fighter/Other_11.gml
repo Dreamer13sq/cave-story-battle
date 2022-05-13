@@ -124,6 +124,8 @@ function SetSpeedX(spd) {speedvec[0] = spd;}
 function SetSpeedY(spd) {speedvec[1] = spd;}
 function AddSpeedX(spd) {speedvec[0] += spd;}
 function AddSpeedY(spd) {speedvec[1] += spd;}
+function ApproachSpeedX(spd, step) {speedvec[0] = Approach(speedvec[0], spd, step);}
+function ApproachSpeedY(spd, step) {speedvec[1] = Approach(speedvec[1], spd, step);}
 
 function FighterVar(key)
 {

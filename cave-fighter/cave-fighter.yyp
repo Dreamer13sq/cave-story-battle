@@ -182,6 +182,9 @@
     {"CopyToMask":-1,"filePath":"datafiles/fighter/sue/pose","resourceVersion":"1.0","name":"crouch.trk","resourceType":"GMIncludedFile",},
     {"CopyToMask":-1,"filePath":"datafiles/fighter/sue","resourceVersion":"1.0","name":"model.vbm","resourceType":"GMIncludedFile",},
     {"CopyToMask":-1,"filePath":"datafiles/fighter/curly/events","resourceVersion":"1.0","name":"jumpland.trk","resourceType":"GMIncludedFile",},
+    {"CopyToMask":-1,"filePath":"datafiles/fighter/curly/events","resourceVersion":"1.0","name":"dashback.trk","resourceType":"GMIncludedFile",},
+    {"CopyToMask":-1,"filePath":"datafiles/fighter/curly/events","resourceVersion":"1.0","name":"walk.trk","resourceType":"GMIncludedFile",},
+    {"CopyToMask":-1,"filePath":"datafiles/fighter/curly/events","resourceVersion":"1.0","name":"walkback.trk","resourceType":"GMIncludedFile",},
   ],
   "MetaData": {
     "IDEVersion": "2022.3.0.625",

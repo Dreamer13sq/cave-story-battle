@@ -31,13 +31,17 @@ state = 0;
 fighterstate = 0;
 frame = 1;
 lastframe = 0;
+sidesign = 1;
 
-walkforwardspeed = 3;
+walkforwardspeed = 4;
 walkbackspeed = 2.7;
+dashforwardspeed = 7;
+dashbackspeed = 6;
 jumpheight = 10;
 jumpspeedforward = 3;
 jumpspeedback = 3;
 grav = -0.4;
+deceleration = 0.7;
 
 // ===========================================================================
 

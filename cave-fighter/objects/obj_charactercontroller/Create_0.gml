@@ -77,10 +77,10 @@ sequencedefs = [
 	["~2 ~8", "Super Jump", "air-rise", FL_FFlag.ground],
 	["~2 ~456 ~8", "Super Jump (3)", "air-rise", FL_FFlag.ground],
 	//["~2 ~456 ~8", "Super Jump (4)", "air-rise"],
-	["~4D", "Backdash", "dash", 0],
+	["~4D", "Backdash", "dashback", 0],
 	["~6D", "Dash", "dash", 0],
 	["~6 ~6", "Dash (Input)", "dash", 0],
-	["~4 ~4", "Backdash (Input)", "dash", 0],
+	["~4 ~4", "Backdash (Input)", "dashback", 0],
 	
 	["~123C", "Crouch Heavy", "crouch-attack0c", FL_FFlag.crouching],
 	["~123B", "Crouch Medium", "crouch-attack0b", FL_FFlag.crouching],

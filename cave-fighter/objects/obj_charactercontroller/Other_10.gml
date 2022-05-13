@@ -173,8 +173,6 @@ function FighterController()
 	// On Ground
 	if ( !fighter.GetStateFlag(FL_FFlag.air) )
 	{
-		fighter.speedvec[0] = 0;
-		
 		if (_allowinterrupt)
 		{
 			// Crouching
@@ -197,8 +195,24 @@ function FighterController()
 			if ( !fighter.GetStateFlag(FL_FFlag.crouching) )
 			{
 				// Walk
-				fighter.speedvec[0] += IHeld(InputIndex.right)? fighter.walkforwardspeed: 0;
-				fighter.speedvec[0] -= IHeld(InputIndex.left)? fighter.walkbackspeed: 0;
+				//fighter.speedvec[0] += IHeld(InputIndex.right)? fighter.walkforwardspeed: 0;
+				//fighter.speedvec[0] -= IHeld(InputIndex.left)? fighter.walkbackspeed: 0;
+				
+				if (!_inmotion)
+				{
+					if ( IHeld(InputIndex.right) )
+					{
+						fighter.SetAction("walk", false)	
+					}
+					else if (IHeld(InputIndex.left))
+					{
+						fighter.SetAction("walkback", false)
+					}
+					else
+					{
+						fighter.SetAction("neutral", false);
+					}
+				}
 				
 				// Jump
 				if (IPressed(InputIndex.up))
