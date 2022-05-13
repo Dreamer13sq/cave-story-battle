@@ -11,8 +11,6 @@ if (keyboard_check(KeyCode.R))
 }
 
 // Movement
-location[0] += LevKeyHeld(KeyCode.D, KeyCode.A);
-location[2] += LevKeyHeld(KeyCode.W, KeyCode.S);
 zrot += LevKeyHeld(KeyCode.Q, KeyCode.E);
 	
 var lev;

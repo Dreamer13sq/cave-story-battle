@@ -202,15 +202,18 @@ function FighterController()
 				{
 					if ( IHeld(InputIndex.right) )
 					{
-						fighter.SetAction("walk", false)	
+						//fighter.SetAction("walk", false)	
+						fighter.ApproachSpeedX(fighter.walkforwardspeed, 1);
 					}
 					else if (IHeld(InputIndex.left))
 					{
-						fighter.SetAction("walkback", false)
+						//fighter.SetAction("walkback", false)
+						fighter.ApproachSpeedX(-fighter.walkbackspeed, 1);
 					}
 					else
 					{
-						fighter.SetAction("neutral", false);
+						//fighter.SetAction("neutral", false);
+						fighter.ApproachSpeedX(0, 1);
 					}
 				}
 				
@@ -261,7 +264,7 @@ function CheckCommands()
 		for (var i = seqlength-1; i >= 0; i--)
 		{
 			// Time between buttons
-			if (icommandframes[commandoffset]-lastcommandframe > buffertimechain)
+			if (icommandframes[commandoffset] > buffertimechain)
 			{
 				break;
 			}

@@ -3,6 +3,9 @@
 fighter.Update();
 world.Update();
 
+viewlocation[0] += LevKeyHeld(KeyCode.D, KeyCode.A);
+viewlocation[2] += LevKeyHeld(KeyCode.W, KeyCode.S);
+
 //viewlocation[0] += LevKeyHeld(vk_right, vk_left);
 //viewlocation[2] += LevKeyHeld(vk_up, vk_down);
 viewdistance -= LevMouseWheel() * 10;

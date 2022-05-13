@@ -112,6 +112,7 @@ function FighterRunner()
 			{
 				SetStateFlag(FL_FFlag.inmotion);
 				SetSpeedX(dashforwardspeed);
+				SetSpeedY(0);
 			}
 			
 			ApproachSpeedX(dashforwardspeed, 1);
@@ -127,6 +128,7 @@ function FighterRunner()
 			{
 				SetStateFlag(FL_FFlag.inmotion);
 				SetSpeedX(-dashbackspeed);
+				SetSpeedY(0);
 			}
 			
 			ApproachSpeedX(-dashbackspeed, 1);
