@@ -139,10 +139,10 @@ function Update()
 	
 	if (bufferedactionstep > 0)
 	{
-		if (fighter.GetStateFlag(FL_FFlag.allowinterrupt))
+		if (fighter.FighterFlagGet(FL_FFlag.allowinterrupt))
 		{
 			bufferedactionstep = 0;
-			fighter.SetAction(bufferedaction);
+			fighter.ActionSet(bufferedaction);
 		}
 		else
 		{
@@ -167,32 +167,32 @@ function Update()
 
 function FighterController()
 {
-	var _inmotion = fighter.GetStateFlag(FL_FFlag.inmotion);
-	var _allowinterrupt = fighter.GetStateFlag(FL_FFlag.allowinterrupt);
+	var _inmotion = fighter.FighterFlagGet(FL_FFlag.inmotion);
+	var _allowinterrupt = fighter.FighterFlagGet(FL_FFlag.allowinterrupt);
 	
 	// On Ground
-	if ( !fighter.GetStateFlag(FL_FFlag.air) )
+	if ( !fighter.FighterFlagGet(FL_FFlag.air) )
 	{
 		if (_allowinterrupt)
 		{
 			// Crouching
 			if (IHeld(InputIndex.down))
 			{
-				if ( !fighter.GetStateFlag(FL_FFlag.crouching) )
+				if ( !fighter.FighterFlagGet(FL_FFlag.crouching) )
 				{
-					fighter.SetAction("crouching");	
+					fighter.ActionSet("crouching");	
 				}
 			}
 			else
 			{
-				if ( fighter.GetStateFlag(FL_FFlag.crouching) )
+				if ( fighter.FighterFlagGet(FL_FFlag.crouching) )
 				{
-					fighter.SetAction("standing");	
+					fighter.ActionSet("standing");	
 				}
 			}
 			
 			// Not Crouching
-			if ( !fighter.GetStateFlag(FL_FFlag.crouching) )
+			if ( !fighter.FighterFlagGet(FL_FFlag.crouching) )
 			{
 				// Walk
 				//fighter.speedvec[0] += IHeld(InputIndex.right)? fighter.walkforwardspeed: 0;
@@ -202,17 +202,17 @@ function FighterController()
 				{
 					if ( IHeld(InputIndex.right) )
 					{
-						//fighter.SetAction("walk", false)	
+						//fighter.ActionSet("walk", false)	
 						fighter.ApproachSpeedX(fighter.walkforwardspeed, 1);
 					}
 					else if (IHeld(InputIndex.left))
 					{
-						//fighter.SetAction("walkback", false)
+						//fighter.ActionSet("walkback", false)
 						fighter.ApproachSpeedX(-fighter.walkbackspeed, 1);
 					}
 					else
 					{
-						//fighter.SetAction("neutral", false);
+						//fighter.ActionSet("neutral", false);
 						fighter.ApproachSpeedX(0, 1);
 					}
 				}
@@ -220,7 +220,7 @@ function FighterController()
 				// Jump
 				if (IPressed(InputIndex.up))
 				{
-					fighter.SetAction("jumpsquat");
+					fighter.ActionSet("jumpsquat");
 				}
 			}
 		}
@@ -347,7 +347,7 @@ function CheckCommands()
 					printf(commandexecuted);
 					icommandframes[icommandsindex] = buffertimechain;
 					
-					//if ( fighter.GetStateFlag(FL_FFlag.allowinterrupt) )
+					//if ( fighter.FighterFlagGet(FL_FFlag.allowinterrupt) )
 					{
 						bufferedaction = sequencedefs[s][2];
 						bufferedactionstep = bufferedactiontime;

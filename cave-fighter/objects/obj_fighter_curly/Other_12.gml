@@ -1,100 +1,104 @@
 /// @desc Attack Defs
 
+event_inherited();
+
 function FighterRunner()
 {
 	switch(actionkey)
 	{
 		default:
 			printf("Action \"%s\" not found", actionkey);
-			SetAction("neutral");
+			ActionSet("neutral");
 			break;
 		
 		case("neutral"): // -------------------------------------------------
-			if ( FrameIsStart() )
+			break;
+			
+			if ( FrameIsStartJump() )
 			{
-				SetStateFlag(FL_FFlag.standing | FL_FFlag.allowinterrupt);
-				ClearStateFlag(FL_FFlag.inmotion | FL_FFlag.crouching | FL_FFlag.air);
+				FighterFlagSet(FL_FFlag.standing | FL_FFlag.allowinterrupt);
+				FighterFlagClear(FL_FFlag.inmotion | FL_FFlag.crouching | FL_FFlag.air);
 			}
 			
 			ApproachSpeedX(0, FighterVar("deceleration"));
 			break;
 		
 		case("crouch"): // -------------------------------------------------
-			if ( FrameIsStart() )
+			if ( FrameIsStartJump() )
 			{
-				SetStateFlag(FL_FFlag.crouching | FL_FFlag.allowinterrupt);
-				ClearStateFlag(FL_FFlag.inmotion | FL_FFlag.standing | FL_FFlag.air);
+				FighterFlagSet(FL_FFlag.crouching | FL_FFlag.allowinterrupt);
+				FighterFlagClear(FL_FFlag.inmotion | FL_FFlag.standing | FL_FFlag.air);
 			}
 			
 			ApproachSpeedX(0, FighterVar("deceleration"));
 			break;
 		
 		case("jumpsquat"): // -------------------------------------------------
-			if ( FrameIsStart() ) {SetStateFlag(FL_FFlag.inmotion);}
-			if ( FrameIsEnd() ) 
+			if ( FrameIsStartJump() ) {FighterFlagSet(FL_FFlag.inmotion);}
+			if ( FrameIsEndJump() ) 
 			{
-				SetAction("air-rise");
+				ActionSet("air-rise");
 				SetSpeedY( FighterVar("jumpheight") );
 			}
 			break;
 		
 		case("jumpland"): // -------------------------------------------------
-			if ( FrameIsStart() )
+			if ( FrameIsStartJump() )
 			{
-				SetStateFlag(FL_FFlag.standing | FL_FFlag.allowinterrupt);
-				ClearStateFlag(FL_FFlag.air);
+				FighterFlagSet(FL_FFlag.standing | FL_FFlag.allowinterrupt);
+				FighterFlagClear(FL_FFlag.air);
 			}
 			ApproachSpeedX(0, FighterVar("deceleration"));
-			if ( FrameIsEnd() ) {SetAction("neutral");}
+			if ( FrameIsEndJump() ) {ActionSet("neutral");}
 			break;
 		
 		case("crouching"): // -------------------------------------------------
-			if ( FrameIsStart() )
+			if ( FrameIsStartJump() )
 			{
-				SetStateFlag(FL_FFlag.crouching | FL_FFlag.allowinterrupt | FL_FFlag.inmotion);
-				ClearStateFlag(FL_FFlag.standing | FL_FFlag.air);
+				FighterFlagSet(FL_FFlag.crouching | FL_FFlag.allowinterrupt | FL_FFlag.inmotion);
+				FighterFlagClear(FL_FFlag.standing | FL_FFlag.air);
 			}
 			ApproachSpeedX(0, FighterVar("deceleration"));
-			if ( FrameIsEnd() ) {SetAction("crouch");}
+			if ( FrameIsEndJump() ) {ActionSet("crouch");}
 			break;
 		
 		case("standing"): // -------------------------------------------------
-			if ( FrameIsStart() )
+			if ( FrameIsStartJump() )
 			{
-				SetStateFlag(FL_FFlag.standing | FL_FFlag.allowinterrupt | FL_FFlag.inmotion);
-				ClearStateFlag(FL_FFlag.crouching | FL_FFlag.air);
+				FighterFlagSet(FL_FFlag.standing | FL_FFlag.allowinterrupt | FL_FFlag.inmotion);
+				FighterFlagClear(FL_FFlag.crouching | FL_FFlag.air);
 			}
 			ApproachSpeedX(0, FighterVar("deceleration"));
-			if ( FrameIsEnd() ) {SetAction("neutral");}
+			if ( FrameIsEndJump() ) {ActionSet("neutral");}
 			break;
 		
 		case("air-rise"):
 		case("air"): // -------------------------------------------------
-			if ( FrameIsStart() )
+			if ( FrameIsStartJump() )
 			{
-				SetStateFlag(FL_FFlag.air | FL_FFlag.allowinterrupt);
-				ClearStateFlag(FL_FFlag.inmotion | FL_FFlag.standing | FL_FFlag.crouching);
+				FighterFlagSet(FL_FFlag.air | FL_FFlag.allowinterrupt);
+				FighterFlagClear(FL_FFlag.inmotion | FL_FFlag.standing | FL_FFlag.crouching);
 			}
 			break;
 		
 		case("block"): // -------------------------------------------------
-			if ( FrameIsStart() )
+			if ( FrameIsStartJump() )
 			{
-				SetStateFlag(FL_FFlag.standing | FL_FFlag.inmotion);
-				ClearStateFlag(FL_FFlag.crouching | FL_FFlag.air);
+				FighterFlagSet(FL_FFlag.standing | FL_FFlag.inmotion);
+				FighterFlagClear(FL_FFlag.crouching | FL_FFlag.air);
 			}
 			
-			if ( FrameIsEnd() ) {SetAction("neutral");}
+			if ( FrameIsEndJump() ) {ActionSet("neutral");}
 			
 			break;
 		
 		case("assist"): // -------------------------------------------------
-			if ( FrameIsStart() ) 
+			if ( FrameIsStartJump() ) 
 			{
-				SetStateFlag(FL_FFlag.inmotion);
-				ClearStateFlag(FL_FFlag.allowinterrupt);
+				FighterFlagSet(FL_FFlag.inmotion);
+				FighterFlagClear(FL_FFlag.allowinterrupt);
 			}
-			if ( FrameIsEnd() ) {SetAction("neutral");}
+			if ( FrameIsEndJump() ) {ActionSet("neutral");}
 			break;
 		
 		// ======================================================================
@@ -108,34 +112,34 @@ function FighterRunner()
 			break;
 		
 		case("dash"): // -------------------------------------------------
-			if ( FrameIsStart() ) 
+			if ( FrameIsStartJump() ) 
 			{
-				SetStateFlag(FL_FFlag.inmotion);
+				FighterFlagSet(FL_FFlag.inmotion);
 				SetSpeedX(dashforwardspeed);
 				SetSpeedY(0);
 			}
 			
 			ApproachSpeedX(dashforwardspeed, 1);
 			
-			if ( FrameIs(10) || FrameIsEnd() ) 
+			if ( FrameIsJump(10) || FrameIsEndJump() ) 
 			{
-				SetAction("neutral");
+				ActionSet("neutral");
 			}
 			break;
 		
 		case("dashback"): // -------------------------------------------------
-			if ( FrameIsStart() ) 
+			if ( FrameIsStartJump() ) 
 			{
-				SetStateFlag(FL_FFlag.inmotion);
+				FighterFlagSet(FL_FFlag.inmotion);
 				SetSpeedX(-dashbackspeed);
 				SetSpeedY(0);
 			}
 			
 			ApproachSpeedX(-dashbackspeed, 1);
 			
-			if ( FrameIs(10) || FrameIsEnd() ) 
+			if ( FrameIsJump(10) || FrameIsEndJump() ) 
 			{
-				SetAction("neutral");
+				ActionSet("neutral");
 			}
 			break;
 		
@@ -144,16 +148,16 @@ function FighterRunner()
 		case("attack0a"):
 		case("attack0b"):
 		case("attack0c"): // -------------------------------------------------
-			if ( FrameIsStart() )
+			if ( FrameIsStartJump() )
 			{
-				SetStateFlag(FL_FFlag.standing | FL_FFlag.inmotion);
-				ClearStateFlag(FL_FFlag.crouching | FL_FFlag.air);
+				FighterFlagSet(FL_FFlag.standing | FL_FFlag.inmotion);
+				FighterFlagClear(FL_FFlag.crouching | FL_FFlag.air);
 			}
 			
-			if ( FrameIs(3) ) {ClearStateFlag(FL_FFlag.allowinterrupt);}
+			if ( FrameIsJump(3) ) {FighterFlagClear(FL_FFlag.allowinterrupt);}
 			
-			if ( FrameIs(17) ) {SetStateFlag(FL_FFlag.allowinterrupt);}
-			if ( FrameIsEnd() ) {SetAction("neutral");}
+			if ( FrameIsJump(17) ) {FighterFlagSet(FL_FFlag.allowinterrupt);}
+			if ( FrameIsEndJump() ) {ActionSet("neutral");}
 			
 			ApproachSpeedX(0, FighterVar("deceleration"));
 			break;
@@ -161,16 +165,16 @@ function FighterRunner()
 		case("crouch-attack0a"):
 		case("crouch-attack0b"):
 		case("crouch-attack0c"): // -------------------------------------------------
-			if ( FrameIsStart() )
+			if ( FrameIsStartJump() )
 			{
-				SetStateFlag(FL_FFlag.crouching | FL_FFlag.inmotion);
-				ClearStateFlag(FL_FFlag.standing | FL_FFlag.air);
+				FighterFlagSet(FL_FFlag.crouching | FL_FFlag.inmotion);
+				FighterFlagClear(FL_FFlag.standing | FL_FFlag.air);
 			}
 			
-			if ( FrameIs(3) ) {ClearStateFlag(FL_FFlag.allowinterrupt);}
+			if ( FrameIsJump(3) ) {FighterFlagClear(FL_FFlag.allowinterrupt);}
 			
-			if ( FrameIs(13) ) {SetStateFlag(FL_FFlag.allowinterrupt);}
-			if ( FrameIsEnd() ) {SetAction("crouch");}
+			if ( FrameIsJump(13) ) {FighterFlagSet(FL_FFlag.allowinterrupt);}
+			if ( FrameIsEndJump() ) {ActionSet("crouch");}
 			
 			ApproachSpeedX(0, FighterVar("deceleration"));
 			break;

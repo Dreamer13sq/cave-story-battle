@@ -207,6 +207,7 @@
     {"CopyToMask":-1,"filePath":"datafiles/fighter/curly/bmp","resourceVersion":"1.0","name":"c15.bmp","resourceType":"GMIncludedFile",},
     {"CopyToMask":-1,"filePath":"datafiles/fighter/curly/bmp","resourceVersion":"1.0","name":"c16.bmp","resourceType":"GMIncludedFile",},
     {"CopyToMask":-1,"filePath":"datafiles/fighter/curly/bmp","resourceVersion":"1.0","name":"c17.bmp","resourceType":"GMIncludedFile",},
+    {"CopyToMask":-1,"filePath":"datafiles/fighter/curly","resourceVersion":"1.0","name":"action.txt","resourceType":"GMIncludedFile",},
   ],
   "MetaData": {
     "IDEVersion": "2022.3.0.625",

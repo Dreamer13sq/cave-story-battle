@@ -1,0 +1,200 @@
+#
+ActionSet(#neutral)
+End()
+
+// ===========================================
+#_standmovement
+ApproachSpeedX(0, @deceleration))
+Return()
+
+// ===========================================
+#neutral
+
+Jump(#_standmovement)
+FrameIsStartJump(##start)
+End()
+
+##start
+FighterFlagSet(@FFLAG_STANDING)
+FighterFlagSet(@FFLAG_INTERRUPT)
+FighterFlagClear(@FFLAG_INMOTION)
+FighterFlagClear(@FFLAG_CROUCHING)
+FighterFlagClear(@FFLAG_AIR)
+Return()
+
+// ===========================================
+#crouch
+
+Jump(#_standmovement)
+FrameIsStartJump(##start)
+End()
+
+##start
+FighterFlagSet(@FFLAG_CROUCHING)
+FighterFlagSet(@FFLAG_INTERRUPT)
+FighterFlagClear(@FFLAG_INMOTION)
+FighterFlagClear(@FFLAG_STANDING)
+FighterFlagClear(@FFLAG_AIR)
+Return()
+
+// ===========================================
+#block
+
+Jump(#_standmovement)
+FrameIsStartJump(##start)
+FrameIsEndJump(##end)
+End()
+
+##start
+FighterFlagSet(@FFLAG_STANDING)
+FighterFlagSet(@FFLAG_INMOTION)
+Return()
+
+##end	ActionSet(#neutral)	Return()
+
+// ===========================================
+#crouching
+
+Jump(#_standmovement)
+FrameIsStartJump(##start)
+FrameIsEndJump(##end)
+End()
+
+##start
+FighterFlagSet(@FFLAG_CROUCHING)
+FighterFlagSet(@FFLAG_INTERRUPT)
+FighterFlagSet(@FFLAG_INMOTION)
+FighterFlagClear(@FFLAG_STANDING)
+FighterFlagClear(@FFLAG_AIR)
+Return()
+
+##end	ActionSet(#crouch)	Return()
+
+// ===========================================
+#standing
+
+Jump(#_standmovement)
+FrameIsStartJump(##start)
+FrameIsEndJump(##end)
+End()
+
+##start
+FighterFlagSet(@FFLAG_STANDING)
+FighterFlagSet(@FFLAG_INTERRUPT)
+FighterFlagSet(@FFLAG_INMOTION)
+FighterFlagClear(@FFLAG_CROUCHING)
+FighterFlagClear(@FFLAG_AIR)
+Return()
+
+##end	ActionSet(#neutral)	Return()
+
+// ===========================================
+#jumpsquat
+
+Jump(#_standmovement)
+FrameIsStartJump(##start)
+FrameIsEndJump(##end)
+End()
+
+##start
+FighterFlagSet(@FFLAG_INMOTION)
+Return()
+
+##end
+SetSpeedY(@jumpheight)
+ActionSet(#air-rise)
+Return()
+
+// ===========================================
+#air-rise
+#air
+
+FrameIsStartJump(##start)
+End()
+
+##start
+FighterFlagSet(@FFLAG_AIR)
+FighterFlagSet(@FFLAG_INTERRUPT)
+FighterFlagClear(@FFLAG_INMOTION)
+FighterFlagClear(@FFLAG_STANDING)
+FighterFlagClear(@FFLAG_CROUCHING)
+Return()
+
+// ===========================================
+#jumpland
+
+Jump(#_standmovement)
+FrameIsStartJump(##start)
+FrameIsEndJump(##end)
+End()
+
+##start
+FighterFlagSet(@FFLAG_STANDING)
+FighterFlagSet(@FFLAG_INTERRUPT)
+FighterFlagClear(@FFLAG_AIR)
+Return()
+
+##end	ActionSet(#neutral)	Return()
+
+// ===========================================
+#assist
+
+Jump(#_standmovement)
+FrameIsStartJump(#_assist_start)
+FrameIsEndJump(#_assist_end)
+End()
+
+#_assist_start
+FighterFlagSet(@FFLAG_INMOTION)
+FighterFlagClear(@FFLAG_INTERRUPT)
+Return()
+
+#_assist_end
+ActionSet(#neutral)
+Return()
+
+// ===========================================
+#attack0a
+#attack0b
+#attack0c
+
+Jump(#_standmovement)
+FrameIsStartJump(##start)
+FrameIsJump(3, ##3)
+FrameIsJump(17, ##17)
+FrameIsEndJump(##end)
+End()
+
+##start
+FighterFlagSet(@FFLAG_STANDING)
+FighterFlagSet(@FFLAG_INMOTION)
+FighterFlagClear(@FFLAG_CROUCHING)
+FighterFlagClear(@FFLAG_AIR)
+Return()
+
+##3	FighterFlagClear(@FFLAG_INTERRUPT) Return()
+##17	FighterFlagSet(@FFLAG_INTERRUPT) Return()
+##end	ActionSet(#neutral)	Return()
+
+// ===========================================
+#crouch-attack0a
+#crouch-attack0b
+#crouch-attack0c
+
+Jump(#_standmovement)
+FrameIsStartJump(##start)
+FrameIsJump(3, ##3)
+FrameIsJump(17, ##17)
+FrameIsEndJump(##end)
+End()
+
+##start
+FighterFlagSet(@FFLAG_CROUCHING)
+FighterFlagSet(@FFLAG_INMOTION)
+FighterFlagClear(@FFLAG_STANDING)
+FighterFlagClear(@FFLAG_AIR)
+Return()
+
+##3	FighterFlagClear(@FFLAG_INTERRUPT) Return()
+##17	FighterFlagSet(@FFLAG_INTERRUPT) Return()
+##end	ActionSet(#crouch)	Return()

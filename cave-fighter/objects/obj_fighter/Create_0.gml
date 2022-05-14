@@ -46,20 +46,19 @@ deceleration = 0.7;
 // ===========================================================================
 
 characterfolder = new CharFolder();
-ReloadFiles();
 
 trkarray = [];
-trkcount = characterfolder.GetTRKs(trkarray);
-trkindex = irandom(trkcount-1);
-trkactive = trkarray[trkindex];
+trkcount = 0
+trkindex = 0;
+trkactive = noone;
 animkey = "";
 
 palarray = [];
-palcount = characterfolder.GetPALs(palarray);
-palindex = irandom(palcount-1);
-palactive = palarray[palindex];
+palcount = 0;
+palindex = 0;
+palactive = noone;
 
-vbm = characterfolder.files_vbm[? characterfolder.GetVBMName(0)];
+vbm = -1;
 
 localpose = Mat4Array(200);
 matpose = Mat4ArrayFlat(200);
@@ -78,10 +77,19 @@ actionkey = "";
 actionmap = ds_map_create();
 actionactive = 0;
 
+actiondata = [];
+labelmap = ds_map_create();
+actionrunnerindex = -1;
+actionpositionstack = ds_stack_create();
+
 function FighterModel()
 {
 	
 }
+
+ReloadFiles();
+
+vbm = characterfolder.files_vbm[? characterfolder.GetVBMName(0)];
 
 
 

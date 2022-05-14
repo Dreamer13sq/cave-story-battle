@@ -38,11 +38,6 @@ function AddPosition(xx, yy)
 	y += yy;
 }
 
-function GetStateFlag(flags) {return (fighterstate & flags) == flags;}
-function SetStateFlag(flags) {fighterstate |= flags;}
-function ClearStateFlag(flags) {fighterstate &= ~flags;}
-function ToggleStateFlag(flags) {fighterstate ^= flags;}
-
 #endregion =============================================
 
 function ReloadFiles()
@@ -56,21 +51,29 @@ function ReloadFiles()
 		}
 	}
 	
+	var b = buffer_load(_path+"action.txt");
+	actiondata = [];
+	ds_map_clear(labelmap);
+	ParseActionEventText(actiondata, labelmap, buffer_read(b, buffer_text));
+	buffer_delete(b);
+	
 	trkarray = [];
 	trkcount = characterfolder.GetTRKs(trkarray);
 	trkindex = irandom(trkcount-1);
 	trkactive = trkarray[trkindex];
+	
+	palcount = characterfolder.GetPALs(palarray);
+	palactive = palarray[palindex];
 }
 
 #region Actions ============================================
 
-function SetAction(key, force_restart=true)
+function ActionSet(key, force_restart=true)
 {
-	key = string_lower(key);
+	//key = string_lower(key);
 	
-	//printf("SetAction(%s)", actionkey);
+	//printf("ActionSet(%s)", actionkey);
 	
-	//if (key != actionkey)
 	if (force_restart || key != actionkey)
 	{
 		actionkey = key;
@@ -79,35 +82,57 @@ function SetAction(key, force_restart=true)
 		
 		frame = 1;
 		
-		FighterRunner();
+		//FighterRunner();
+		ActionEventRunner(actionkey);
 		UpdateFighterState(0);
 	}
 }
 
-function ActionEventRunner()
+function ActionEventRunner(label)
 {
-	// [frame, command_index, arg0, arg1, ...]
-	
-	if (!actionactive) {return;}
-	
-	var ev;
-	var n = array_length(actionactive);
-	
-	for (var i = 0; i < n; i++)
+	// Jump to label
+	if (ds_map_exists(labelmap, label))
 	{
-		ev = actionactive[i];
-		if (ev[0] != frame) {continue;}
+		actionrunnerindex = labelmap[? label];
+	}
+	else
+	{
+		actionrunnerindex = 0;
+		printf("label \"%s\" invalid", label)
+	}
+	
+	ds_stack_clear(actionpositionstack);
+	
+	var args;
+	
+	actiondatasize = array_length(actiondata);
+	
+	while (actionrunnerindex != -1 && actionrunnerindex < actiondatasize)
+	{
+		args = actiondata[actionrunnerindex];
+		actionrunnerindex++;
 		
-		switch(ev[1])
+		switch(string_lower(args[0]))
 		{
-			// Jump to action
-			case(ActionEventCommand.action):
-				SetAction(ev[2]);
-				break;
+			case("goto"): Goto(AEL(args[1])); break;
+			case("jump"): Jump(AEL(args[1])); break;
+			case("return"): Return(); break;
+			case("end"): End(); break;
 			
-			// Set Flag
-			case(ActionEventCommand.fighterflag_enable): SetStateFlag(ev[2]); break;
-			case(ActionEventCommand.fighterflag_disable): ClearStateFlag(ev[2]); break;
+			case("actionset"): ActionSet(AEL(args[1])); break;
+			
+			case("frameisjump"): FrameIsJump(AEL(args[1]), AEL(args[2])); break;
+			case("frameisstartjump"): FrameIsStartJump(AEL(args[1])); break;
+			case("frameisendjump"): FrameIsEndJump(AEL(args[1])); break;
+			
+			case("fighterflagset"): FighterFlagSet(AEL(args[1])); break;
+			case("fighterflagclear"): FighterFlagClear(AEL(args[1])); break;
+			
+			case("setspeedx"): SetSpeedX(AEL(args[1])); break;
+			case("setspeedy"): SetSpeedY(AEL(args[1])); break;
+			case("approachspeedx"): ApproachSpeedY(AEL(args[1])); break;
+			case("approachspeedy"): ApproachSpeedY(AEL(args[1])); break;
+			
 		}
 	}
 }
@@ -115,17 +140,6 @@ function ActionEventRunner()
 #endregion =================================================
 
 #region Action Utility ===========================================
-
-function FrameIs(_frame) {return floor(frame) == _frame;}
-function FrameIsEnd() {return floor(frame) == trkactive.framecount;}
-function FrameIsStart() {return floor(frame) == 1;}
-
-function SetSpeedX(spd) {speedvec[0] = spd;}
-function SetSpeedY(spd) {speedvec[1] = spd;}
-function AddSpeedX(spd) {speedvec[0] += spd;}
-function AddSpeedY(spd) {speedvec[1] += spd;}
-function ApproachSpeedX(spd, step) {speedvec[0] = Approach(speedvec[0], spd, step);}
-function ApproachSpeedY(spd, step) {speedvec[1] = Approach(speedvec[1], spd, step);}
 
 function FighterVar(key)
 {

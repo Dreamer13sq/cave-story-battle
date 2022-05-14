@@ -94,6 +94,7 @@ sequencedefs = [
 
 var n = array_length(sequencedefs);
 sequences = array_create(n);
+
 for (var i = 0; i < n; i++)
 {
 	sequences[i][0] = ParseSequence(sequencedefs[i][0]);
@@ -105,6 +106,6 @@ for (var i = 0; i < n; i++)
 		ss += InputCmdChar(sequences[i][0][j]) + " ";
 	}
 	
-	printf("%s: %s", sequencedefs[i][1], ss);
+	//printf("%s: %s", sequencedefs[i][1], ss);
 }
 

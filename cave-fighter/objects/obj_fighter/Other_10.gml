@@ -24,7 +24,8 @@ function Update(ts)
 	
 	if (lastframe != floor(frame))
 	{
-		FighterRunner();
+		//FighterRunner();
+		ActionEventRunner(actionkey);
 		
 		// Progress playback
 		if (frame-1 < trkactive.framecount-1)
@@ -57,34 +58,34 @@ function UpdateFighterState(ts)
 		location[1] = 0;
 		speedvec[1] = 0;
 		
-		SetAction("jumpland");
+		ActionSet("jumpland");
 	}
 	
 	if (location[1] > 0)
 	{
-		SetStateFlag(FL_FFlag.air);
-		ClearStateFlag(FL_FFlag.crouching);
-		ClearStateFlag(FL_FFlag.standing);
-		ClearStateFlag(FL_FFlag.ground);
+		FighterFlagSet(FL_FFlag.air);
+		FighterFlagClear(FL_FFlag.crouching);
+		FighterFlagClear(FL_FFlag.standing);
+		FighterFlagClear(FL_FFlag.ground);
 		
 		if (speedvec[1] >= 1) 
 		{
-			SetStateFlag(FL_FFlag.air_rise);
-			ClearStateFlag(FL_FFlag.air_fall);
+			FighterFlagSet(FL_FFlag.air_rise);
+			FighterFlagClear(FL_FFlag.air_fall);
 		}
 		else if (speedvec[1] <= 1)
 		{
-			SetStateFlag(FL_FFlag.air_fall);
-			ClearStateFlag(FL_FFlag.air_rise);
+			FighterFlagSet(FL_FFlag.air_fall);
+			FighterFlagClear(FL_FFlag.air_rise);
 		}
 	}
 	
-	if ( !GetStateFlag(FL_FFlag.inmotion) )
+	if ( !FighterFlagGet(FL_FFlag.inmotion) )
 	{
-		if ( GetStateFlag(FL_FFlag.air) )
+		if ( FighterFlagGet(FL_FFlag.air) )
 		{
-			if ( GetStateFlag(FL_FFlag.air_rise) ) {SetAction("air-rise", false);}
-			if ( GetStateFlag(FL_FFlag.air_fall) ) {SetAction("air", false);}
+			if ( FighterFlagGet(FL_FFlag.air_rise) ) {ActionSet("air-rise", false);}
+			if ( FighterFlagGet(FL_FFlag.air_fall) ) {ActionSet("air", false);}
 		}
 		else
 		{
