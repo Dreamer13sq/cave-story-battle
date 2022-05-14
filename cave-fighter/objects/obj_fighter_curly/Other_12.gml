@@ -12,8 +12,6 @@ function FighterRunner()
 			break;
 		
 		case("neutral"): // -------------------------------------------------
-			break;
-			
 			if ( FrameIsStartJump() )
 			{
 				FighterFlagSet(FL_FFlag.standing | FL_FFlag.allowinterrupt);

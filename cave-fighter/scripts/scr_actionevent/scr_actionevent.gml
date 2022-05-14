@@ -43,34 +43,6 @@ enum ActionEventCommand
 	}
 */
 
-var ss = @"
-
-// Jab Loop -----------------------------------
-#jabloop
-
-FrameIs(4, #jabloop_hb1)
-FrameIs(8, #jabloop_hb1)
-FrameIs(12, #jabloop_hb1)
-FrameIs(16, #jabloop_hb1)
-
-FrameIs(6, #jabloop_hbclear)
-FrameIs(10, #jabloop_hbclear)
-FrameIs(14, #jabloop_hbclear)
-FrameIs(18, #jabloop_hbclear)
-Return()
-
-#jabloop_hb1
-HitboxEnable(0)
-HitboxRect(0, 40, 40, 80, 80)
-HitboxProperties(0, 10, 10, HB_MID)
-Return()
-
-#jabloop_hbclear
-HitboxDisable(0)
-Return()
-
-";
-
 function AEL(varname)
 {
 	if (is_real(varname))
@@ -127,8 +99,17 @@ function ParseActionEventText(outarray, outmap, s)
 		// Look for functions and labels
 		if (mode == 0)
 		{
+			// Comments
+			if (c == "/" && string_char_at(s, i+1) == "/")
+			{
+				while (i<n && (string_ord_at(s, i) >= 0x20))
+				{
+					i++;
+				}
+				word = "";
+			}
 			// Label
-			if (c == "#")
+			else if (c == "#")
 			{
 				word = "";
 				i++;
@@ -187,17 +168,8 @@ function ParseActionEventText(outarray, outmap, s)
 				word = "";
 				mode = 1;
 			}
-			// Comments
-			else if (c == "/" && string_char_at(s, i+1) == "/")
-			{
-				while (i<n && ord(string_char_at(s, i)) >= 0x32)
-				{
-					i++;
-				}
-				word = "";
-			}
 			// Word
-			else if (o > 0x32)
+			else if (o > 0x30)
 			{
 				word += c;
 			}
@@ -284,10 +256,10 @@ function ParseActionEventText(outarray, outmap, s)
 				argpos++;
 			}
 			// Number
-			else if ( (ord(c) >= ord("0") && ord(c) <= ord("9")) || ord(c) == ord(".") )
+			else if ( (ord(c) >= ord("0") && ord(c) <= ord("9")) || c=="." || c=="-" )
 			{
 				word = "";
-				while (i < n && ( (ord(c) >= ord("0") && ord(c) <= ord("9")) || ord(c) == ord(".") ))
+				while (i < n && ( (ord(c) >= ord("0") && ord(c) <= ord("9")) || c=="." || c=="-" ))
 				{
 					word += c;
 					i++;
@@ -310,4 +282,5 @@ function ParseActionEventText(outarray, outmap, s)
 		}
 	}
 }
+
 

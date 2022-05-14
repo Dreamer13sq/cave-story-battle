@@ -9,7 +9,7 @@ enum FL_ActionConditions
 
 function FighterAction() constructor
 {
-
+	
 }
 
 function DefineFighterAction(state, conditions, cmdsequence)

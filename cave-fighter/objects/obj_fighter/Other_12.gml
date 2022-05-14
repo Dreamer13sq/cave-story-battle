@@ -41,12 +41,12 @@ function FrameIsStartJump(label="")
 	return false;
 }
 
-function SetSpeedX(spd) {speedvec[0] = spd;}
-function SetSpeedY(spd) {speedvec[1] = spd;}
-function AddSpeedX(spd) {speedvec[0] += spd;}
-function AddSpeedY(spd) {speedvec[1] += spd;}
-function ApproachSpeedX(spd, step) {speedvec[0] = Approach(speedvec[0], spd, step);}
-function ApproachSpeedY(spd, step) {speedvec[1] = Approach(speedvec[1], spd, step);}
+function SetSpeedX(spd, mult=1.0) {speedvec[0] = spd*mult;}
+function SetSpeedY(spd, mult=1.0) {speedvec[1] = spd*mult;}
+function AddSpeedX(spd, mult=1.0) {speedvec[0] += spd*mult;}
+function AddSpeedY(spd, mult=1.0) {speedvec[1] += spd*mult;}
+function ApproachSpeedX(spd, step, mult=1.0) {speedvec[0] = Approach(speedvec[0], spd*mult, step);}
+function ApproachSpeedY(spd, step, mult=1.0) {speedvec[1] = Approach(speedvec[1], spd*mult, step);}
 
 function End()
 {

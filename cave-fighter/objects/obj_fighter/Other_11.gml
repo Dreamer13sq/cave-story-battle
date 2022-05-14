@@ -42,16 +42,17 @@ function AddPosition(xx, yy)
 
 function ReloadFiles()
 {
-	var _path = "fighter/curly/";
-	if (characterfolder.SearchFolder("D:/GitHub/Cave-Story-Fighter/cave-fighter/datafiles/"+_path, 3) == -1)
-	{
-		if (characterfolder.SearchFolder("C:/Users/Dreamer/Documents/GitHub/Cave-Story-Fighter/cave-fighter/datafiles/"+_path, 3) == -1)
-		{
-			characterfolder.SearchFolder(_path, 3);
-		}
-	}
+	var rootpath;
+	rootpath = "D:/GitHub/Cave-Story-Fighter/cave-fighter/datafiles/";
+	if (!directory_exists(rootpath))
+	{rootpath = "C:/Users/Dreamer/Documents/GitHub/Cave-Story-Fighter/cave-fighter/datafiles/";}
+	if (!directory_exists(rootpath))
+	{rootpath = "";}
 	
-	var b = buffer_load(_path+"action.txt");
+	var _path = "fighter/curly/";
+	characterfolder.SearchFolder(rootpath+_path, 3);
+	
+	var b = buffer_load(rootpath+_path+"action.txt");
 	actiondata = [];
 	ds_map_clear(labelmap);
 	ParseActionEventText(actiondata, labelmap, buffer_read(b, buffer_text));
@@ -82,8 +83,8 @@ function ActionSet(key, force_restart=true)
 		
 		frame = 1;
 		
-		//FighterRunner();
-		ActionEventRunner(actionkey);
+		FighterRunner();
+		//ActionEventRunner(actionkey);
 		UpdateFighterState(0);
 	}
 }
@@ -102,6 +103,7 @@ function ActionEventRunner(label)
 	}
 	
 	ds_stack_clear(actionpositionstack);
+	ds_stack_push(actionpositionstack, -1);
 	
 	var args;
 	
@@ -125,13 +127,19 @@ function ActionEventRunner(label)
 			case("frameisstartjump"): FrameIsStartJump(AEL(args[1])); break;
 			case("frameisendjump"): FrameIsEndJump(AEL(args[1])); break;
 			
-			case("fighterflagset"): FighterFlagSet(AEL(args[1])); break;
-			case("fighterflagclear"): FighterFlagClear(AEL(args[1])); break;
+			case("fighterflagset"): 
+				FighterFlagSet(AEL(args[1]) | AEL(args[2]) | AEL(args[3]) | AEL(args[4])); 
+				break;
+			case("fighterflagclear"):
+				FighterFlagClear(AEL(args[1]) | AEL(args[2]) | AEL(args[3]) | AEL(args[4])); 
+				break;
 			
-			case("setspeedx"): SetSpeedX(AEL(args[1])); break;
-			case("setspeedy"): SetSpeedY(AEL(args[1])); break;
-			case("approachspeedx"): ApproachSpeedY(AEL(args[1])); break;
-			case("approachspeedy"): ApproachSpeedY(AEL(args[1])); break;
+			case("setspeedx"): SetSpeedX(AEL(args[1]), AEL(args[2])); break;
+			case("setspeedy"): SetSpeedY(AEL(args[1]), AEL(args[2])); break;
+			case("addspeedx"): AddSpeedX(AEL(args[1]), AEL(args[2])); break;
+			case("addspeedy"): AddSpeedY(AEL(args[1]), AEL(args[2])); break;
+			case("approachspeedx"): ApproachSpeedX(AEL(args[1]), AEL(args[2]), AEL(args[3])); break;
+			case("approachspeedy"): ApproachSpeedY(AEL(args[1]), AEL(args[2]), AEL(args[3])); break;
 			
 		}
 	}

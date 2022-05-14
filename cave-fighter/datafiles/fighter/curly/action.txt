@@ -1,10 +1,11 @@
 #
+
 ActionSet(#neutral)
 End()
 
 // ===========================================
 #_standmovement
-ApproachSpeedX(0, @deceleration))
+ApproachSpeedX(0, @deceleration, 1))
 Return()
 
 // ===========================================
@@ -15,11 +16,8 @@ FrameIsStartJump(##start)
 End()
 
 ##start
-FighterFlagSet(@FFLAG_STANDING)
-FighterFlagSet(@FFLAG_INTERRUPT)
-FighterFlagClear(@FFLAG_INMOTION)
-FighterFlagClear(@FFLAG_CROUCHING)
-FighterFlagClear(@FFLAG_AIR)
+FighterFlagSet(@FFLAG_STANDING, @FFLAG_INTERRUPT)
+FighterFlagClear(@FFLAG_INMOTION, @FFLAG_CROUCHING, @FFLAG_AIR)
 Return()
 
 // ===========================================
@@ -30,11 +28,8 @@ FrameIsStartJump(##start)
 End()
 
 ##start
-FighterFlagSet(@FFLAG_CROUCHING)
-FighterFlagSet(@FFLAG_INTERRUPT)
-FighterFlagClear(@FFLAG_INMOTION)
-FighterFlagClear(@FFLAG_STANDING)
-FighterFlagClear(@FFLAG_AIR)
+FighterFlagSet(@FFLAG_CROUCHING, @FFLAG_INTERRUPT)
+FighterFlagClear(@FFLAG_INMOTION, @FFLAG_STANDING, @FFLAG_AIR)
 Return()
 
 // ===========================================
@@ -46,8 +41,7 @@ FrameIsEndJump(##end)
 End()
 
 ##start
-FighterFlagSet(@FFLAG_STANDING)
-FighterFlagSet(@FFLAG_INMOTION)
+FighterFlagSet(@FFLAG_STANDING, @FFLAG_INMOTION)
 Return()
 
 ##end	ActionSet(#neutral)	Return()
@@ -61,11 +55,8 @@ FrameIsEndJump(##end)
 End()
 
 ##start
-FighterFlagSet(@FFLAG_CROUCHING)
-FighterFlagSet(@FFLAG_INTERRUPT)
-FighterFlagSet(@FFLAG_INMOTION)
-FighterFlagClear(@FFLAG_STANDING)
-FighterFlagClear(@FFLAG_AIR)
+FighterFlagSet(@FFLAG_CROUCHING, @FFLAG_INTERRUPT, @FFLAG_INMOTION)
+FighterFlagClear(@FFLAG_STANDING, @FFLAG_AIR)
 Return()
 
 ##end	ActionSet(#crouch)	Return()
@@ -79,11 +70,8 @@ FrameIsEndJump(##end)
 End()
 
 ##start
-FighterFlagSet(@FFLAG_STANDING)
-FighterFlagSet(@FFLAG_INTERRUPT)
-FighterFlagSet(@FFLAG_INMOTION)
-FighterFlagClear(@FFLAG_CROUCHING)
-FighterFlagClear(@FFLAG_AIR)
+FighterFlagSet(@FFLAG_STANDING, @FFLAG_INTERRUPT, @FFLAG_INMOTION)
+FighterFlagClear(@FFLAG_CROUCHING, @FFLAG_AIR)
 Return()
 
 ##end	ActionSet(#neutral)	Return()
@@ -91,7 +79,7 @@ Return()
 // ===========================================
 #jumpsquat
 
-Jump(#_standmovement)
+//Jump(#_standmovement)
 FrameIsStartJump(##start)
 FrameIsEndJump(##end)
 End()
@@ -101,7 +89,7 @@ FighterFlagSet(@FFLAG_INMOTION)
 Return()
 
 ##end
-SetSpeedY(@jumpheight)
+SetSpeedY(@jumpheight, 1)
 ActionSet(#air-rise)
 Return()
 
@@ -113,11 +101,8 @@ FrameIsStartJump(##start)
 End()
 
 ##start
-FighterFlagSet(@FFLAG_AIR)
-FighterFlagSet(@FFLAG_INTERRUPT)
-FighterFlagClear(@FFLAG_INMOTION)
-FighterFlagClear(@FFLAG_STANDING)
-FighterFlagClear(@FFLAG_CROUCHING)
+FighterFlagSet(@FFLAG_AIR, @FFLAG_INTERRUPT)
+FighterFlagClear(@FFLAG_INMOTION, @FFLAG_STANDING, @FFLAG_CROUCHING)
 Return()
 
 // ===========================================
@@ -129,8 +114,7 @@ FrameIsEndJump(##end)
 End()
 
 ##start
-FighterFlagSet(@FFLAG_STANDING)
-FighterFlagSet(@FFLAG_INTERRUPT)
+FighterFlagSet(@FFLAG_STANDING, @FFLAG_INTERRUPT)
 FighterFlagClear(@FFLAG_AIR)
 Return()
 
@@ -154,6 +138,42 @@ ActionSet(#neutral)
 Return()
 
 // ===========================================
+#dash
+
+ApproachSpeedX(@dashforwardspeed, 1, 1)
+SetSpeedY(0, 0)
+FrameIsStartJump(##start)
+FrameIsEndJump(##end)
+End()
+
+##start
+FighterFlagSet(@FFLAG_INMOTION)
+SetSpeedX(@dashforwardspeed, 1)
+Return()
+
+##end
+ActionSet(#neutral)
+Return()
+
+// ===========================================
+#dashback
+
+ApproachSpeedX(@dashbackspeed, 1, -1)
+SetSpeedY(0, 0)
+FrameIsStartJump(##start)
+FrameIsEndJump(##end)
+End()
+
+##start
+FighterFlagSet(@FFLAG_INMOTION)
+SetSpeedX(@dashbackspeed, 1, -1)
+Return()
+
+##end
+ActionSet(#neutral)
+Return()
+
+// ===========================================
 #attack0a
 #attack0b
 #attack0c
@@ -166,10 +186,8 @@ FrameIsEndJump(##end)
 End()
 
 ##start
-FighterFlagSet(@FFLAG_STANDING)
-FighterFlagSet(@FFLAG_INMOTION)
-FighterFlagClear(@FFLAG_CROUCHING)
-FighterFlagClear(@FFLAG_AIR)
+FighterFlagSet(@FFLAG_STANDING, @FFLAG_INMOTION)
+FighterFlagClear(@FFLAG_CROUCHING, @FFLAG_AIR)
 Return()
 
 ##3	FighterFlagClear(@FFLAG_INTERRUPT) Return()
@@ -189,10 +207,8 @@ FrameIsEndJump(##end)
 End()
 
 ##start
-FighterFlagSet(@FFLAG_CROUCHING)
-FighterFlagSet(@FFLAG_INMOTION)
-FighterFlagClear(@FFLAG_STANDING)
-FighterFlagClear(@FFLAG_AIR)
+FighterFlagSet(@FFLAG_CROUCHING, @FFLAG_INMOTION)
+FighterFlagClear(@FFLAG_STANDING, @FFLAG_AIR)
 Return()
 
 ##3	FighterFlagClear(@FFLAG_INTERRUPT) Return()

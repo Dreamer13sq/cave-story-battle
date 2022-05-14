@@ -24,8 +24,8 @@ function Update(ts)
 	
 	if (lastframe != floor(frame))
 	{
-		//FighterRunner();
-		ActionEventRunner(actionkey);
+		FighterRunner();
+		//ActionEventRunner(actionkey);
 		
 		// Progress playback
 		if (frame-1 < trkactive.framecount-1)
