@@ -344,8 +344,8 @@ def PalUpdate(node_tree):
     
     LinkNodes('pal-uv', 2, 'uv', 0)
     LinkNodes('pal-uv', 1, 'dp', 0)
-    LinkNodes('outcolor', 0, 'pal-specular', 4)
-    LinkNodes('outalpha', 0, 'pal-specular', 3)
+    LinkNodes('outcolor', 0, 'pal-specular', 0)
+    LinkNodes('outalpha', 0, 'pal-specular', 5)
     LinkNodes('pal-specular', 0, 'output', 0)
     
     LinkNodes('outalpha', 0, 'output-roughness', 0)
@@ -901,9 +901,10 @@ class DMR_OP_Palette_NewLiveGroup(bpy.types.Operator):
         # Specular
         ng_spe = NewNode('pal-specular', '', 'ShaderNodeGroup', 1000, 400)
         ng_spe.node_tree = [x for x in bpy.data.node_groups if NODEGROUPSIGNATURESPECULAR in x.nodes.keys()][0]
-        LinkNodes(inputs, 3, ng_spe, 0)
         LinkNodes(inputs, 1, ng_spe, 1)
-        LinkNodes(inputs, 4, ng_spe, 2)
+        LinkNodes(inputs, 2, ng_spe, 2)
+        LinkNodes(inputs, 3, ng_spe, 3)
+        LinkNodes(inputs, 4, ng_spe, 4)
         
         # Param Preview
         paluvXYZ = NewNode('palXYZ', 'Palette UV', 'ShaderNodeSeparateXYZ', -500, -400, True)
@@ -923,7 +924,7 @@ class DMR_OP_Palette_NewLiveGroup(bpy.types.Operator):
         LinkNodes(paluvXYZ, 0, 'output-ao', 0)
         LinkNodes('outalpha', 0, 'output-roughness', 0)
         LinkNodes(ng_spe, 1, 'output-specular', 0)
-        LinkNodes(paluvXYZ, 0, ng_spe, 5)
+        LinkNodes(paluvXYZ, 1, ng_spe, 6)
         
         # Generate nodes
         for i in range(0, MAXCOLORS):
@@ -1145,6 +1146,7 @@ class DMR_PT_CSFighterPalette(bpy.types.Panel):
             rr.label(text='Isolate:')
             rr = rr.row(align=1)
             rr.operator('dmr.palette_set_active_output', icon='COLOR', text='').node_name = 'output'
+            rr.operator('dmr.palette_set_active_output', icon='IMAGE_DATA', text='').node_name = 'output'
             rr.operator('dmr.palette_set_active_output', icon='OUTLINER_OB_LIGHT', text='').node_name = 'output-light'
             rr.operator('dmr.palette_set_active_output', icon='MOD_MASK', text='').node_name = 'output-ao'
             rr.operator('dmr.palette_set_active_output', icon='NODE_MATERIAL', text='').node_name = 'output-roughness'
