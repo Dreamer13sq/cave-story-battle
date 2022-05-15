@@ -41,7 +41,6 @@
     {"id":{"name":"obj_fighter","path":"objects/obj_fighter/obj_fighter.yy",},"order":0,},
     {"id":{"name":"spr_pal","path":"sprites/spr_pal/spr_pal.yy",},"order":8,},
     {"id":{"name":"spr_inputcmd","path":"sprites/spr_inputcmd/spr_inputcmd.yy",},"order":0,},
-    {"id":{"name":"obj_buttontest","path":"objects/obj_buttontest/obj_buttontest.yy",},"order":3,},
     {"id":{"name":"scr_camera3d","path":"scripts/scr_camera3d/scr_camera3d.yy",},"order":0,},
     {"id":{"name":"scr_cmdsequence","path":"scripts/scr_cmdsequence/scr_cmdsequence.yy",},"order":6,},
     {"id":{"name":"obj_header","path":"objects/obj_header/obj_header.yy",},"order":0,},
@@ -208,6 +207,8 @@
     {"CopyToMask":-1,"filePath":"datafiles/fighter/curly/bmp","resourceVersion":"1.0","name":"c16.bmp","resourceType":"GMIncludedFile",},
     {"CopyToMask":-1,"filePath":"datafiles/fighter/curly/bmp","resourceVersion":"1.0","name":"c17.bmp","resourceType":"GMIncludedFile",},
     {"CopyToMask":-1,"filePath":"datafiles/fighter/curly","resourceVersion":"1.0","name":"action.txt","resourceType":"GMIncludedFile",},
+    {"CopyToMask":-1,"filePath":"datafiles/fighter/curly/events","resourceVersion":"1.0","name":"crouch-attack0c.001.trk","resourceType":"GMIncludedFile",},
+    {"CopyToMask":-1,"filePath":"datafiles/fighter/curly/events","resourceVersion":"1.0","name":"walk.001.trk","resourceType":"GMIncludedFile",},
   ],
   "MetaData": {
     "IDEVersion": "2022.3.0.625",

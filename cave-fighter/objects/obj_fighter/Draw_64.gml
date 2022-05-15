@@ -10,3 +10,5 @@ DrawText(16, 140, StringBinary(fighterstate, 8));
 DrawText(16, 160, FighterFlagGet(FL_FFlag.inmotion));
 
 
+
+

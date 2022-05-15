@@ -663,7 +663,9 @@ function EvaluateAnimationTracks(
 }
 
 // Fills outtransform with calculated animation pose
-// bones = Array of VBMBone()
+// bone_parentindices = Array of parent index for bone at current index
+// bone_localmatricies = Array of local 4x4 matrices for bones
+// bone_inversemodelmatrices = Array of inverse 4x4 matrices for bones
 // posedata = Array of 4x4 matrices. 2D
 // outposetransform = Flat Array of matrices in localspace, size = len(posedata) * 16, give to shader
 // outbonetransform = Array of bone matrices in modelspace

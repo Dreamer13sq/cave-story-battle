@@ -64,6 +64,8 @@ localpose = Mat4Array(200);
 matpose = Mat4ArrayFlat(200);
 mattran = Mat4();
 matshear = Mat4();
+lasttranslate = [0,0,0];
+translatekey = 0;
 
 shearbool = false;
 
@@ -82,6 +84,9 @@ labelmap = ds_map_create();
 actionrunnerindex = -1;
 actionpositionstack = ds_stack_create();
 
+actionanimation = ds_map_create(); // {actionkey: [flatmatrixdata, framecount]}
+actionframecount = 0;
+
 function FighterModel()
 {
 	
@@ -90,6 +95,5 @@ function FighterModel()
 ReloadFiles();
 
 vbm = characterfolder.files_vbm[? characterfolder.GetVBMName(0)];
-
-
+translatekey = 0;
 

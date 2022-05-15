@@ -11,7 +11,7 @@ function SetAnimation(key, force_reset=false)
 			
 			frame = 1;
 			lastframe = 0;
-			ApplyFrameMatrices(trkactive, frame-1, vbm.bonenames, matpose);
+			UpdateFrame(0);
 		}
 		
 	}
@@ -65,6 +65,28 @@ function ReloadFiles()
 	
 	palcount = characterfolder.GetPALs(palarray);
 	palactive = palarray[palindex];
+	
+	vbm = characterfolder.files_vbm[? characterfolder.GetVBMName(0)];
+	
+	// Load Animations
+	var _vbm = vbm;
+	ds_map_clear(actionanimation);
+	
+	for (var i = 0; i < trkcount; i++)
+	{
+		var _trk = trkarray[i];
+		var _name = filename_change_ext(characterfolder.GetTRKName(i), "");
+		var _framecount = _trk.framecount;
+		var _framemats = array_create(_framecount);
+		
+		for (var f = 0; f < _framecount; f++)
+		{
+			_framemats[f] = Mat4ArrayPartition(_trk.framematrices[f]);
+		}
+		
+		actionanimation[? _name] = _framemats;
+	}
+	
 }
 
 #region Actions ============================================

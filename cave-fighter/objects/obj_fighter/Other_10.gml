@@ -17,6 +17,21 @@ function Update(ts)
 	}
 	
 	// Newframe
+	UpdateFrame(ts);
+	
+	location[0] = Wrap(location[0], -200, 200);
+	
+	UpdateFighterState(ts);
+	
+	mattran = Mat4Transform(
+		location[0], location[2], location[1],
+		0, 0, zrot,
+		1, 1, 1
+		);
+}
+
+function UpdateFrame(ts)
+{
 	if (lastframe == floor(frame))
 	{
 		frame += 1;
@@ -27,27 +42,42 @@ function Update(ts)
 		FighterRunner();
 		//ActionEventRunner(actionkey);
 		
-		// Progress playback
-		if (frame-1 < trkactive.framecount-1)
-		{
-			ApplyFrameMatrices(trkactive, frame-1, vbm.bonenames, matpose);
-		}
-		// 
-		else
+		if (frame >= trkactive.framecount)
 		{
 			OnAnimationEnd();
 		}
 		
+		// Progress playback
+		/*
+		CalculateAnimationPose(
+			vbm.bone_parentindices,
+			vbm.bone_localmatricies,
+			vbm.bone_inversematricies,
+			actionanimation[? actionkey][frame-1],
+			matpose
+			);
+		*/
+		
+		ApplyFrameMatrices(trkactive, frame-1, vbm.bonenames, matpose);
+		
 		lastframe = floor(frame);
+		
+		// Move by translation bone
+		var newtranslation = trkactive.framematrices[frame-1][0];
+		
+		if (frame <= 1)
+		{
+			lasttranslate = newtranslation;
+		}
+		
+		//Mat4ArrayFlatSet(matpose, 0, Mat4());
+		
+		//printf(newtranslation[0] - lasttranslate[0])
+		
+		//location[0] += newtranslation[0] - lasttranslate[0];
+		//location[2] += newtranslation[2] - lasttranslate[2];
+		lasttranslate = newtranslation;
 	}
-	
-	UpdateFighterState(ts);
-	
-	mattran = Mat4Transform(
-		location[0], location[2], location[1],
-		0, 0, zrot,
-		1, 1, 1
-		);
 }
 
 function UpdateFighterState(ts)

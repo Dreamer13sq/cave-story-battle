@@ -43,7 +43,7 @@ function FighterRunner()
 		case("jumpland"): // -------------------------------------------------
 			if ( FrameIsStartJump() )
 			{
-				FighterFlagSet(FL_FFlag.standing | FL_FFlag.allowinterrupt);
+				FighterFlagSet(FL_FFlag.standing | FL_FFlag.allowinterrupt | FL_FFlag.inmotion);
 				FighterFlagClear(FL_FFlag.air);
 			}
 			ApproachSpeedX(0, FighterVar("deceleration"));

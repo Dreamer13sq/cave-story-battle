@@ -35,7 +35,7 @@ buffertimechain = 12;
 buffertimetrigger = 7;
 
 bufferedaction = "";	// Action to start when interrupt is allowed
-bufferedactiontime = 10;	// Max number of frames the action can be inputted ahead of time
+bufferedactiontime = 5;	// Max number of frames the action can be inputted ahead of time
 bufferedactionstep = 0;	// Decrementing value
 bufferedactionindex = 0xFF;	// Where to stop parsing sequences. 
 //Lower priority actions will not be processed until buffer runs out or action is executed

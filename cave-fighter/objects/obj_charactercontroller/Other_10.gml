@@ -202,18 +202,18 @@ function FighterController()
 				{
 					if ( IHeld(InputIndex.right) )
 					{
-						//fighter.ActionSet("walk", false)	
-						fighter.ApproachSpeedX(fighter.walkforwardspeed, 1);
+						fighter.ActionSet("walk", false)	
+						//fighter.ApproachSpeedX(fighter.walkforwardspeed, 1);
 					}
 					else if (IHeld(InputIndex.left))
 					{
-						//fighter.ActionSet("walkback", false)
-						fighter.ApproachSpeedX(-fighter.walkbackspeed, 1);
+						fighter.ActionSet("walkback", false)
+						//fighter.ApproachSpeedX(-fighter.walkbackspeed, 1);
 					}
 					else
 					{
-						//fighter.ActionSet("neutral", false);
-						fighter.ApproachSpeedX(0, 1);
+						fighter.ActionSet("neutral", false);
+						//fighter.ApproachSpeedX(0, 1);
 					}
 				}
 				
