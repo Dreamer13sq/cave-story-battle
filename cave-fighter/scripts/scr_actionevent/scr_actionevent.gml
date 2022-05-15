@@ -156,7 +156,7 @@ function ParseActionEventText(outarray, outmap, s)
 				
 				//array_push(labels, [word, array_length(outarray)]);
 				outmap[? word] = array_length(outarray);
-				printf("Label: %s", [word, array_length(outarray), activelabel])
+				//printf("Label: %s", [word, array_length(outarray), activelabel])
 				word = "";
 			}
 			// Function Start
@@ -277,7 +277,7 @@ function ParseActionEventText(outarray, outmap, s)
 				mode = 0;
 				word = "";
 				
-				printf(args)
+				//printf(args)
 			}
 		}
 	}

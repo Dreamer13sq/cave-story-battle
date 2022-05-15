@@ -64,6 +64,7 @@ function ReloadFiles()
 	trkactive = trkarray[trkindex];
 	
 	palcount = characterfolder.GetPALs(palarray);
+	palindex = Modulo(palindex, palcount);
 	palactive = palarray[palindex];
 	
 	vbm = characterfolder.files_vbm[? characterfolder.GetVBMName(0)];

@@ -55,7 +55,7 @@ animkey = "";
 
 palarray = [];
 palcount = 0;
-palindex = 0;
+palindex = irandom(255);
 palactive = noone;
 
 vbm = -1;

@@ -1,9 +1,5 @@
 /// @desc
 
-vertex_format_delete(vbf_pct);
-vertex_format_delete(vbf_pnct);
-vertex_format_delete(vbf_pnctbw);
-
 var k, m;
 
 m = vb_map;

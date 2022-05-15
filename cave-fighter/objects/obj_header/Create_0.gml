@@ -31,49 +31,6 @@ display_set_gui_size(480, 270);
 
 show_debug_overlay(1);
 
-// VBFormats
-
-// POS COL TEX
-vertex_format_begin();
-vertex_format_add_position_3d();
-vertex_format_add_color();
-vertex_format_add_texcoord();
-vbf_pct = vertex_format_end();
-
-// POS NOR COL TEX
-vertex_format_begin();
-vertex_format_add_position_3d();
-vertex_format_add_normal();
-vertex_format_add_color();
-vertex_format_add_texcoord();
-vbf_pnct = vertex_format_end();
-
-// POS NOR COL TEX BON WEI
-vertex_format_begin();
-vertex_format_add_position_3d();
-vertex_format_add_normal();
-vertex_format_add_color();
-vertex_format_add_texcoord();
-vertex_format_add_custom(vertex_type_float4, vertex_usage_texcoord); // Bone Indices
-vertex_format_add_custom(vertex_type_float4, vertex_usage_texcoord); // Bone Weights
-vbf_pnctbw = vertex_format_end();
-
-var shd = shd_pct;
-shd_pct_u_zoffset = shader_get_uniform(shd, "u_zoffset");
-
-var shd = shd_pnctbw;
-shd_pnctbw_u_matpose = shader_get_uniform(shd, "u_matpose");
-shd_pnctbw_u_zoffset = shader_get_uniform(shd, "u_zoffset");
-shd_pnctbw_u_normalsign = shader_get_uniform(shd, "u_normalsign");
-
-var shd = shd_fighter;
-shd_fighter_u_matpose = shader_get_uniform(shd, "u_matpose");
-shd_fighter_u_zoffset = shader_get_uniform(shd, "u_zoffset");
-shd_fighter_u_forwardsign = shader_get_uniform(shd, "u_forwardsign");
-shd_fighter_u_tintcolor = shader_get_uniform(shd, "u_tintcolor");
-shd_fighter_u_tintparam = shader_get_uniform(shd, "u_tintparam");
-shd_fighter_u_matshear = shader_get_uniform(shd, "u_matshear");
-
 // Input
 playerinputcount = 2;
 playerinput = [];
@@ -99,3 +56,4 @@ vb_map = ds_map_create();
 vbm_map = ds_map_create();
 
 room_goto_next();
+
