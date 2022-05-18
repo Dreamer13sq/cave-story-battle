@@ -212,7 +212,7 @@ function FighterController()
 					}
 					else
 					{
-						fighter.ActionSet("neutral", false);
+						//fighter.ActionSet("neutral", false);
 						//fighter.ApproachSpeedX(0, 1);
 					}
 				}

@@ -1,7 +1,7 @@
 /// @desc
 
-fighter.Update();
-world.Update();
+fighter.Update(battlespeed);
+world.Update(battlespeed);
 
 viewlocation[0] += LevKeyHeld(KeyCode.D, KeyCode.A);
 viewlocation[2] += LevKeyHeld(KeyCode.W, KeyCode.S);

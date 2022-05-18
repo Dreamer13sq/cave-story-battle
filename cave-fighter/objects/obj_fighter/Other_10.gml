@@ -34,7 +34,7 @@ function UpdateFrame(ts)
 {
 	if (lastframe == floor(frame))
 	{
-		frame += 1;
+		frame += ts * actionspeed;
 	}
 	
 	if (lastframe != floor(frame))

@@ -33,6 +33,8 @@ frame = 1;
 lastframe = 0;
 sidesign = 1;
 
+controller = -1;
+
 walkforwardspeed = 4;
 walkbackspeed = 2.7;
 dashforwardspeed = 7;
@@ -43,7 +45,21 @@ jumpspeedback = 3;
 grav = -0.4;
 deceleration = 0.7;
 
-// ===========================================================================
+// Action ===========================================================================
+
+actionkey = "";
+actionmap = ds_map_create();
+actionactive = 0;
+
+actiondata = [];
+labelmap = ds_map_create();
+actionrunnerindex = -1;
+actionpositionstack = ds_stack_create();
+
+actionanimation = ds_map_create(); // {actionkey: [flatmatrixdata, framecount]}
+actionframecount = 0;
+
+// Animation ===========================================================================
 
 characterfolder = new CharFolder();
 
@@ -69,23 +85,10 @@ translatekey = 0;
 
 shearbool = false;
 
+actionspeed = 1.0;
+
 image_speed = 0;
 
-controller = -1;
-
-// Action ===========================================================================
-
-actionkey = "";
-actionmap = ds_map_create();
-actionactive = 0;
-
-actiondata = [];
-labelmap = ds_map_create();
-actionrunnerindex = -1;
-actionpositionstack = ds_stack_create();
-
-actionanimation = ds_map_create(); // {actionkey: [flatmatrixdata, framecount]}
-actionframecount = 0;
 
 function FighterModel()
 {

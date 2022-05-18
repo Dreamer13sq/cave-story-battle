@@ -78,7 +78,7 @@ function U_Fighter_SetShear(camposvec, gameposvec, characterposvec, xshearstreng
 	return m;
 }
 
-function Mat4GetPerspectiveCorrection(cameraposition, gameplayposition, characterposition, xamt=1.0, yamt=1.0)
+function Mat4GetPerspectiveCorrection(cameraposition, gameplayposition, characterposition, xamt=0.99, yamt=0.7)
 {
 	//return Mat4();
 	
@@ -97,17 +97,7 @@ function Mat4GetPerspectiveCorrection(cameraposition, gameplayposition, characte
 	matshear[4] = xamt * xshear * sign(characterposition[0]-gx);
 	matshear[6] = yamt * yshear * sign(characterposition[2]-gz);
 	
-	var ztheta = -0.1;
-	matshear = matrix_multiply(matshear,
-		[
-		1.0, 0.0, 0.0, 0.0,
-		0.0, cos(ztheta), -sin(ztheta), 0.0,
-		0.0, sin(ztheta), cos(ztheta), 0.0,
-		0.0, 0.0, 0.0, 1.0]
-		);
-	
-	// Fix y-flip
-	//matshear[6] *= -1;
+	matshear = matrix_multiply(matshear, matrix_build(0,0,0, -5, 0,0,1,1,1));
 	
 	return matshear;
 }
