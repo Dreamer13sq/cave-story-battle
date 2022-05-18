@@ -59,6 +59,10 @@ actionpositionstack = ds_stack_create();
 actionanimation = ds_map_create(); // {actionkey: [flatmatrixdata, framecount]}
 actionframecount = 0;
 
+hitboxcount = 16;
+hitboxes = array_create(hitboxcount);
+for (var i = 0; i < hitboxcount; i++) {hitboxes[i] = new ActionHitbox();}
+
 // Animation ===========================================================================
 
 characterfolder = new CharFolder();
