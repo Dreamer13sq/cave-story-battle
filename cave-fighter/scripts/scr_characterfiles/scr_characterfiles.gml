@@ -8,36 +8,34 @@ function CharFolder() constructor
 	files_trk = ds_map_create();
 	files_pal = ds_map_create();
 	
+	names_vbm = array_create(0);
+	names_trk = array_create(0);
+	names_pal = array_create(0);
+	
 	// ====================================================================
 	
-	function _Get(_map, outarray)
+	function _Get(_map, _names, outarray)
 	{
-		var k = ds_map_find_first(_map);
-		while (ds_map_exists(_map, k))
+		var n = array_length(_names);
+		for (var i = 0; i < n; i++)
 		{
-			array_push(outarray, _map[? k]);	
-			k = ds_map_find_next(_map, k);
+			array_push(outarray, _map[? _names[i]])
 		}
-		return ds_map_size(_map);
+		return n;
 	}
 	
-	function _GetName(_map, index)
+	function _GetName(_names, index)
 	{
-		var k = ds_map_find_first(_map);
-		repeat(index)
-		{
-			k = ds_map_find_next(_map, k);	
-		}
-		return k;
+		return _names[index];
 	}
 	
-	function GetVBMs(outarray) {return _Get(files_vbm, outarray);}
-	function GetTRKs(outarray) {return _Get(files_trk, outarray);}
-	function GetPALs(outarray) {return _Get(files_pal, outarray);}
+	function GetVBMs(outarray) {return _Get(files_vbm, names_vbm, outarray);}
+	function GetTRKs(outarray) {return _Get(files_trk, names_trk, outarray);}
+	function GetPALs(outarray) {return _Get(files_pal, names_pal, outarray);}
 	
-	function GetVBMName(index) {return _GetName(files_vbm, index);}
-	function GetTRKName(index) {return _GetName(files_trk, index);}
-	function GetPALName(index) {return _GetName(files_pal, index);}
+	function GetVBMName(index) {return _GetName(names_vbm, index);}
+	function GetTRKName(index) {return _GetName(names_trk, index);}
+	function GetPALName(index) {return _GetName(names_pal, index);}
 	
 	// ====================================================================
 	
@@ -50,6 +48,7 @@ function CharFolder() constructor
 			_map[k].Free();
 			k = ds_map_find_next(_map, k);
 		}
+		array_resize(names_vbm, 0);
 		
 		// Free TRKs
 		var _map = files_trk, k = ds_map_find_first(_map);
@@ -58,6 +57,7 @@ function CharFolder() constructor
 			_map[k].Free();
 			k = ds_map_find_next(_map, k);
 		}
+		array_resize(names_trk, 0);
 		
 		// Free Sprites
 		var _map = files_pal, k = ds_map_find_first(_map);
@@ -66,6 +66,7 @@ function CharFolder() constructor
 			sprite_delete(_map[k]);
 			k = ds_map_find_next(_map, k);
 		}
+		array_resize(names_pal, 0);
 	}
 	
 	function Free()
@@ -78,7 +79,7 @@ function CharFolder() constructor
 	function _SearchFolder_Rec(_pathmap, rootpath, depth=0)
 	{
 		rootpath = filename_dir(rootpath) + "/";
-		printf(rootpath)
+		//printf(rootpath)
 		
 		// Find subfolders
 		if (depth > 0)
@@ -94,7 +95,6 @@ function CharFolder() constructor
 					array_push(subpaths, rootpath+dirname+"/");
 					n++;
 				}
-				
 				
 				dirname = file_find_next();
 			}
@@ -144,22 +144,29 @@ function CharFolder() constructor
 			{
 				case(".vbm"):
 					files_vbm[? fname] = new VBMData();
+					array_push(names_vbm, fname);
 					OpenVBM(files_vbm[? fname], _pathmap[? fname]);
 					break;
 				
 				case(".trk"):
 					files_trk[? fname] = new TRKData();
+					array_push(names_trk, fname);
 					OpenTRK(files_trk[? fname], _pathmap[? fname]);
 					break;
 				
 				case(".png"):
 					files_pal[? fname] = sprite_add(_pathmap[? fname], 1, 0, 0, 0, 0);
+					array_push(names_pal, fname);
 					printf(_pathmap[? fname] + " %s", files_pal[? fname]);
 					break;
 			}
 			
 			fname = ds_map_find_next(_pathmap, fname);
 		}
+		
+		array_sort(names_vbm, true);
+		array_sort(names_trk, true);
+		array_sort(names_pal, true);
 		
 		ds_map_destroy(_pathmap);
 		
