@@ -19,6 +19,14 @@ enum FL_FFlag
 	air_fall =	1<<10,
 }
 
+fflagname = [];
+fflagname[log2(FL_FFlag.inmotion)] = "inmotion";
+fflagname[log2(FL_FFlag.allowinterrupt)] = "allowinterrupt";
+fflagname[log2(FL_FFlag.standing)] = "standing";
+fflagname[log2(FL_FFlag.crouching)] = "crouching";
+fflagname[log2(FL_FFlag.ground)] = "ground";
+fflagname[log2(FL_FFlag.air)] = "air";
+
 x = 0;
 y = 0;
 
@@ -40,6 +48,7 @@ walkbackspeed = 2.7;
 dashforwardspeed = 7;
 dashbackspeed = 6;
 jumpheight = 10;
+superjumpheight = 15;
 jumpspeedforward = 3;
 jumpspeedback = 3;
 grav = -0.4;
@@ -65,8 +74,6 @@ for (var i = 0; i < hitboxcount; i++) {hitboxes[i] = new ActionHitbox();}
 
 // Animation ===========================================================================
 
-characterfolder = new CharFolder();
-
 trkarray = [];
 trkcount = 0
 trkindex = 0;
@@ -78,6 +85,7 @@ palcount = 0;
 palindex = irandom(255);
 palactive = noone;
 
+vb = -1;
 vbm = -1;
 
 localpose = Mat4Array(200);
@@ -93,12 +101,12 @@ actionspeed = 1.0;
 
 image_speed = 0;
 
-
 function FighterModel()
 {
 	
 }
 
+characterfolder = new CharFolder();
 ReloadFiles();
 
 vbm = characterfolder.files_vbm[? characterfolder.GetVBMName(0)];

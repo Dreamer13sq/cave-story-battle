@@ -63,10 +63,12 @@ function ReloadFiles()
 	trkindex = irandom(trkcount-1);
 	trkactive = trkarray[trkindex];
 	
+	palarray = [];
 	palcount = characterfolder.GetPALs(palarray);
 	palindex = Modulo(palindex, palcount);
 	palactive = palarray[palindex];
 	
+	vb = OpenVertexBuffer(rootpath+_path+"model.vb", GRAPHICS.Format("fighter"));
 	vbm = characterfolder.files_vbm[? characterfolder.GetVBMName(0)];
 	
 	// Load Animations

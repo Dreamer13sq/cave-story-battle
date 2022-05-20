@@ -7,9 +7,14 @@ DrawText(16, 80, "Anim: " + animkey);
 DrawText(16, 100, "Action: " + actionkey);
 DrawText(16, 120, "Frame: " + string(frame) + "/" + string(trkactive.framecount));
 DrawText(16, 140, StringBinary(fighterstate, 8));
-DrawText(16, 160, FighterFlagGet(FL_FFlag.inmotion));
+DrawText(16, 160, []);
 DrawText(16, 180, hitboxes[0].rect);
 
+for (var i = 0; i < array_length(fflagname); i++)
+{
+	DrawTextExt(140, 20+i*10, fflagname[i] + (fighterstate & (1<<i) ? " 1": " 0"),
+		.5, .5);
+}
 
 
 

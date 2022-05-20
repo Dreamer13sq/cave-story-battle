@@ -63,20 +63,24 @@ function UpdateFrame(ts)
 		lastframe = floor(frame);
 		
 		// Move by translation bone
-		var newtranslation = trkactive.framematrices[frame-1][0];
-		
-		if (frame <= 1)
+		if (trkactive)
 		{
+			var newtranslation = Mat4GetTranslation(trkactive.framematrices[frame-1]);
+			
+			if (frame <= 1)
+			{
+				lasttranslate = newtranslation;
+			}
+		
+			Mat4ArrayFlatSet(matpose, 0, Mat4());
+		
+			//printf(newtranslation[0] - lasttranslate[0])
+		
+			location[0] += newtranslation[0] - lasttranslate[0];
+			location[2] += newtranslation[2] - lasttranslate[2];
 			lasttranslate = newtranslation;
 		}
 		
-		//Mat4ArrayFlatSet(matpose, 0, Mat4());
-		
-		//printf(newtranslation[0] - lasttranslate[0])
-		
-		//location[0] += newtranslation[0] - lasttranslate[0];
-		//location[2] += newtranslation[2] - lasttranslate[2];
-		lasttranslate = newtranslation;
 	}
 }
 
@@ -109,6 +113,11 @@ function UpdateFighterState(ts)
 			FighterFlagClear(FL_FFlag.air_rise);
 		}
 	}
+	else
+	{
+		FighterFlagSet(FL_FFlag.ground);
+		FighterFlagClear(FL_FFlag.air);
+	}
 	
 	if ( !FighterFlagGet(FL_FFlag.inmotion) )
 	{
@@ -137,8 +146,11 @@ function Render()
 	GRAPHICS.activeshader.UniformMatrix4("u_mattran", mattran);
 	GRAPHICS.activeshader.UniformMatrix4("u_matpose", matpose);
 	GRAPHICS.activeshader.UniformMatrix4("u_matshear", matshear);
+	if (sprite_exists(palarray[palindex]))
 	GRAPHICS.activeshader.UniformSampler2D("u_texture", sprite_get_texture(palarray[palindex], 0));
 	
-	for (var i = 0; i < vbm.vbcount; i++) {vbm.SubmitVBIndex(i);}
+	vertex_submit(vb, pr_trianglelist, -1);
+	
+	//for (var i = 0; i < vbm.vbcount; i++) {vbm.SubmitVBIndex(i);}
 }
 

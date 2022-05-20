@@ -36,10 +36,20 @@ function FighterRunner()
 			if ( FrameIsStartJump() ) {FighterFlagSet(FL_FFlag.inmotion);}
 			if ( FrameIsEndJump() ) 
 			{
-				ActionSet("air-rise");
 				SetSpeedY( FighterVar("jumpheight") );
+				ActionSet("air-rise");
 			}
 			break;
+		
+		case("superjumpsquat"): // -------------------------------------------------
+			if ( FrameIsStartJump() ) {FighterFlagSet(FL_FFlag.inmotion);}
+			if ( FrameIsEndJump() ) 
+			{
+				SetSpeedY( FighterVar("superjumpheight") );
+				ActionSet("air-rise");
+			}
+			break;
+		
 		
 		case("jumpland"): // -------------------------------------------------
 			if ( FrameIsStartJump() )
@@ -91,6 +101,15 @@ function FighterRunner()
 			
 			break;
 		
+		case("idle"): // -------------------------------------------------
+			if ( FrameIsStartJump() ) 
+			{
+				FighterFlagSet(FL_FFlag.inmotion);
+				FighterFlagClear(FL_FFlag.allowinterrupt);
+			}
+			if ( FrameIsEndJump() ) {ActionSet("neutral");}
+			break;
+			
 		case("assist"): // -------------------------------------------------
 			if ( FrameIsStartJump() ) 
 			{
@@ -103,10 +122,26 @@ function FighterRunner()
 		// ======================================================================
 		
 		case("walk"): // -------------------------------------------------
-			ApproachSpeedX(walkforwardspeed, 1);
+			if ( FrameIsStartJump() )
+			{
+				FighterFlagClear(FL_FFlag.inmotion);
+			}
+			//ApproachSpeedX(walkforwardspeed, 1);
+			break;
+		
+		case("walkforward"): // -------------------------------------------------
+			if ( FrameIsStartJump() )
+			{
+				FighterFlagClear(FL_FFlag.inmotion);
+			}
+			ApproachSpeedX(0, FighterVar("deceleration"));
 			break;
 		
 		case("walkback"): // -------------------------------------------------
+			if ( FrameIsStartJump() )
+			{
+				FighterFlagClear(FL_FFlag.inmotion);
+			}
 			ApproachSpeedX(-walkbackspeed, 1);
 			break;
 		
@@ -144,8 +179,7 @@ function FighterRunner()
 		
 		// ======================================================================
 		
-		case("attack0a"):
-		case("attack0c"): // -------------------------------------------------
+		case("attack0a"): // -------------------------------------------------
 			if ( FrameIsStartJump() )
 			{
 				FighterFlagSet(FL_FFlag.standing | FL_FFlag.inmotion);
@@ -185,6 +219,28 @@ function FighterRunner()
 			if ( FrameIsJump(11) ) {HitboxReset();}
 			
 			if ( FrameIsJump(17) ) {FighterFlagSet(FL_FFlag.allowinterrupt);}
+			if ( FrameIsEndJump() ) {ActionSet("neutral");}
+			
+			ApproachSpeedX(0, FighterVar("deceleration"));
+			break;
+		
+		case("attack0c"): // -------------------------------------------------
+			if ( FrameIsStartJump() )
+			{
+				FighterFlagSet(FL_FFlag.standing | FL_FFlag.inmotion);
+				FighterFlagClear(FL_FFlag.crouching | FL_FFlag.air);
+			}
+			
+			if ( FrameIsJump(3) ) {FighterFlagClear(FL_FFlag.allowinterrupt);}
+			
+			if ( FrameIsJump(10) ) // Hitbox
+			{
+				HitboxEnable(0);
+				HitboxRect(0, 60, 48, 168, 152);
+			}
+			if ( FrameIsJump(13) ) {HitboxReset();}
+			
+			if ( FrameIsJump(26) ) {FighterFlagSet(FL_FFlag.allowinterrupt);}
 			if ( FrameIsEndJump() ) {ActionSet("neutral");}
 			
 			ApproachSpeedX(0, FighterVar("deceleration"));

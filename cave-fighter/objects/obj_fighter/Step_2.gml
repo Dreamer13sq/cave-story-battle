@@ -7,11 +7,11 @@ if (keyboard_check_pressed(KeyCode.M))
 
 if (keyboard_check(KeyCode.R))
 {
-	ReloadFiles();	
+	ReloadFiles();
 }
 
 // Movement
-zrot += LevKeyHeld(KeyCode.Q, KeyCode.E);
+//zrot += LevKeyHeld(KeyCode.Q, KeyCode.E);
 	
 var lev;
 	
