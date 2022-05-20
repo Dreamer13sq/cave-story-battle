@@ -4,7 +4,21 @@ enum InputIndex
 {
 	right, up, left, down,
 	a, b, c, dash,
-	start, select
+	start, select,
+	
+	mask_direction = (
+		(1 << InputIndex.right) |
+		(1 << InputIndex.up) |
+		(1 << InputIndex.left) |
+		(1 << InputIndex.down)
+	),
+	
+	mask_button = (
+		(1 << InputIndex.a) |
+		(1 << InputIndex.b) |
+		(1 << InputIndex.c) |
+		(1 << InputIndex.dash)
+	)
 }
 
 enum InputCmd

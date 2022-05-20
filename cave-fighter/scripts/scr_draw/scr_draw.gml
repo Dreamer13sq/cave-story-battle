@@ -17,6 +17,12 @@ function DrawText(x, y, text, color=c_white, alpha=1.0)
 	draw_text_color(x, y, text, color, color, color, color, alpha);	
 }
 
+function DrawTextExt(x, y, text, xscale, yscale, angle=0, color=c_white, alpha=1.0)
+{
+	draw_text_transformed_color(x, y, text, xscale, yscale, angle,
+		color, color, color, color, alpha);	
+}
+
 function CreateGridVB(count, cellsize)
 {
 	function __vert(vb, x, y, z, color)

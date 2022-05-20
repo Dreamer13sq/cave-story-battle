@@ -110,7 +110,9 @@ function Update()
 	}
 	
 	// Buttons
-	if ( ((ipressed) != 0) || ((ireleased) != 0) )
+	if ( 
+		((ipressed & InputIndex.mask_button) != 0)
+		)
 	{
 		if (iheld & (1 << InputIndex.a)) {_inputcmd |= 1 << InputCmd.a;}
 		if (iheld & (1 << InputIndex.b)) {_inputcmd |= 1 << InputCmd.b;}
@@ -161,8 +163,6 @@ function Update()
 	{
 		printf("-----");
 	}
-	
-	
 }
 
 function FighterController()
@@ -175,52 +175,45 @@ function FighterController()
 	{
 		if (_allowinterrupt)
 		{
-			// Crouching
-			if (IHeld(InputIndex.down))
-			{
-				if ( !fighter.FighterFlagGet(FL_FFlag.crouching) )
-				{
-					fighter.ActionSet("crouching");	
-				}
-			}
-			else
-			{
-				if ( fighter.FighterFlagGet(FL_FFlag.crouching) )
-				{
-					fighter.ActionSet("standing");	
-				}
-			}
-			
-			// Not Crouching
+			// Standing
 			if ( !fighter.FighterFlagGet(FL_FFlag.crouching) )
 			{
-				// Walk
-				//fighter.speedvec[0] += IHeld(InputIndex.right)? fighter.walkforwardspeed: 0;
-				//fighter.speedvec[0] -= IHeld(InputIndex.left)? fighter.walkbackspeed: 0;
-				
-				if (!_inmotion)
+				if ( IHeld(InputIndex.right) && !_inmotion )
 				{
-					if ( IHeld(InputIndex.right) )
+					fighter.ActionSet("walkforward", false)
+				}
+				else if ( IHeld(InputIndex.left) && !_inmotion)
+				{
+					fighter.ActionSet("walkback", false)
+				}
+				else
+				{
+					if (IHeld(InputIndex.down))
 					{
-						fighter.ActionSet("walk", false)	
-						//fighter.ApproachSpeedX(fighter.walkforwardspeed, 1);
+						fighter.ActionSet("crouching");
 					}
-					else if (IHeld(InputIndex.left))
+					
+					if (!_inmotion)
 					{
-						fighter.ActionSet("walkback", false)
-						//fighter.ApproachSpeedX(-fighter.walkbackspeed, 1);
-					}
-					else
-					{
-						//fighter.ActionSet("neutral", false);
-						//fighter.ApproachSpeedX(0, 1);
+						if ( IReleased(InputIndex.right) || IReleased(InputIndex.left) )
+						{
+							fighter.ActionSet("neutral");
+						}
 					}
 				}
 				
 				// Jump
 				if (IPressed(InputIndex.up))
 				{
-					fighter.ActionSet("jumpsquat");
+					//fighter.ActionSet("jumpsquat");
+				}
+			}
+			// Crouching
+			else
+			{
+				if (!IHeld(InputIndex.down))
+				{
+					fighter.ActionSet("standing");
 				}
 			}
 		}

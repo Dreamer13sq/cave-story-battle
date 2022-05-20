@@ -29,6 +29,5 @@ function ActionHitbox() constructor
 	properties_block = [];
 	properties_counter = [];
 	
-	
 }
 

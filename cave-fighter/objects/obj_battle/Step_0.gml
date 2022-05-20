@@ -5,6 +5,7 @@ world.Update(battlespeed);
 
 viewlocation[0] += LevKeyHeld(KeyCode.D, KeyCode.A);
 viewlocation[2] += LevKeyHeld(KeyCode.W, KeyCode.S);
+viewzrot += LevKeyHeld(KeyCode.Q, KeyCode.E);
 
 //viewlocation[0] += LevKeyHeld(vk_right, vk_left);
 //viewlocation[2] += LevKeyHeld(vk_up, vk_down);
@@ -26,7 +27,7 @@ var _camvalstate = [
 if (!array_equals(_camvalstate, cameravaluestate))
 {
 	matproj = matrix_build_projection_perspective_fov(
-	    40, //50 * pi / 180.0,
+	    fieldofview, //50 * pi / 180.0,
 	    window_get_width() / window_get_height(),
 	    znear,
 	    zfar

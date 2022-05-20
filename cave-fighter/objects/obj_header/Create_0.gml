@@ -20,11 +20,21 @@ lastwindowsize = [window_get_width(), window_get_height()];
 windowresized = false;
 
 GRAPHICS = instance_create_depth(x, y, 0, obj_graphics);
+
 vertex_format_begin();
 vertex_format_add_position_3d();
 vertex_format_add_color();
 vertex_format_add_texcoord();
 GRAPHICS.DefineFormat(vertex_format_end(), "color");
+
+vertex_format_begin();
+vertex_format_add_position_3d();
+vertex_format_add_normal();
+vertex_format_add_color();
+vertex_format_add_texcoord();
+vertex_format_add_custom(vertex_type_float4, vertex_usage_texcoord);
+vertex_format_add_custom(vertex_type_float4, vertex_usage_texcoord);
+GRAPHICS.DefineFormat(vertex_format_end(), "fighter");
 
 draw_set_font(fnt_cave);
 display_set_gui_size(480, 270);

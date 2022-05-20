@@ -45,32 +45,37 @@ function CharFolder() constructor
 		var _map = files_vbm, k = ds_map_find_first(_map);
 		while (ds_map_exists(_map , k))
 		{
-			_map[k].Free();
+			VBMFree(_map[? k]);
 			k = ds_map_find_next(_map, k);
 		}
+		ds_map_clear(_map);
 		array_resize(names_vbm, 0);
 		
 		// Free TRKs
 		var _map = files_trk, k = ds_map_find_first(_map);
 		while (ds_map_exists(_map , k))
 		{
-			_map[k].Free();
+			TRKFree(_map[? k]);
 			k = ds_map_find_next(_map, k);
 		}
+		ds_map_clear(_map);
 		array_resize(names_trk, 0);
 		
 		// Free Sprites
 		var _map = files_pal, k = ds_map_find_first(_map);
 		while (ds_map_exists(_map , k))
 		{
-			sprite_delete(_map[k]);
+			sprite_delete(_map[? k]);
 			k = ds_map_find_next(_map, k);
 		}
+		ds_map_clear(_map);
 		array_resize(names_pal, 0);
 	}
 	
 	function Free()
 	{
+		Clear();
+		
 		ds_map_destroy(files_vbm);
 		ds_map_destroy(files_trk);
 		ds_map_destroy(files_pal);
@@ -132,6 +137,8 @@ function CharFolder() constructor
 		}
 		
 		var _pathmap = ds_map_create();
+		
+		Clear();
 		
 		// Find files
 		_SearchFolder_Rec(_pathmap, rootpath, depth);

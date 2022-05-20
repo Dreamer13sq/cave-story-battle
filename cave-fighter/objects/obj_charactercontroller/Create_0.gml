@@ -51,9 +51,9 @@ sequencedefs = [
 	["~36 ~32 ~36 B", "Zigzag Fwd B", "assist", FL_FFlag.ground],
 	["~36 ~32 ~36 C", "Zigzag Fwd C", "assist", FL_FFlag.ground],
 	
-	["2 2 A", "Double Dwn A", "", FL_FFlag.ground],
-	["2 2 B", "Double Dwn B", "", FL_FFlag.ground],
-	["2 2 C", "Double Dwn C", "", FL_FFlag.ground],
+	["2 2 A", "Double Dwn A", "crouch-attack0c", FL_FFlag.ground],
+	["2 2 B", "Double Dwn B", "crouch-attack0c", FL_FFlag.ground],
+	["2 2 C", "Double Dwn C", "crouch-attack0c", FL_FFlag.ground],
 	
 	// Start on down, Need to end on back
 	["2 ~14 ~4 C", "Special Bck C", "air-rise", FL_FFlag.ground],
@@ -68,28 +68,30 @@ sequencedefs = [
 	["A B C", "Triangle C", "assist", FL_FFlag.ground],
 	["A B", "Triangle B", "assist", FL_FFlag.ground],
 	
-	["BC", "Skill", "assist", 0],
+	["BC", "Skill", "assist", FL_FFlag.ground],
 	
 	["4AD", "Throw Back", "block", FL_FFlag.ground],
 	["6AD", "Throw (Forward)", "block", FL_FFlag.ground],
 	["AD", "Throw", "block", FL_FFlag.ground],
 	
-	["~2 ~8", "Super Jump", "air-rise", FL_FFlag.ground],
-	["~2 ~456 ~8", "Super Jump (3)", "air-rise", FL_FFlag.ground],
+	["~2 ~8", "Super Jump", "superjumpsquat", FL_FFlag.ground],
+	["~2 ~456 ~8", "Super Jump (3)", "superjumpsquat", FL_FFlag.ground],
 	//["~2 ~456 ~8", "Super Jump (4)", "air-rise"],
 	["~4D", "Backdash", "dashback", 0],
 	["~6D", "Dash", "dash", 0],
 	["~6 ~6", "Dash (Input)", "dash", 0],
 	["~4 ~4", "Backdash (Input)", "dashback", 0],
 	
-	["~123C", "Crouch Heavy", "crouch-attack0c", FL_FFlag.crouching],
-	["~123B", "Crouch Medium", "crouch-attack0b", FL_FFlag.crouching],
-	["~123A", "Crouch Light", "crouch-attack0a", FL_FFlag.crouching],
+	["~123C", "Crouch Heavy", "crouch-attack0c", FL_FFlag.ground],
+	["~123B", "Crouch Medium", "crouch-attack0b", FL_FFlag.ground],
+	["~123A", "Crouch Light", "crouch-attack0a", FL_FFlag.ground],
 	
-	["C", "Heavy", "attack0b", FL_FFlag.standing],
-	["B", "Medium", "attack0b", FL_FFlag.standing],
-	["A", "Light", "attack0a", FL_FFlag.standing],
-	["D", "Parry", "block", FL_FFlag.standing],
+	["C", "Heavy", "attack0c", FL_FFlag.ground],
+	["B", "Medium", "attack0b", FL_FFlag.ground],
+	["A", "Light", "attack0a", FL_FFlag.ground],
+	["D", "Parry", "block", FL_FFlag.ground],
+	
+	["~8", "Jump", "jumpsquat", FL_FFlag.ground],
 ];
 
 var n = array_length(sequencedefs);
