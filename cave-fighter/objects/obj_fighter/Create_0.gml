@@ -10,13 +10,14 @@ enum FL_FFlag
 	allowinterrupt =	1<<1,
 	standing =	1<<2,
 	crouching =	1<<3,
-	ground =	1<<4,
-	air =		1<<5,
-	blockstun =	1<<6,
-	hitstun =	1<<7,
-	sliding =	1<<8,
-	air_rise =	1<<9,
-	air_fall =	1<<10,
+	dashing =	1<<4,
+	ground =	1<<5,
+	air =		1<<6,
+	blockstun =	1<<7,
+	hitstun =	1<<8,
+	sliding =	1<<9,
+	air_rise =	1<<10,
+	air_fall =	1<<11,
 }
 
 fflagname = [];
@@ -24,6 +25,7 @@ fflagname[log2(FL_FFlag.inmotion)] = "inmotion";
 fflagname[log2(FL_FFlag.allowinterrupt)] = "allowinterrupt";
 fflagname[log2(FL_FFlag.standing)] = "standing";
 fflagname[log2(FL_FFlag.crouching)] = "crouching";
+fflagname[log2(FL_FFlag.dashing)] = "dashing";
 fflagname[log2(FL_FFlag.ground)] = "ground";
 fflagname[log2(FL_FFlag.air)] = "air";
 

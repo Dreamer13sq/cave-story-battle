@@ -86,6 +86,10 @@ sequencedefs = [
 	["~123B", "Crouch Medium", "crouch-attack0b", FL_FFlag.ground],
 	["~123A", "Crouch Light", "crouch-attack0a", FL_FFlag.ground],
 	
+	["C", "Dash Heavy", "dash-attack0c", FL_FFlag.ground | FL_FFlag.dashing],
+	["B", "Dash Medium", "dash-attack0b", FL_FFlag.ground | FL_FFlag.dashing],
+	["A", "Dash Light", "dash-attack0a", FL_FFlag.ground | FL_FFlag.dashing],
+	
 	["C", "Heavy", "attack0c", FL_FFlag.ground],
 	["B", "Medium", "attack0b", FL_FFlag.ground],
 	["A", "Light", "attack0a", FL_FFlag.ground],

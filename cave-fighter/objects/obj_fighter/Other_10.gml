@@ -149,8 +149,8 @@ function Render()
 	if (sprite_exists(palarray[palindex]))
 	GRAPHICS.activeshader.UniformSampler2D("u_texture", sprite_get_texture(palarray[palindex], 0));
 	
-	vertex_submit(vb, pr_trianglelist, -1);
+	//vertex_submit(vb, pr_trianglelist, -1);
 	
-	//for (var i = 0; i < vbm.vbcount; i++) {vbm.SubmitVBIndex(i);}
+	for (var i = 0; i < vbm.vbcount; i++) {vbm.SubmitVBIndex(i);}
 }
 

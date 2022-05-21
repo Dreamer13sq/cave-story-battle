@@ -1019,6 +1019,28 @@ class DMR_OP_Palette_PalUVsToVC(bpy.types.Operator):
         return {'FINISHED'}
 classlist.append(DMR_OP_Palette_PalUVsToVC)
 
+# ----------------------------------------------------------------------------------
+
+class DMR_OP_Palette_QuantizeStops(bpy.types.Operator):
+    """Tooltip"""
+    bl_idname = "dmr.palette_quantize_stops"
+    bl_label = "Quantize Stops"
+    bl_options = {'REGISTER', 'UNDO'}
+    
+    @classmethod
+    def poll(self, context):
+        return GetPalLive()
+    
+    def execute(self, context):
+        width = 32
+        colorramps = GetPalRamps(GetPalLive())
+        for nd in colorramps:
+            for e in nd.color_ramp.elements:
+                e.position = math.floor(e.position*(width)) / width
+        
+        return {'FINISHED'}
+classlist.append(DMR_OP_Palette_QuantizeStops)
+
 # ====================================================================================
 
 class DMR_MT_CSFighterPalette_Submenu(bpy.types.Menu):
@@ -1162,6 +1184,8 @@ class DMR_PT_CSFighterPalette(bpy.types.Panel):
             c = layout.column(align=1)
             if len(colorramps) == 0:
                 layout.operator('dmr.palette_add_color', icon='ADD', text='').index=0
+            
+            c.operator('dmr.palette_quantize_stops', icon='CON_FLOOR')
             
             # Draw color ramps
             for i, cr_node in enumerate(colorramps):

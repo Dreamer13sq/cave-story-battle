@@ -60,7 +60,7 @@ function ReloadFiles()
 	
 	trkarray = [];
 	trkcount = characterfolder.GetTRKs(trkarray);
-	trkindex = irandom(trkcount-1);
+	trkindex = min(0, trkcount-1);
 	trkactive = trkarray[trkindex];
 	
 	palarray = [];

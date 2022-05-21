@@ -2,6 +2,12 @@ import bpy
 
 classlist = []
 
+def ActionPoll(context):
+    action = bpy.data.actions[context.scene.actionnav_action_index] if bpy.data.actions else None
+    return (
+        bpy.data.actions and len(action.pose_markers) <= 1
+    )
+
 # ====================================================================
 
 class ACTIONNAV_OP_ActionSelect(bpy.types.Operator):
@@ -74,10 +80,7 @@ class ACTIONNAV_OP_AddRangeMarkers(bpy.types.Operator):
     
     @classmethod
     def poll(self, context):
-        action = bpy.data.actions[context.scene.actionnav_action_index] if bpy.data.actions else None
-        return (
-            bpy.data.actions and len(action.pose_markers) <= 1
-        )
+        ActionPoll(context)
     
     def execute(self, context):
         scene = context.scene
@@ -142,8 +145,30 @@ class CSBATTLE_PT_ActionNav(bpy.types.Panel):
 
     def draw(self, context):
         ActionNav_draw(self, context)
-        
 classlist.append(CSBATTLE_PT_ActionNav)
+
+class CSBATTLE_PT_EditTab(bpy.types.Panel):
+    """Creates a Panel in the Object properties window"""
+    bl_label = "Quick edits"
+    bl_space_type = 'VIEW_3D'
+    bl_region_type = 'UI'
+    bl_category = "ActionNav" # Name of sidebar
+
+    def draw(self, context):
+        layout = self.layout
+        obj = context.object
+        if obj == None:
+            return
+        if obj.type != 'ARMATURE':
+            obj = obj.find_armature()
+        if obj == None:
+            return
+        for pb in obj.pose.bones:
+            for c in pb.constraints:
+                if c.name[0] == '*':
+                    layout.prop(c, 'influence', text=pb.name)
+        
+classlist.append(CSBATTLE_PT_EditTab)
 
 # ==================================================================
 

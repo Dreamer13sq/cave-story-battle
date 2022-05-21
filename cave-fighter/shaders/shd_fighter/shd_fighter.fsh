@@ -101,7 +101,7 @@ void Standard()
 	// Uniforms -------------------------------------------------------
 	float alpha = 1.0;
 	float emission = 0.0;
-	float roughness = 0.4;
+	float roughness = 0.3;
 	float rim = 1.0;
 	vec4 colorblend = vec4(1.0, 1.0, 1.0, 0.0);
 	vec4 colorfill = vec4(1.0, 1.0, 1.0, 0.0);
@@ -129,6 +129,8 @@ void Standard()
 	shine = pow( sqrt((shine+1.0)*0.5), pow(1.0/(roughness+0.001), 4.0) ) * 1.0 * (1.0-roughness);
 	fresnel = pow(fresnel, RIM_EXP)*rim;
 	
+	float lightvalue = mix(AO, AO * dp, DPSTRENGTH);
+	
 	// Colors ----------------------------------------------------------------
 	// Use only v_color if bottom left pixel is completely white (no texture given)
 	//vec4 diffusecolor = v_color;
@@ -137,10 +139,10 @@ void Standard()
 	diffusecolor *= 1.1;
 	
 	// Output ----------------------------------------------------------------
-	vec3 outcolor = diffusecolor.rgb * (dp+1.0) / 2.0;	// Shadow
+	vec3 outcolor = diffusecolor.rgb * (lightvalue+1.0) / 2.0;	// Shadow
 	vec3 ambient = vec3(0.01, 0.0, 0.05);
 	ambient = vec3(0.09, 0.04, 0.1);
-	outcolor += ambient * (1.0-dp);	// Ambient
+	outcolor += ambient * (1.0-lightvalue);	// Ambient
 	outcolor += (diffusecolor.rgb + (pow(1.0-roughness, SPE_EXP))) * shine*shine * (1.0-roughness);	// Specular
 	outcolor += vec3(0.5) * fresnel;	// Rim
 	
