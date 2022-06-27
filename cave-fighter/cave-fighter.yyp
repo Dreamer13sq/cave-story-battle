@@ -224,7 +224,7 @@
     {"CopyToMask":-1,"filePath":"datafiles/fighter/curly/events","resourceVersion":"1.0","name":"eyeAction.trk","resourceType":"GMIncludedFile",},
   ],
   "MetaData": {
-    "IDEVersion": "2022.3.0.625",
+    "IDEVersion": "2022.5.1.16",
   },
   "resourceVersion": "1.5",
   "name": "cave-fighter",

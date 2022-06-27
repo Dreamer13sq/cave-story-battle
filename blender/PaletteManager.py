@@ -1,3 +1,11 @@
+'''
+    R = Palette AO
+    G = Palette Color Index
+    B = DP Strength
+    A = DP Max
+    
+'''
+
 import bpy
 import mathutils
 import numpy
@@ -210,6 +218,100 @@ def Palette_FromImage(node_tree, image):
             elements = Palette_AddColor(node_tree, MAXCOLORS, False).color_ramp.elements
     
     PalUpdate(node_tree)
+
+# ---------------------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------------------
+
+def PalCreate(node_tree):
+    header = node_tree.nodes.new('NodeFrame')
+    header.name = header.label = NODEGROUPSIGNATURE
+    header.location = (0, 400)
+    
+    def NewNode(name, label, type, x, y, hide=False, width=-1):
+        nd = node_tree.nodes.new(type)
+        nd.name = name
+        nd.label = label
+        nd.location = (x, y)
+        nd.hide=hide
+        if width > -1:
+            nd.width = width
+        return nd
+    
+    def LinkNodes(n1, output_index, n2, input_index):
+        return node_tree.links.new(
+            (node_tree.nodes[n1] if isinstance(n1, str) else n1).outputs[output_index], 
+            (node_tree.nodes[n2] if isinstance(n2, str) else n2).inputs[input_index]
+            )
+    
+    bpy.context.scene.dfighter_active_palette = node_tree.name
+    
+    # I/O
+    node_tree.inputs.new('NodeSocketVector', 'Texture UV')
+    node_tree.inputs.new('NodeSocketVector', 'Pal Params').default_value = (1,0,1)
+    node_tree.inputs.new('NodeSocketFloat', 'Pal DP Max').default_value = 1.0
+    node_tree.inputs.new('NodeSocketVector', 'Surface Normal').default_value = (0,0,1)
+    node_tree.inputs.new('NodeSocketVector', 'Light Vector').default_value = (0.256158, -0.819705, 0.512316)
+    
+    node_tree.outputs.new('NodeSocketColor', 'Color')
+    node_tree.outputs.new('NodeSocketVector', 'UV')
+    
+    inputs = node_tree.nodes.new('NodeGroupInput')
+    inputs.name = 'input'
+    inputs.location = (-1000, 0)
+    
+    outputs = node_tree.nodes.new('NodeGroupOutput')
+    outputs.name = 'output'
+    outputs.label = 'Base Output'
+    outputs.location = (1200, 0)
+    
+    # Reroutes
+    NewNode('uv', '', 'NodeReroute', -40, 80)
+    NewNode('dp', '', 'NodeReroute', -40, 40)
+    NewNode('outcolor', '', 'NodeReroute', 800, 40)
+    NewNode('outalpha', '', 'NodeReroute', 800, 0)
+    
+    # UV
+    ng_uv = NewNode('pal-uv', '', 'ShaderNodeGroup', -500, 0)
+    ng_uv.node_tree = [x for x in bpy.data.node_groups if NODEGROUPSIGNATUREUV in x.nodes.keys()][0]
+    LinkNodes(inputs, 1, ng_uv, 0)
+    LinkNodes(inputs, 2, ng_uv, 1)
+    LinkNodes(inputs, 3, ng_uv, 2)
+    LinkNodes(inputs, 4, ng_uv, 3)
+    
+    # Specular
+    ng_spe = NewNode('pal-specular', '', 'ShaderNodeGroup', 1000, 400)
+    ng_spe.node_tree = [x for x in bpy.data.node_groups if NODEGROUPSIGNATURESPECULAR in x.nodes.keys()][0]
+    LinkNodes(inputs, 0, ng_spe, 1)
+    LinkNodes(inputs, 1, ng_spe, 2)
+    LinkNodes(inputs, 3, ng_spe, 3)
+    LinkNodes(inputs, 4, ng_spe, 4)
+    
+    # Param Preview
+    paramsXYZ = NewNode('paramsXYZ', 'Params XYZ', 'ShaderNodeSeparateXYZ', -500, -500, True)
+    LinkNodes(inputs, 1, paramsXYZ, 0)
+    
+    for i,entry in enumerate([
+        ('output-light', 'Light Value'),
+        ('output-ao', 'Ambient Occlusion'),
+        ('output-roughness', 'Roughness'),
+        ('output-specular', 'Specular'),
+    ]):
+        NewNode(entry[0], entry[1], 'NodeGroupOutput', 1200, -200-50*i, True)
+    
+    LinkNodes(ng_uv, 1, 'output-light', 0)
+    LinkNodes(paramsXYZ, 0, 'output-ao', 0)
+    LinkNodes('outalpha', 0, 'output-roughness', 0)
+    LinkNodes(ng_spe, 1, 'output-specular', 0)
+    LinkNodes(paramsXYZ, 1, ng_spe, 6)
+    
+    # Generate nodes
+    for i in range(0, MAXCOLORS):
+        Palette_AddColor(node_tree, i, False)
+    PalUpdate(node_tree)
+    
+    for nd in [nd for nd in node_tree.nodes if 'output' in nd.name]:
+        LinkNodes(ng_uv, 0, nd, 1)
 
 # ---------------------------------------------------------------------------------------
 
@@ -543,23 +645,36 @@ class DMR_OP_Palette_SetUV(bpy.types.Operator):
         xx = self.xposition
         
         for obj in [x for x in context.selected_objects if x.type == 'MESH']:
-            me = obj.data
-            bm = bmesh.new()
-            bm.from_mesh(me)
+            mesh = obj.data
+            # Create color layer if not found
+            if not mesh.uv_layers:
+                mesh.uv_layers.new()
+            uvlayer = mesh.uv_layers.active.data
             
-            uv_lay = bm.loops.layers.uv.active
+            targetpolys = [poly for poly in mesh.polygons if poly.select]
+            targetloops = []
+            # Use faces
+            if targetpolys and not self.use_vertices:
+                targetloops = (
+                    l 
+                    for p in targetpolys 
+                    for l in mesh.loops[p.loop_start:p.loop_start + p.loop_total]
+                    )
+            # Use vertices
+            else:
+                targetloops = (
+                    l
+                    for p in mesh.polygons if not p.hide
+                    for l in mesh.loops[p.loop_start:p.loop_start + p.loop_total] if mesh.vertices[l.vertex_index].select
+                    )
             
-            targetloops = [x for face in bm.faces if face.select for x in face.loops]
-            if len(targetloops) == 0:
-                targetloops = [x for face in bm.faces for x in face.loops]
-            for loop in targetloops:
-                loop[uv_lay].uv[1] = yy;
-                if self.movex:
-                    loop[uv_lay].uv[0] = xx;
-            
-            bm.to_mesh(me)
-            bm.free()
-            me.update()
+            # Set colors
+            if self.movex:
+                for l in targetloops:
+                    uvlayer[l.index].uv = (xx, yy)
+            else:
+                for l in targetloops:
+                    uvlayer[l.index].uv[1] = yy
         
         bpy.ops.object.mode_set(mode=lastobjectmode)
         
@@ -819,11 +934,19 @@ class DMR_OP_Palette_ExportPalette(bpy.types.Operator, ExportHelper):
         node_tree = GetPalLive()
         Palette_ToImage(node_tree, image.name, self.width)
         
-        colormode = context.scene.render.image_settings.color_mode
-        context.scene.render.image_settings.color_mode = 'RGBA'
-        context.scene.render.image_settings.color_mode = colormode
+        scene = context.scene
+        image_settings = scene.render.image_settings
+        file_format = image_settings.file_format
+        colormode = image_settings.color_mode
+        
+        image_settings.file_format = 'PNG'
+        image_settings.color_mode = 'RGBA'
+        
         image.save_render(self.filepath)
         bpy.data.images.remove(image)
+        
+        image_settings.file_format = file_format
+        image_settings.color_mode = colormode
         
         self.report({'INFO'}, 'Palette written to "%s"' % self.filepath)
         
@@ -842,98 +965,7 @@ class DMR_OP_Palette_NewLiveGroup(bpy.types.Operator):
     
     def execute(self, context):
         node_tree = bpy.data.node_groups.new(self.name, 'ShaderNodeTree')
-        header = node_tree.nodes.new('NodeFrame')
-        header.name = header.label = NODEGROUPSIGNATURE
-        header.location = (0, 400)
-        
-        def NewNode(name, label, type, x, y, hide=False, width=-1):
-            nd = node_tree.nodes.new(type)
-            nd.name = name
-            nd.label = label
-            nd.location = (x, y)
-            nd.hide=hide
-            if width > -1:
-                nd.width = width
-            return nd
-        
-        def LinkNodes(n1, output_index, n2, input_index):
-            return node_tree.links.new(
-                (node_tree.nodes[n1] if isinstance(n1, str) else n1).outputs[output_index], 
-                (node_tree.nodes[n2] if isinstance(n2, str) else n2).inputs[input_index]
-                )
-        
-        context.scene.dfighter_active_palette = node_tree.name
-        
-        # I/O
-        node_tree.inputs.new('NodeSocketVector', 'Palette UV')
-        node_tree.inputs.new('NodeSocketVector', 'Texture UV')
-        node_tree.inputs.new('NodeSocketVector', 'Pal Params').default_value = (1,0,1)
-        node_tree.inputs.new('NodeSocketVector', 'Surface Normal').default_value = (0,0,1)
-        node_tree.inputs.new('NodeSocketVector', 'Light Direction').default_value = (0.256158, -0.819705, 0.512316)
-        
-        node_tree.outputs.new('NodeSocketColor', 'Color')
-        node_tree.outputs.new('NodeSocketVector', 'UV')
-        
-        inputs = node_tree.nodes.new('NodeGroupInput')
-        inputs.name = 'input'
-        inputs.location = (-1000, 0)
-        
-        outputs = node_tree.nodes.new('NodeGroupOutput')
-        outputs.name = 'output'
-        outputs.label = 'Base Output'
-        outputs.location = (1200, 0)
-        
-        # Reroutes
-        NewNode('uv', '', 'NodeReroute', -40, 80)
-        NewNode('dp', '', 'NodeReroute', -40, 40)
-        NewNode('outcolor', '', 'NodeReroute', 800, 40)
-        NewNode('outalpha', '', 'NodeReroute', 800, 0)
-        
-        # UV
-        ng_uv = NewNode('pal-uv', '', 'ShaderNodeGroup', -500, 0)
-        ng_uv.node_tree = [x for x in bpy.data.node_groups if NODEGROUPSIGNATUREUV in x.nodes.keys()][0]
-        LinkNodes(inputs, 0, ng_uv, 0)
-        LinkNodes(inputs, 1, ng_uv, 1)
-        LinkNodes(inputs, 2, ng_uv, 2)
-        LinkNodes(inputs, 3, ng_uv, 3)
-        LinkNodes(inputs, 4, ng_uv, 4)
-        
-        # Specular
-        ng_spe = NewNode('pal-specular', '', 'ShaderNodeGroup', 1000, 400)
-        ng_spe.node_tree = [x for x in bpy.data.node_groups if NODEGROUPSIGNATURESPECULAR in x.nodes.keys()][0]
-        LinkNodes(inputs, 1, ng_spe, 1)
-        LinkNodes(inputs, 2, ng_spe, 2)
-        LinkNodes(inputs, 3, ng_spe, 3)
-        LinkNodes(inputs, 4, ng_spe, 4)
-        
-        # Param Preview
-        paluvXYZ = NewNode('palXYZ', 'Palette UV', 'ShaderNodeSeparateXYZ', -500, -400, True)
-        LinkNodes(inputs, 0, paluvXYZ, 0)
-        paramsXYZ = NewNode('paramsXYZ', 'Params XYZ', 'ShaderNodeSeparateXYZ', -500, -500, True)
-        LinkNodes(inputs, 2, paramsXYZ, 0)
-        
-        for i,entry in enumerate([
-            ('output-light', 'Light Value'),
-            ('output-ao', 'Ambient Occlusion'),
-            ('output-roughness', 'Roughness'),
-            ('output-specular', 'Specular'),
-        ]):
-            NewNode(entry[0], entry[1], 'NodeGroupOutput', 1200, -200-50*i, True)
-        
-        LinkNodes(ng_uv, 1, 'output-light', 0)
-        LinkNodes(paluvXYZ, 0, 'output-ao', 0)
-        LinkNodes('outalpha', 0, 'output-roughness', 0)
-        LinkNodes(ng_spe, 1, 'output-specular', 0)
-        LinkNodes(paluvXYZ, 1, ng_spe, 6)
-        
-        # Generate nodes
-        for i in range(0, MAXCOLORS):
-            Palette_AddColor(node_tree, i, False)
-        PalUpdate(node_tree)
-        
-        for nd in [nd for nd in node_tree.nodes if 'output' in nd.name]:
-            LinkNodes(ng_uv, 0, nd, 1)
-        
+        PalCreate(node_tree)
         return {'FINISHED'}
 classlist.append(DMR_OP_Palette_NewLiveGroup)
 
