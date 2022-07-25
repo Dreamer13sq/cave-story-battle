@@ -110,9 +110,12 @@ function Mat4GetPerspectiveCorrection(cameraposition, gameplayposition, characte
 
 function ApplyFrameMatrices(trk, frame, bonekeys, outmatflat)
 {
+	if (trk.FrameCount() <= 0) {return outmatflat;}
+	
 	var n = array_length(bonekeys);
+	
 	var trackindices = trk.trackindices;
-	var framematrices = trk.framematrices[frame];
+	var framematrices = trk.GetFrameMatrices(clamp(frame, 0, trk.FrameCount()));
 	
 	for (var i = 0; i < n; i++)
 	{

@@ -43,7 +43,7 @@ function E_Fighter_Afterimage() : Entity() constructor
 			U_Fighter_SetTint_Preset(tintpreset, 1.0);
 			shader_set_uniform_matrix_array(HEADER.shd_fighter_u_matshear, shearmat);
 			
-			for (var i = 0; i < vbm.vbcount; i++)
+			for (var i = 0; i < vbm.Count(); i++)
 			{
 				vbm.SubmitVBIndex(i, pr_trianglelist, texture);
 			}

@@ -27,7 +27,9 @@ if (trkactive)
 	if (lev != 0)
 	{
 		trkindex = Modulo(trkindex+lev, trkcount);
-		trkactive = trkarray[trkindex];	
+		trkactive = trkarray[trkindex];
+		frame = 1;
+		ApplyFrameMatrices(trkactive, frame-1, vbm.bonenames, matpose);
 	}
 }
 

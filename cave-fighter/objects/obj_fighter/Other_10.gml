@@ -42,7 +42,7 @@ function UpdateFrame(ts)
 		FighterRunner();
 		//ActionEventRunner(actionkey);
 		
-		if (frame >= trkactive.framecount)
+		if ( frame >= trkactive.FrameCount() )
 		{
 			OnAnimationEnd();
 		}
@@ -65,7 +65,7 @@ function UpdateFrame(ts)
 		// Move by translation bone
 		if (trkactive)
 		{
-			var newtranslation = Mat4GetTranslation(trkactive.framematrices[frame-1]);
+			var newtranslation = Mat4GetTranslation(trkactive.GetFrameMatrices(frame-1));
 			
 			if (frame <= 1)
 			{
@@ -151,6 +151,7 @@ function Render()
 	
 	//vertex_submit(vb, pr_trianglelist, -1);
 	
-	for (var i = 0; i < vbm.vbcount; i++) {vbm.SubmitVBIndex(i);}
+	gpu_set_tex_filter(true);
+	for (var i = 0; i < vbm.Count(); i++) {vbm.SubmitVBIndex(i);}
 }
 

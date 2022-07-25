@@ -63,7 +63,7 @@ sequencedefs = [
 	// Start on down, Need to end on forward
 	["2 ~36 ~6 C", "Special Fwd C", "idle", FL_FFlag.ground],
 	["2 ~36 ~6 B", "Special Fwd B", "idle", FL_FFlag.ground],
-	["2 ~36 ~6 A", "Special Fwd A", "idle", FL_FFlag.ground],
+	["2 ~36 ~6 A", "Special Fwd A", "special0a", FL_FFlag.ground],
 	
 	["A B C", "Triangle C", "assist", FL_FFlag.ground],
 	["A B", "Triangle B", "assist", FL_FFlag.ground],

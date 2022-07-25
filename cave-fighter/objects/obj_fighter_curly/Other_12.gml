@@ -134,7 +134,8 @@ function FighterRunner()
 			{
 				FighterFlagClear(FL_FFlag.inmotion);
 			}
-			ApproachSpeedX(0, FighterVar("deceleration"));
+			//ApproachSpeedX(0, FighterVar("deceleration"));
+			ApproachSpeedX(walkforwardspeed, 1);
 			break;
 		
 		case("walkback"): // -------------------------------------------------
@@ -247,7 +248,7 @@ function FighterRunner()
 			break;
 		
 		case("crouch-attack0a"):
-		case("crouch-attack0b"):
+		//case("crouch-attack0b"):
 		case("crouch-attack0c"): // -------------------------------------------------
 			if ( FrameIsStartJump() )
 			{
@@ -262,6 +263,44 @@ function FighterRunner()
 			
 			ApproachSpeedX(0, FighterVar("deceleration"));
 			break;
+		
+		case("crouch-attack0b"): // -------------------------------------------------
+			if ( FrameIsStartJump() )
+			{
+				FighterFlagSet(FL_FFlag.crouching | FL_FFlag.inmotion);
+				FighterFlagClear(FL_FFlag.standing | FL_FFlag.air);
+			}
+			
+			if ( FrameIsJump(3) ) {FighterFlagClear(FL_FFlag.allowinterrupt);}
+			
+			if ( FrameIsJump(10) ) {AddSpeedX(10);}
+			
+			if ( FrameIsJump(25) ) {FighterFlagSet(FL_FFlag.allowinterrupt);}
+			if ( FrameIsEndJump() ) {ActionSet("crouch");}
+			
+			ApproachSpeedX(0, FighterVar("deceleration"));
+			break;
+		
+		// ======================================================================
+		
+		case("special0a"): // -------------------------------------------------
+			if ( FrameIsStartJump() )
+			{
+				FighterFlagSet(FL_FFlag.standing | FL_FFlag.inmotion);
+				FighterFlagClear(FL_FFlag.crouching | FL_FFlag.air);
+			}
+			
+			if ( FrameIsJump(3) ) {FighterFlagClear(FL_FFlag.allowinterrupt);}
+			
+			if ( FrameIsJump(8) ) {AddSpeedX(15);}
+			
+			if ( FrameIsJump(25) ) {FighterFlagSet(FL_FFlag.allowinterrupt);}
+			if ( FrameIsEndJump() ) {ActionSet("neutral");}
+			
+			ApproachSpeedX(0, FighterVar("deceleration"));
+			break;
+		
+		// ======================================================================
 		
 		case("dash-attack0a"):
 		case("dash-attack0b"):

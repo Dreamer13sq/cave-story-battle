@@ -621,6 +621,7 @@ class DMR_OP_Palette_SetUV(bpy.types.Operator):
     bl_label = "Set UV from Index"
     bl_options = {'REGISTER', 'UNDO'}
     
+    use_vertices : bpy.props.BoolProperty(name='Use Vertices', default=False)
     movex : bpy.props.BoolProperty(name='Change X Position', default=0)
     index : bpy.props.IntProperty(name='Color Index', default=0)
     xposition : bpy.props.FloatProperty(name='Default Shadow', default=1.0, min=0.0, max=1.0)
@@ -630,6 +631,7 @@ class DMR_OP_Palette_SetUV(bpy.types.Operator):
         return context.object and context.object.active_material and context.object.data.uv_layers.active
     
     def draw(self, context):
+        self.layout.prop(self, 'use_vertices')
         self.layout.prop(self, 'movex')
         self.layout.prop(self, 'index')
         if self.movex:
@@ -1028,8 +1030,24 @@ class DMR_OP_Palette_PalUVsToVC(bpy.types.Operator):
     bl_description = "Sets VC.rg to UV"
     bl_options = {'REGISTER', 'UNDO'}
     
-    uv_layer_name : bpy.props.StringProperty(default='UVPal')
-    vc_layer_name : bpy.props.StringProperty(default='PalControl')
+    uv_layer_name : bpy.props.EnumProperty(name='UV Layer', default=0,
+        items = lambda s,context:(
+            (lyr, lyr, lyr)
+            for lyr in set(
+                lyr.name
+                for obj in context.selected_objects if obj.type == 'MESH'
+                for lyr in set(obj.data.uv_layers)
+            )
+        ))
+    vc_layer_name : bpy.props.EnumProperty(name='VC Layer', default=0,
+        items = lambda s,context:(
+            (lyr, lyr, lyr)
+            for lyr in set(
+                lyr.name
+                for obj in context.selected_objects if obj.type == 'MESH'
+                for lyr in obj.data.vertex_colors
+            )
+        ))
     
     @classmethod
     def poll(self, context):

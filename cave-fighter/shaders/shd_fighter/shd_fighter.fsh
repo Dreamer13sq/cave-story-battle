@@ -129,7 +129,7 @@ void Standard()
 	shine = pow( sqrt((shine+1.0)*0.5), pow(1.0/(roughness+0.001), 4.0) ) * 1.0 * (1.0-roughness);
 	fresnel = pow(fresnel, RIM_EXP)*rim;
 	
-	float lightvalue = mix(AO, AO * dp, DPSTRENGTH);
+	float lightvalue = mix(AO, (AO*0.5+0.5) * dp, DPSTRENGTH);
 	
 	// Colors ----------------------------------------------------------------
 	// Use only v_color if bottom left pixel is completely white (no texture given)
